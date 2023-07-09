@@ -17,7 +17,7 @@ import (
 func Test_BTree_Basic(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := NewBTree[string, string](3, comparator.ComparatorString)
-		m.Set("key1", "val1")
+		m.Put("key1", "val1")
 
 		t.Assert(m.Height(), 1)
 
@@ -27,13 +27,13 @@ func Test_BTree_Basic(t *testing.T) {
 		t.Assert(m.Size(), 1)
 		t.Assert(m.IsEmpty(), false)
 
-		t.Assert(m.GetOrSet("key2", "val2"), "val2")
-		t.Assert(m.SetIfNotExist("key2", "val2"), false)
+		t.Assert(m.GetOrPut("key2", "val2"), "val2")
+		t.Assert(m.PutIfAbsent("key2", "val2"), false)
 
-		t.Assert(m.SetIfNotExist("key3", "val3"), true)
+		t.Assert(m.PutIfAbsent("key3", "val3"), true)
 
 		t.Assert(m.Remove("key2"), "val2")
-		t.Assert(m.Contains("key2"), false)
+		t.Assert(m.ContainsKey("key2"), false)
 
 		t.AssertIN("key3", m.Keys())
 		t.AssertIN("key1", m.Keys())
@@ -50,23 +50,23 @@ func Test_BTree_Basic(t *testing.T) {
 }
 
 func Test_BTree_Set_Fun(t *testing.T) {
-	//GetOrSetFunc lock or unlock
+	//GetOrPutFunc lock or unlock
 	gtest.C(t, func(t *gtest.T) {
 		m := NewBTree[string, int](3, comparator.ComparatorString)
-		t.Assert(m.GetOrSetFunc("fun", getValue), 3)
-		t.Assert(m.GetOrSetFunc("fun", getValue), 3)
-		t.Assert(m.GetOrSetFuncLock("funlock", getValue), 3)
-		t.Assert(m.GetOrSetFuncLock("funlock", getValue), 3)
+		t.Assert(m.GetOrPutFunc("fun", getValue), 3)
+		t.Assert(m.GetOrPutFunc("fun", getValue), 3)
+		t.Assert(m.GetOrPutFunc("funlock", getValue), 3)
+		t.Assert(m.GetOrPutFunc("funlock", getValue), 3)
 		t.Assert(m.Get("funlock"), 3)
 		t.Assert(m.Get("fun"), 3)
 	})
-	//SetIfNotExistFunc lock or unlock
+	//PutIfAbsentFunc lock or unlock
 	gtest.C(t, func(t *gtest.T) {
 		m := NewBTree[string, int](3, comparator.ComparatorString)
-		t.Assert(m.SetIfNotExistFunc("fun", getValue), true)
-		t.Assert(m.SetIfNotExistFunc("fun", getValue), false)
-		t.Assert(m.SetIfNotExistFuncLock("funlock", getValue), true)
-		t.Assert(m.SetIfNotExistFuncLock("funlock", getValue), false)
+		t.Assert(m.PutIfAbsentFunc("fun", getValue), true)
+		t.Assert(m.PutIfAbsentFunc("fun", getValue), false)
+		t.Assert(m.PutIfAbsentFunc("funlock", getValue), true)
+		t.Assert(m.PutIfAbsentFunc("funlock", getValue), false)
 		t.Assert(m.Get("funlock"), 3)
 		t.Assert(m.Get("fun"), 3)
 	})
@@ -76,7 +76,7 @@ func Test_BTree_Set_Fun(t *testing.T) {
 func Test_BTree_Batch(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := NewBTree[string, string](3, comparator.ComparatorString)
-		m.Sets(map[string]string{"1": "1", "key1": "val1", "key2": "val2", "key3": "val3"})
+		m.Puts(map[string]string{"1": "1", "key1": "val1", "key2": "val2", "key3": "val3"})
 		t.Assert(m.Map(), map[string]string{"1": "1", "key1": "val1", "key2": "val2", "key3": "val3"})
 		m.Removes([]string{"key1", "1"})
 		t.Assert(m.Map(), map[interface{}]interface{}{"key2": "val2", "key3": "val3"})
@@ -209,7 +209,7 @@ func Test_BTree_LRNode(t *testing.T) {
 func Test_BTree_Remove(t *testing.T) {
 	m := NewBTree[int, string](3, comparator.ComparatorInt)
 	for i := 1; i <= 100; i++ {
-		m.Set(i, fmt.Sprintf("val%d", i))
+		m.Put(i, fmt.Sprintf("val%d", i))
 	}
 	expect := m.Map()
 	gtest.C(t, func(t *gtest.T) {

@@ -46,19 +46,19 @@ func Test_AnyAnyMap_Var(t *testing.T) {
 			Message: "m3",
 		}
 
-		m.Set(exampleKey{Key: "1"}, element1)
+		m.Put(exampleKey{Key: "1"}, element1)
 
 		t.Assert(m.Get(exampleKey{Key: "1"}), element1)
 		t.Assert(m.Size(), 1)
 		t.Assert(m.IsEmpty(), false)
 
-		t.Assert(m.GetOrSet(exampleKey{Key: "2"}, element2), element2)
-		t.Assert(m.SetIfNotExist(exampleKey{Key: "2"}, element2), false)
+		t.Assert(m.GetOrPut(exampleKey{Key: "2"}, element2), element2)
+		t.Assert(m.PutIfAbsent(exampleKey{Key: "2"}, element2), false)
 
-		t.Assert(m.SetIfNotExist(exampleKey{Key: "3"}, element3), true)
+		t.Assert(m.PutIfAbsent(exampleKey{Key: "3"}, element3), true)
 
 		t.Assert(m.Remove(exampleKey{Key: "2"}), element2)
-		t.Assert(m.Contains(exampleKey{Key: "2"}), false)
+		t.Assert(m.ContainsKey(exampleKey{Key: "2"}), false)
 
 		t.AssertIN(exampleKey{Key: "3"}, m.Keys())
 		t.AssertIN(exampleKey{Key: "1"}, m.Keys())
@@ -74,19 +74,19 @@ func Test_AnyAnyMap_Var(t *testing.T) {
 	})
 	gtest.C(t, func(t *gtest.T) {
 		var m = gmap.NewHashMap[string, string]()
-		m.Set("1", "1")
+		m.Put("1", "1")
 
 		t.Assert(m.Get("1"), "1")
 		t.Assert(m.Size(), 1)
 		t.Assert(m.IsEmpty(), false)
 
-		t.Assert(m.GetOrSet("2", "2"), "2")
-		t.Assert(m.SetIfNotExist("2", "2"), false)
+		t.Assert(m.GetOrPut("2", "2"), "2")
+		t.Assert(m.PutIfAbsent("2", "2"), false)
 
-		t.Assert(m.SetIfNotExist("3", "3"), true)
+		t.Assert(m.PutIfAbsent("3", "3"), true)
 
 		t.Assert(m.Remove("2"), "2")
-		t.Assert(m.Contains("2"), false)
+		t.Assert(m.ContainsKey("2"), false)
 
 		t.AssertIN(3, m.Keys())
 		t.AssertIN(1, m.Keys())
@@ -104,19 +104,19 @@ func Test_AnyAnyMap_Var(t *testing.T) {
 func Test_AnyAnyMap_Basic(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewHashMap[int, int]()
-		m.Set(1, 1)
+		m.Put(1, 1)
 
 		t.Assert(m.Get(1), 1)
 		t.Assert(m.Size(), 1)
 		t.Assert(m.IsEmpty(), false)
 
-		t.Assert(m.GetOrSet(2, 2), 2)
-		t.Assert(m.SetIfNotExist(2, 2), false)
+		t.Assert(m.GetOrPut(2, 2), 2)
+		t.Assert(m.PutIfAbsent(2, 2), false)
 
-		t.Assert(m.SetIfNotExist(3, 3), true)
+		t.Assert(m.PutIfAbsent(3, 3), true)
 
 		t.Assert(m.Remove(2), 2)
-		t.Assert(m.Contains(2), false)
+		t.Assert(m.ContainsKey(2), false)
 
 		t.AssertIN(3, m.Keys())
 		t.AssertIN(1, m.Keys())
@@ -138,16 +138,16 @@ func Test_AnyAnyMap_Set_Fun(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewHashMap[int, any]()
 
-		m.GetOrSetFunc(1, getAny)
-		m.GetOrSetFuncLock(2, getAny)
+		m.GetOrPutFunc(1, getAny)
+		m.GetOrPutFunc(2, getAny)
 		t.Assert(m.Get(1), 123)
 		t.Assert(m.Get(2), 123)
 
-		t.Assert(m.SetIfNotExistFunc(1, getAny), false)
-		t.Assert(m.SetIfNotExistFunc(3, getAny), true)
+		t.Assert(m.PutIfAbsentFunc(1, getAny), false)
+		t.Assert(m.PutIfAbsentFunc(3, getAny), true)
 
-		t.Assert(m.SetIfNotExistFuncLock(2, getAny), false)
-		t.Assert(m.SetIfNotExistFuncLock(4, getAny), true)
+		t.Assert(m.PutIfAbsentFunc(2, getAny), false)
+		t.Assert(m.PutIfAbsentFunc(4, getAny), true)
 	})
 
 }
@@ -156,7 +156,7 @@ func Test_AnyAnyMap_Batch(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewHashMap[int, int]()
 
-		m.Sets(map[int]int{1: 1, 2: 2, 3: 3})
+		m.Puts(map[int]int{1: 1, 2: 2, 3: 3})
 		t.Assert(m.Map(), map[int]int{1: 1, 2: 2, 3: 3})
 		m.Removes([]int{1, 2})
 		t.Assert(m.Map(), map[int]int{3: 3})
@@ -220,8 +220,8 @@ func Test_AnyAnyMap_Merge(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m1 := gmap.NewHashMap[int, int]()
 		m2 := gmap.NewHashMap[int, int]()
-		m1.Set(1, 1)
-		m2.Set(2, 2)
+		m1.Put(1, 1)
+		m2.Put(2, 2)
 		m1.Merge(m2)
 		t.Assert(m1.Map(), map[int]int{1: 1, 2: 2})
 		m3 := gmap.NewHashMapFrom[int, int](nil)
@@ -233,8 +233,8 @@ func Test_AnyAnyMap_Merge(t *testing.T) {
 func Test_AnyAnyMap_Map(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewHashMap[int, int]()
-		m.Set(1, 0)
-		m.Set(2, 2)
+		m.Put(1, 0)
+		m.Put(2, 2)
 		t.Assert(m.Get(1), 0)
 		t.Assert(m.Get(2), 2)
 		data := m.Map()
@@ -242,7 +242,7 @@ func Test_AnyAnyMap_Map(t *testing.T) {
 		t.Assert(data[2], 2)
 		data[3] = 3
 		t.Assert(m.Get(3), 0)
-		m.Set(4, 4)
+		m.Put(4, 4)
 		t.Assert(data[4], 0)
 	})
 }
@@ -250,8 +250,8 @@ func Test_AnyAnyMap_Map(t *testing.T) {
 func Test_AnyAnyMap_FilterEmpty(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewHashMap[int, int]()
-		m.Set(1, 0)
-		m.Set(2, 2)
+		m.Put(1, 0)
+		m.Put(2, 2)
 		t.Assert(m.Get(1), 0)
 		t.Assert(m.Get(2), 2)
 		m.FilterEmpty()
@@ -260,8 +260,8 @@ func Test_AnyAnyMap_FilterEmpty(t *testing.T) {
 	})
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewHashMap[string, time.Time]()
-		m.Set("time1", time.Time{})
-		m.Set("time2", time.Now())
+		m.Put("time1", time.Time{})
+		m.Put("time2", time.Now())
 		t.Assert(m.Get("time1"), time.Time{})
 		m.FilterEmpty()
 		t.Assert(m.Get("time1"), nil)
@@ -492,7 +492,7 @@ func Test_AnyAnyMap_DeepCopy(t *testing.T) {
 		t.Assert(m.Size(), 2)
 
 		n := m.DeepCopy().(*gmap.HashMap[string, string])
-		n.Set("k1", "val1")
+		n.Put("k1", "val1")
 		t.AssertNE(m.Get("k1"), n.Get("k1"))
 	})
 }

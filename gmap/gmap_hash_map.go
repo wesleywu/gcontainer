@@ -61,7 +61,7 @@ func (m *HashMap[K, V]) Clone(safe ...bool) Map[K, V] {
 	return NewHashMapFrom[K, V](m.Map(), safe...)
 }
 
-// HashMap returns a shallow copy of the underlying data of the hash map.
+// Map returns a shallow copy of the underlying data of the hash map.
 func (m *HashMap[K, V]) Map() map[K]V {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -106,8 +106,8 @@ func (m *HashMap[K, V]) FilterNil() {
 	}
 }
 
-// Set sets key-value to the hash map.
-func (m *HashMap[K, V]) Set(key K, value V) {
+// Put sets key-value to the hash map.
+func (m *HashMap[K, V]) Put(key K, value V) {
 	m.mu.Lock()
 	if m.data == nil {
 		m.data = make(map[K]V)
@@ -116,8 +116,8 @@ func (m *HashMap[K, V]) Set(key K, value V) {
 	m.mu.Unlock()
 }
 
-// Sets batch sets key-values to the hash map.
-func (m *HashMap[K, V]) Sets(data map[K]V) {
+// Puts batch sets key-values to the hash map.
+func (m *HashMap[K, V]) Puts(data map[K]V) {
 	m.mu.Lock()
 	if m.data == nil {
 		m.data = data
@@ -140,7 +140,7 @@ func (m *HashMap[K, V]) Search(key K) (value V, found bool) {
 	return
 }
 
-// Get returns the value by given `key`.
+// Get returns the value by given `key`, or empty value of type K if the key is not found in the map.
 func (m *HashMap[K, V]) Get(key K) (value V) {
 	m.mu.RLock()
 	if m.data != nil {
@@ -196,7 +196,7 @@ func (m *HashMap[K, V]) Pops(size int) map[K]V {
 // and its return value will be set to the map with `key`.
 //
 // It returns value with given `key`.
-func (m *HashMap[K, V]) doSetWithLockCheck(key K, value any) V {
+func (m *HashMap[K, V]) doSetWithLockCheck(key K, value V) V {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if m.data == nil {
@@ -205,18 +205,34 @@ func (m *HashMap[K, V]) doSetWithLockCheck(key K, value any) V {
 	if v, ok := m.data[key]; ok {
 		return v
 	}
-	if f, ok := value.(func() V); ok {
-		value = f()
+	if !empty.IsNil(value) {
+		m.data[key] = value
 	}
-	if value != nil {
-		m.data[key] = value.(V)
-	}
-	return value.(V)
+	return value
 }
 
-// GetOrSet returns the value by key,
+// doSetWithLockCheckFunc checks whether value of the key exists with mutex.Lock,
+// if not exists, a `func() V will be executed with mutex.Lock of the hash map,
+// and its return value will be set to the map with `key` and then be returned.
+func (m *HashMap[K, V]) doSetWithLockCheckFunc(key K, f func() V) V {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.data == nil {
+		m.data = make(map[K]V)
+	}
+	if v, ok := m.data[key]; ok {
+		return v
+	}
+	value := f()
+	if !empty.IsNil(value) {
+		m.data[key] = value
+	}
+	return value
+}
+
+// GetOrPut returns the value by key,
 // or sets value with given `value` if it does not exist and then returns this value.
-func (m *HashMap[K, V]) GetOrSet(key K, value V) V {
+func (m *HashMap[K, V]) GetOrPut(key K, value V) V {
 	if v, ok := m.Search(key); !ok {
 		return m.doSetWithLockCheck(key, value)
 	} else {
@@ -224,59 +240,32 @@ func (m *HashMap[K, V]) GetOrSet(key K, value V) V {
 	}
 }
 
-// GetOrSetFunc returns the value by key,
+// GetOrPutFunc returns the value by key,
 // or sets value with returned value of callback function `f` if it does not exist
 // and then returns this value.
-func (m *HashMap[K, V]) GetOrSetFunc(key K, f func() V) V {
+func (m *HashMap[K, V]) GetOrPutFunc(key K, f func() V) V {
 	if v, ok := m.Search(key); !ok {
-		return m.doSetWithLockCheck(key, f())
+		return m.doSetWithLockCheckFunc(key, f)
 	} else {
 		return v
 	}
 }
 
-// GetOrSetFuncLock returns the value by key,
-// or sets value with returned value of callback function `f` if it does not exist
-// and then returns this value.
-//
-// GetOrSetFuncLock differs with GetOrSetFunc function is that it executes function `f`
-// with mutex.Lock of the hash map.
-func (m *HashMap[K, V]) GetOrSetFuncLock(key K, f func() V) V {
-	if v, ok := m.Search(key); !ok {
-		return m.doSetWithLockCheck(key, f)
-	} else {
-		return v
-	}
-}
-
-// SetIfNotExist sets `value` to the map if the `key` does not exist, and then returns true.
+// PutIfAbsent sets `value` to the map if the `key` does not exist, and then returns true.
 // It returns false if `key` exists, and `value` would be ignored.
-func (m *HashMap[K, V]) SetIfNotExist(key K, value V) bool {
-	if !m.Contains(key) {
+func (m *HashMap[K, V]) PutIfAbsent(key K, value V) bool {
+	if !m.ContainsKey(key) {
 		m.doSetWithLockCheck(key, value)
 		return true
 	}
 	return false
 }
 
-// SetIfNotExistFunc sets value with return value of callback function `f`, and then returns true.
+// PutIfAbsentFunc sets value with return value of callback function `f`, and then returns true.
 // It returns false if `key` exists, and `value` would be ignored.
-func (m *HashMap[K, V]) SetIfNotExistFunc(key K, f func() V) bool {
-	if !m.Contains(key) {
-		m.doSetWithLockCheck(key, f())
-		return true
-	}
-	return false
-}
-
-// SetIfNotExistFuncLock sets value with return value of callback function `f`, and then returns true.
-// It returns false if `key` exists, and `value` would be ignored.
-//
-// SetIfNotExistFuncLock differs with SetIfNotExistFunc function is that
-// it executes function `f` with mutex.Lock of the hash map.
-func (m *HashMap[K, V]) SetIfNotExistFuncLock(key K, f func() V) bool {
-	if !m.Contains(key) {
-		m.doSetWithLockCheck(key, f)
+func (m *HashMap[K, V]) PutIfAbsentFunc(key K, f func() V) bool {
+	if !m.ContainsKey(key) {
+		m.doSetWithLockCheckFunc(key, f)
 		return true
 	}
 	return false
@@ -336,9 +325,9 @@ func (m *HashMap[K, V]) Values() []V {
 	return values
 }
 
-// Contains checks whether a key exists.
+// ContainsKey checks whether a key exists.
 // It returns true if the `key` exists, or else false.
-func (m *HashMap[K, V]) Contains(key K) bool {
+func (m *HashMap[K, V]) ContainsKey(key K) bool {
 	var ok bool
 	m.mu.RLock()
 	if m.data != nil {

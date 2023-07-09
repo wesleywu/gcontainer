@@ -20,23 +20,23 @@ func getValue() int {
 func Test_Map_Var(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		var m gmap.HashMap[int, int]
-		m.Set(1, 11)
+		m.Put(1, 11)
 		t.Assert(m.Get(1), 11)
 	})
 
 	gtest.C(t, func(t *gtest.T) {
 		var m gmap.HashMap[int, string]
-		m.Set(1, "11")
+		m.Put(1, "11")
 		t.Assert(m.Get(1), "11")
 	})
 	gtest.C(t, func(t *gtest.T) {
 		var m gmap.HashMap[string, string]
-		m.Set("1", "11")
+		m.Put("1", "11")
 		t.Assert(m.Get("1"), "11")
 	})
 	gtest.C(t, func(t *gtest.T) {
 		var m gmap.HashMap[string, int]
-		m.Set("1", 11)
+		m.Put("1", 11)
 		t.Assert(m.Get("1"), 11)
 	})
 }
@@ -44,20 +44,20 @@ func Test_Map_Var(t *testing.T) {
 func Test_Map_Basic(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewHashMap[string, string]()
-		m.Set("key1", "val1")
+		m.Put("key1", "val1")
 		t.Assert(m.Keys(), []interface{}{"key1"})
 
 		t.Assert(m.Get("key1"), "val1")
 		t.Assert(m.Size(), 1)
 		t.Assert(m.IsEmpty(), false)
 
-		t.Assert(m.GetOrSet("key2", "val2"), "val2")
-		t.Assert(m.SetIfNotExist("key2", "val2"), false)
+		t.Assert(m.GetOrPut("key2", "val2"), "val2")
+		t.Assert(m.PutIfAbsent("key2", "val2"), false)
 
-		t.Assert(m.SetIfNotExist("key3", "val3"), true)
+		t.Assert(m.PutIfAbsent("key3", "val3"), true)
 
 		t.Assert(m.Remove("key2"), "val2")
-		t.Assert(m.Contains("key2"), false)
+		t.Assert(m.ContainsKey("key2"), false)
 
 		t.AssertIN("key3", m.Keys())
 		t.AssertIN("key1", m.Keys())
@@ -73,13 +73,13 @@ func Test_Map_Basic(t *testing.T) {
 func Test_Map_Set_Fun(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewHashMap[string, int]()
-		m.GetOrSetFunc("fun", getValue)
-		m.GetOrSetFuncLock("funlock", getValue)
+		m.GetOrPutFunc("fun", getValue)
+		m.GetOrPutFunc("funlock", getValue)
 		t.Assert(m.Get("funlock"), 3)
 		t.Assert(m.Get("fun"), 3)
-		m.GetOrSetFunc("fun", getValue)
-		t.Assert(m.SetIfNotExistFunc("fun", getValue), false)
-		t.Assert(m.SetIfNotExistFuncLock("funlock", getValue), false)
+		m.GetOrPutFunc("fun", getValue)
+		t.Assert(m.PutIfAbsentFunc("fun", getValue), false)
+		t.Assert(m.PutIfAbsentFunc("funlock", getValue), false)
 	})
 }
 
@@ -140,8 +140,8 @@ func Test_Map_Basic_Merge(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m1 := gmap.NewHashMap[string, string]()
 		m2 := gmap.NewHashMap[string, string]()
-		m1.Set("key1", "val1")
-		m2.Set("key2", "val2")
+		m1.Put("key1", "val1")
+		m2.Put("key2", "val2")
 		m1.Merge(m2)
 		t.Assert(m1.Map(), map[string]string{"key1": "val1", "key2": "val2"})
 	})

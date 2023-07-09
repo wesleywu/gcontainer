@@ -118,7 +118,7 @@ func ExampleStrSet_Complement() {
 	// [str4 str5]
 }
 
-// Contains checks whether the set contains `item`.
+// ContainsKey checks whether the set contains `item`.
 func ExampleStrSet_Contains() {
 	var set gset.HashSet[string]
 	set.Add("a")

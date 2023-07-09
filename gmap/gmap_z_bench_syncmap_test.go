@@ -23,7 +23,7 @@ func Benchmark_GMapSet(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		i := 0
 		for pb.Next() {
-			gm.Set(i, i)
+			gm.Put(i, i)
 			i++
 		}
 	})

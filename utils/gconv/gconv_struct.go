@@ -417,7 +417,7 @@ func bindVarToReflectValue(structFieldValue reflect.Value, value interface{}, ma
 	}
 
 	kind := structFieldValue.Kind()
-	// Converting using `Set` interface implements, for some types.
+	// Converting using `Put` interface implements, for some types.
 	switch kind {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Interface:
 		if !structFieldValue.IsNil() {

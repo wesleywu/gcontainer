@@ -31,7 +31,7 @@ func Benchmark_IntIntMap_Set(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		i := 0
 		for pb.Next() {
-			intIntMap.Set(i, i)
+			intIntMap.Put(i, i)
 			i++
 		}
 	})
@@ -41,7 +41,7 @@ func Benchmark_IntAnyMap_Set(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		i := 0
 		for pb.Next() {
-			intAnyMap.Set(i, i)
+			intAnyMap.Put(i, i)
 			i++
 		}
 	})
@@ -51,7 +51,7 @@ func Benchmark_IntStrMap_Set(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		i := 0
 		for pb.Next() {
-			intStrMap.Set(i, "123456789")
+			intStrMap.Put(i, "123456789")
 			i++
 		}
 	})
@@ -62,7 +62,7 @@ func Benchmark_StrIntMap_Set(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		i := 0
 		for pb.Next() {
-			strIntMap.Set(strconv.Itoa(i), i)
+			strIntMap.Put(strconv.Itoa(i), i)
 			i++
 		}
 	})
@@ -73,7 +73,7 @@ func Benchmark_StrAnyMap_Set(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		i := 0
 		for pb.Next() {
-			strAnyMap.Set(strconv.Itoa(i), i)
+			strAnyMap.Put(strconv.Itoa(i), i)
 			i++
 		}
 	})
@@ -84,7 +84,7 @@ func Benchmark_StrStrMap_Set(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		i := 0
 		for pb.Next() {
-			strStrMap.Set(strconv.Itoa(i), "123456789")
+			strStrMap.Put(strconv.Itoa(i), "123456789")
 			i++
 		}
 	})

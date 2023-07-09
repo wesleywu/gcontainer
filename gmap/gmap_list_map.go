@@ -54,7 +54,7 @@ func NewListMap[K comparable, V comparable](safe ...bool) *ListMap[K, V] {
 // there might be some concurrent-safe issues when changing the map outside.
 func NewListMapFrom[K comparable, V comparable](data map[K]V, safe ...bool) *ListMap[K, V] {
 	m := NewListMap[K, V](safe...)
-	m.Sets(data)
+	m.Puts(data)
 	return m
 }
 
@@ -180,8 +180,8 @@ func (m *ListMap[K, V]) FilterEmpty() {
 	m.mu.Unlock()
 }
 
-// Set sets key-value to the map.
-func (m *ListMap[K, V]) Set(key K, value V) {
+// Put sets key-value to the map.
+func (m *ListMap[K, V]) Put(key K, value V) {
 	m.mu.Lock()
 	if m.data == nil {
 		m.data = make(map[K]*glist.Element[*gListMapNode[K, V]])
@@ -195,8 +195,8 @@ func (m *ListMap[K, V]) Set(key K, value V) {
 	m.mu.Unlock()
 }
 
-// Sets batch sets key-values to the map.
-func (m *ListMap[K, V]) Sets(data map[K]V) {
+// Puts batch sets key-values to the map.
+func (m *ListMap[K, V]) Puts(data map[K]V) {
 	m.mu.Lock()
 	if m.data == nil {
 		m.data = make(map[K]*glist.Element[*gListMapNode[K, V]])
@@ -226,7 +226,7 @@ func (m *ListMap[K, V]) Search(key K) (value V, found bool) {
 	return
 }
 
-// Get returns the value by given `key`.
+// Get returns the value by given `key`, or empty value of type K if the key is not found in the map.
 func (m *ListMap[K, V]) Get(key K) (value V) {
 	m.mu.RLock()
 	if m.data != nil {
@@ -305,7 +305,7 @@ func (m *ListMap[K, V]) doSetWithLockCheck(key K, value V) V {
 	return value
 }
 
-// doSetWithLockCheck checks whether value of the key exists with mutex.Lock,
+// doSetWithLockCheckFunc checks whether value of the key exists with mutex.Lock,
 // if not exists, set value to the map with given `key`,
 // or else just return the existing value.
 //
@@ -332,9 +332,9 @@ func (m *ListMap[K, V]) doSetWithLockCheckFunc(key K, f func() V) V {
 	return value
 }
 
-// GetOrSet returns the value by key,
+// GetOrPut returns the value by key,
 // or sets value with given `value` if it does not exist and then returns this value.
-func (m *ListMap[K, V]) GetOrSet(key K, value V) V {
+func (m *ListMap[K, V]) GetOrPut(key K, value V) V {
 	if v, ok := m.Search(key); !ok {
 		return m.doSetWithLockCheck(key, value)
 	} else {
@@ -342,24 +342,13 @@ func (m *ListMap[K, V]) GetOrSet(key K, value V) V {
 	}
 }
 
-// GetOrSetFunc returns the value by key,
-// or sets value with returned value of callback function `f` if it does not exist
-// and then returns this value.
-func (m *ListMap[K, V]) GetOrSetFunc(key K, f func() V) V {
-	if v, ok := m.Search(key); !ok {
-		return m.doSetWithLockCheck(key, f())
-	} else {
-		return v
-	}
-}
-
-// GetOrSetFuncLock returns the value by key,
+// GetOrPutFunc returns the value by key,
 // or sets value with returned value of callback function `f` if it does not exist
 // and then returns this value.
 //
 // GetOrSetFuncLock differs with GetOrSetFunc function is that it executes function `f`
 // with mutex.Lock of the map.
-func (m *ListMap[K, V]) GetOrSetFuncLock(key K, f func() V) V {
+func (m *ListMap[K, V]) GetOrPutFunc(key K, f func() V) V {
 	if v, ok := m.Search(key); !ok {
 		return m.doSetWithLockCheckFunc(key, f)
 	} else {
@@ -367,33 +356,20 @@ func (m *ListMap[K, V]) GetOrSetFuncLock(key K, f func() V) V {
 	}
 }
 
-// SetIfNotExist sets `value` to the map if the `key` does not exist, and then returns true.
+// PutIfAbsent sets `value` to the map if the `key` does not exist, and then returns true.
 // It returns false if `key` exists, and `value` would be ignored.
-func (m *ListMap[K, V]) SetIfNotExist(key K, value V) bool {
-	if !m.Contains(key) {
+func (m *ListMap[K, V]) PutIfAbsent(key K, value V) bool {
+	if !m.ContainsKey(key) {
 		m.doSetWithLockCheck(key, value)
 		return true
 	}
 	return false
 }
 
-// SetIfNotExistFunc sets value with return value of callback function `f`, and then returns true.
+// PutIfAbsentFunc sets value with return value of callback function `f`, and then returns true.
 // It returns false if `key` exists, and `value` would be ignored.
-func (m *ListMap[K, V]) SetIfNotExistFunc(key K, f func() V) bool {
-	if !m.Contains(key) {
-		m.doSetWithLockCheck(key, f())
-		return true
-	}
-	return false
-}
-
-// SetIfNotExistFuncLock sets value with return value of callback function `f`, and then returns true.
-// It returns false if `key` exists, and `value` would be ignored.
-//
-// SetIfNotExistFuncLock differs with SetIfNotExistFunc function is that
-// it executes function `f` with mutex.Lock of the map.
-func (m *ListMap[K, V]) SetIfNotExistFuncLock(key K, f func() V) bool {
-	if !m.Contains(key) {
+func (m *ListMap[K, V]) PutIfAbsentFunc(key K, f func() V) bool {
+	if !m.ContainsKey(key) {
 		m.doSetWithLockCheckFunc(key, f)
 		return true
 	}
@@ -464,9 +440,9 @@ func (m *ListMap[K, V]) Values() []V {
 	return values
 }
 
-// Contains checks whether a key exists.
+// ContainsKey checks whether a key exists.
 // It returns true if the `key` exists, or else false.
-func (m *ListMap[K, V]) Contains(key K) (ok bool) {
+func (m *ListMap[K, V]) ContainsKey(key K) (ok bool) {
 	m.mu.RLock()
 	if m.data != nil {
 		_, ok = m.data[key]
@@ -494,7 +470,7 @@ func (m *ListMap[K, V]) Flip() *ListMap[V, K] {
 	data := m.Map()
 	result := NewListMap[V, K](m.mu.IsSafe())
 	for key, value := range data {
-		result.Set(value, key)
+		result.Put(value, key)
 	}
 	return result
 }

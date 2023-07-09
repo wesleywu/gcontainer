@@ -19,19 +19,19 @@ import (
 func Test_ListMap_Var(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		var m = gmap.NewListMap[string, string]()
-		m.Set("key1", "val1")
+		m.Put("key1", "val1")
 		t.Assert(m.Keys(), []string{"key1"})
 
 		t.Assert(m.Get("key1"), "val1")
 		t.Assert(m.Size(), 1)
 		t.Assert(m.IsEmpty(), false)
 
-		t.Assert(m.GetOrSet("key2", "val2"), "val2")
-		t.Assert(m.SetIfNotExist("key2", "val2"), false)
+		t.Assert(m.GetOrPut("key2", "val2"), "val2")
+		t.Assert(m.PutIfAbsent("key2", "val2"), false)
 
-		t.Assert(m.SetIfNotExist("key3", "val3"), true)
+		t.Assert(m.PutIfAbsent("key3", "val3"), true)
 		t.Assert(m.Remove("key2"), "val2")
-		t.Assert(m.Contains("key2"), false)
+		t.Assert(m.ContainsKey("key2"), false)
 
 		t.AssertIN("key3", m.Keys())
 		t.AssertIN("key1", m.Keys())
@@ -51,19 +51,19 @@ func Test_ListMap_Var(t *testing.T) {
 func Test_ListMap_Basic(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewListMap[string, string]()
-		m.Set("key1", "val1")
+		m.Put("key1", "val1")
 		t.Assert(m.Keys(), []string{"key1"})
 
 		t.Assert(m.Get("key1"), "val1")
 		t.Assert(m.Size(), 1)
 		t.Assert(m.IsEmpty(), false)
 
-		t.Assert(m.GetOrSet("key2", "val2"), "val2")
-		t.Assert(m.SetIfNotExist("key2", "val2"), false)
+		t.Assert(m.GetOrPut("key2", "val2"), "val2")
+		t.Assert(m.PutIfAbsent("key2", "val2"), false)
 
-		t.Assert(m.SetIfNotExist("key3", "val3"), true)
+		t.Assert(m.PutIfAbsent("key3", "val3"), true)
 		t.Assert(m.Remove("key2"), "val2")
-		t.Assert(m.Contains("key2"), false)
+		t.Assert(m.ContainsKey("key2"), false)
 
 		t.AssertIN("key3", m.Keys())
 		t.AssertIN("key1", m.Keys())
@@ -86,20 +86,20 @@ func Test_ListMap_Basic(t *testing.T) {
 func Test_ListMap_Set_Fun(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewListMap[string, int]()
-		m.GetOrSetFunc("fun", getValue)
-		m.GetOrSetFuncLock("funlock", getValue)
+		m.GetOrPutFunc("fun", getValue)
+		m.GetOrPutFunc("funlock", getValue)
 		t.Assert(m.Get("funlock"), 3)
 		t.Assert(m.Get("fun"), 3)
-		m.GetOrSetFunc("fun", getValue)
-		t.Assert(m.SetIfNotExistFunc("fun", getValue), false)
-		t.Assert(m.SetIfNotExistFuncLock("funlock", getValue), false)
+		m.GetOrPutFunc("fun", getValue)
+		t.Assert(m.PutIfAbsentFunc("fun", getValue), false)
+		t.Assert(m.PutIfAbsentFunc("funlock", getValue), false)
 	})
 }
 
 func Test_ListMap_Batch(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewListMap[string, string]()
-		m.Sets(map[string]string{"1": "1", "key1": "val1", "key2": "val2", "key3": "val3"})
+		m.Puts(map[string]string{"1": "1", "key1": "val1", "key2": "val2", "key3": "val3"})
 		t.Assert(m.Map(), map[interface{}]interface{}{1: 1, "key1": "val1", "key2": "val2", "key3": "val3"})
 		m.Removes([]string{"key1", "1"})
 		t.Assert(m.Map(), map[interface{}]interface{}{"key2": "val2", "key3": "val3"})
@@ -150,8 +150,8 @@ func Test_ListMap_Basic_Merge(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m1 := gmap.NewListMap[string, string]()
 		m2 := gmap.NewListMap[string, string]()
-		m1.Set("key1", "val1")
-		m2.Set("key2", "val2")
+		m1.Put("key1", "val1")
+		m2.Put("key2", "val2")
 		m1.Merge(m2)
 		t.Assert(m1.Map(), map[interface{}]interface{}{"key1": "val1", "key2": "val2"})
 		m3 := gmap.NewListMapFrom[string, string](nil)
@@ -163,9 +163,9 @@ func Test_ListMap_Basic_Merge(t *testing.T) {
 func Test_ListMap_Order(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewListMap[string, string]()
-		m.Set("k1", "v1")
-		m.Set("k2", "v2")
-		m.Set("k3", "v3")
+		m.Put("k1", "v1")
+		m.Put("k2", "v2")
+		m.Put("k3", "v3")
 		t.Assert(m.Keys(), []string{"k1", "k2", "k3"})
 		t.Assert(m.Values(), []string{"v1", "v2", "v3"})
 	})
@@ -174,8 +174,8 @@ func Test_ListMap_Order(t *testing.T) {
 func Test_ListMap_FilterEmpty(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewListMap[int, int]()
-		m.Set(1, 0)
-		m.Set(2, 2)
+		m.Put(1, 0)
+		m.Put(2, 2)
 		t.Assert(m.Size(), 2)
 		t.Assert(m.Get(2), 2)
 		m.FilterEmpty()
@@ -233,7 +233,7 @@ func Test_ListMap_Json_Sequence(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewListMap[string, int32]()
 		for i := 'z'; i >= 'a'; i-- {
-			m.Set(string(i), i)
+			m.Put(string(i), i)
 		}
 		b, err := json.Marshal(m)
 		t.AssertNil(err)
@@ -242,7 +242,7 @@ func Test_ListMap_Json_Sequence(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewListMap[string, int32]()
 		for i := 'a'; i <= 'z'; i++ {
-			m.Set(string(i), i)
+			m.Put(string(i), i)
 		}
 		b, err := json.Marshal(m)
 		t.AssertNil(err)
@@ -351,8 +351,8 @@ func TestListMap_UnmarshalValue(t *testing.T) {
 func TestListMap_String(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewListMap[int, string]()
-		m.Set(1, "")
-		m.Set(2, "2")
+		m.Put(1, "")
+		m.Put(2, "2")
 		t.Assert(m.String(), "{\"1\":\"\",\"2\":\"2\"}")
 
 		m1 := gmap.NewListMapFrom[int, string](nil)
@@ -363,8 +363,8 @@ func TestListMap_String(t *testing.T) {
 func TestListMap_MarshalJSON(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewListMap[int, string]()
-		m.Set(1, "")
-		m.Set(2, "2")
+		m.Put(1, "")
+		m.Put(2, "2")
 		res, err := m.MarshalJSON()
 		t.Assert(res, []byte("{\"1\":\"\",\"2\":\"2\"}"))
 		t.AssertNil(err)
@@ -379,12 +379,12 @@ func TestListMap_MarshalJSON(t *testing.T) {
 func TestListMap_DeepCopy(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		m := gmap.NewListMap[int, string]()
-		m.Set(1, "1")
-		m.Set(2, "2")
+		m.Put(1, "1")
+		m.Put(2, "2")
 		t.Assert(m.Size(), 2)
 
 		n := m.DeepCopy().(*gmap.ListMap[int, string])
-		n.Set(1, "val1")
+		n.Put(1, "val1")
 		t.AssertNE(m.Get(1), n.Get(1))
 	})
 }

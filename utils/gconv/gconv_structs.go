@@ -156,7 +156,7 @@ func doStructs(params interface{}, pointer interface{}, mapping map[string]strin
 	return nil
 }
 
-// doStructsByDirectReflectSet do the converting directly using reflect Set.
+// doStructsByDirectReflectSet do the converting directly using reflect Put.
 // It returns true if success, or else false.
 func doStructsByDirectReflectSet(params interface{}, pointer interface{}) (ok bool) {
 	v1 := reflect.ValueOf(pointer)

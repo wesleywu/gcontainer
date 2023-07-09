@@ -16,7 +16,7 @@ import (
 func ExampleNewAVLTree() {
 	avlTree := NewAVLTree[string, string](comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
-		avlTree.Set("key"+gconv.String(i), "val"+gconv.String(i))
+		avlTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
 
 	fmt.Println(avlTree)
@@ -33,7 +33,7 @@ func ExampleNewAVLTree() {
 func ExampleNewAVLTreeFrom() {
 	avlTree := NewAVLTree[string, string](comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
-		avlTree.Set("key"+gconv.String(i), "val"+gconv.String(i))
+		avlTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
 
 	otherAvlTree := NewAVLTreeFrom(comparator.ComparatorString, avlTree.Map())
@@ -51,7 +51,7 @@ func ExampleNewAVLTreeFrom() {
 func ExampleNewBTree() {
 	bTree := NewBTree[string, string](3, comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
-		bTree.Set("key"+gconv.String(i), "val"+gconv.String(i))
+		bTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
 	fmt.Println(bTree.Map())
 
@@ -62,7 +62,7 @@ func ExampleNewBTree() {
 func ExampleNewBTreeFrom() {
 	bTree := NewBTree[string, string](3, comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
-		bTree.Set("key"+gconv.String(i), "val"+gconv.String(i))
+		bTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
 
 	otherBTree := NewBTreeFrom(3, comparator.ComparatorString, bTree.Map())
@@ -75,7 +75,7 @@ func ExampleNewBTreeFrom() {
 func ExampleNewRedBlackTree() {
 	rbTree := NewRedBlackTree[string, string](comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
-		rbTree.Set("key"+gconv.String(i), "val"+gconv.String(i))
+		rbTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
 
 	fmt.Println(rbTree)
@@ -92,7 +92,7 @@ func ExampleNewRedBlackTree() {
 func ExampleNewRedBlackTreeFrom() {
 	rbTree := NewRedBlackTree[string, string](comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
-		rbTree.Set("key"+gconv.String(i), "val"+gconv.String(i))
+		rbTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
 
 	otherRBTree := NewRedBlackTreeFrom[string, string](comparator.ComparatorString, rbTree.Map())

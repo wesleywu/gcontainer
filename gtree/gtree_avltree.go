@@ -57,19 +57,19 @@ func NewAVLTreeFrom[K comparable, V comparable](comparator func(v1, v2 K) int, d
 // Clone returns a new tree with a copy of current tree.
 func (tree *AVLTree[K, V]) Clone(safe ...bool) gmap.Map[K, V] {
 	newTree := NewAVLTree[K, V](tree.comparator, safe...)
-	newTree.Sets(tree.Map())
+	newTree.Puts(tree.Map())
 	return newTree
 }
 
-// Set inserts node into the tree.
-func (tree *AVLTree[K, V]) Set(key K, value V) {
+// Put inserts node into the tree.
+func (tree *AVLTree[K, V]) Put(key K, value V) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	tree.put(key, value, nil, &tree.root)
 }
 
-// Sets batch sets key-values to the tree.
-func (tree *AVLTree[K, V]) Sets(data map[K]V) {
+// Puts batch sets key-values to the tree.
+func (tree *AVLTree[K, V]) Puts(data map[K]V) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	for key, value := range data {
@@ -106,7 +106,7 @@ func (tree *AVLTree[K, V]) doSearch(key K) (node *AVLTreeNode[K, V], found bool)
 	return nil, false
 }
 
-// Get searches the node in the tree by `key` and returns its value or nil if key is not found in tree.
+// Get returns the value by given `key`, or empty value of type K if the key is not found in the map.
 func (tree *AVLTree[K, V]) Get(key K) (value V) {
 	value, _ = tree.Search(key)
 	return
@@ -133,7 +133,7 @@ func (tree *AVLTree[K, V]) doSetWithLockCheck(key K, value V) V {
 	return value
 }
 
-// doSetWithLockCheck checks whether value of the key exists with mutex.Lock,
+// doSetWithLockCheckFunc checks whether value of the key exists with mutex.Lock,
 // if not exists, set value to the map with given `key`,
 // or else just return the existing value.
 //
@@ -155,9 +155,9 @@ func (tree *AVLTree[K, V]) doSetWithLockCheckFunc(key K, f func() V) V {
 	return value
 }
 
-// GetOrSet returns the value by key,
+// GetOrPut returns the value by key,
 // or sets value with given `value` if it does not exist and then returns this value.
-func (tree *AVLTree[K, V]) GetOrSet(key K, value V) V {
+func (tree *AVLTree[K, V]) GetOrPut(key K, value V) V {
 	if v, ok := tree.Search(key); !ok {
 		return tree.doSetWithLockCheck(key, value)
 	} else {
@@ -165,24 +165,10 @@ func (tree *AVLTree[K, V]) GetOrSet(key K, value V) V {
 	}
 }
 
-// GetOrSetFunc returns the value by key,
+// GetOrPutFunc returns the value by key,
 // or sets value with returned value of callback function `f` if it does not exist
 // and then returns this value.
-func (tree *AVLTree[K, V]) GetOrSetFunc(key K, f func() V) V {
-	if v, ok := tree.Search(key); !ok {
-		return tree.doSetWithLockCheck(key, f())
-	} else {
-		return v
-	}
-}
-
-// GetOrSetFuncLock returns the value by key,
-// or sets value with returned value of callback function `f` if it does not exist
-// and then returns this value.
-//
-// GetOrSetFuncLock differs with GetOrSetFunc function is that it executes function `f`
-// with mutex.Lock of the hash map.
-func (tree *AVLTree[K, V]) GetOrSetFuncLock(key K, f func() V) V {
+func (tree *AVLTree[K, V]) GetOrPutFunc(key K, f func() V) V {
 	if v, ok := tree.Search(key); !ok {
 		return tree.doSetWithLockCheckFunc(key, f)
 	} else {
@@ -190,41 +176,28 @@ func (tree *AVLTree[K, V]) GetOrSetFuncLock(key K, f func() V) V {
 	}
 }
 
-// SetIfNotExist sets `value` to the map if the `key` does not exist, and then returns true.
+// PutIfAbsent sets `value` to the map if the `key` does not exist, and then returns true.
 // It returns false if `key` exists, and `value` would be ignored.
-func (tree *AVLTree[K, V]) SetIfNotExist(key K, value V) bool {
-	if !tree.Contains(key) {
+func (tree *AVLTree[K, V]) PutIfAbsent(key K, value V) bool {
+	if !tree.ContainsKey(key) {
 		tree.doSetWithLockCheck(key, value)
 		return true
 	}
 	return false
 }
 
-// SetIfNotExistFunc sets value with return value of callback function `f`, and then returns true.
+// PutIfAbsentFunc sets value with return value of callback function `f`, and then returns true.
 // It returns false if `key` exists, and `value` would be ignored.
-func (tree *AVLTree[K, V]) SetIfNotExistFunc(key K, f func() V) bool {
-	if !tree.Contains(key) {
-		tree.doSetWithLockCheck(key, f())
-		return true
-	}
-	return false
-}
-
-// SetIfNotExistFuncLock sets value with return value of callback function `f`, and then returns true.
-// It returns false if `key` exists, and `value` would be ignored.
-//
-// SetIfNotExistFuncLock differs with SetIfNotExistFunc function is that
-// it executes function `f` with mutex.Lock of the hash map.
-func (tree *AVLTree[K, V]) SetIfNotExistFuncLock(key K, f func() V) bool {
-	if !tree.Contains(key) {
+func (tree *AVLTree[K, V]) PutIfAbsentFunc(key K, f func() V) bool {
+	if !tree.ContainsKey(key) {
 		tree.doSetWithLockCheckFunc(key, f)
 		return true
 	}
 	return false
 }
 
-// Contains checks whether `key` exists in the tree.
-func (tree *AVLTree[K, V]) Contains(key K) bool {
+// ContainsKey checks whether `key` exists in the tree.
+func (tree *AVLTree[K, V]) ContainsKey(key K) bool {
 	_, ok := tree.Search(key)
 	return ok
 }

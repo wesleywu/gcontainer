@@ -20,7 +20,7 @@ func Benchmark_HashMap_Set(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		i := 0
 		for pb.Next() {
-			hashMap.Set(i, i)
+			hashMap.Put(i, i)
 			i++
 		}
 	})
