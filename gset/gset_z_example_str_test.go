@@ -39,28 +39,28 @@ func ExampleStrSet_Add() {
 	strSet := gset.NewFrom[string]([]string{"str1", "str2", "str3"}, true)
 	strSet.Add("str")
 	fmt.Println(strSet.Slice())
-	fmt.Println(strSet.AddIfNotExist("str"))
+	fmt.Println(strSet.Add("str"))
 
 	// Mya Output:
 	// [str str1 str2 str3]
 	// false
 }
 
-// AddIfNotExist checks whether item exists in the set,
+// Add checks whether item exists in the set,
 // it adds the item to set and returns true if it does not exists in the set,
 // or else it does nothing and returns false.
 func ExampleStrSet_AddIfNotExist() {
 	strSet := gset.NewFrom[string]([]string{"str1", "str2", "str3"}, true)
 	strSet.Add("str")
 	fmt.Println(strSet.Slice())
-	fmt.Println(strSet.AddIfNotExist("str"))
+	fmt.Println(strSet.Add("str"))
 
 	// Mya Output:
 	// [str str1 str2 str3]
 	// false
 }
 
-// AddIfNotExistFunc checks whether item exists in the set,
+// AddFunc checks whether item exists in the set,
 // it adds the item to set and returns true if it does not exists in the set and function `f` returns true,
 // or else it does nothing and returns false.
 // Note that, the function `f` is executed without writing lock.
@@ -68,16 +68,14 @@ func ExampleStrSet_AddIfNotExistFunc() {
 	strSet := gset.NewFrom[string]([]string{"str1", "str2", "str3"}, true)
 	strSet.Add("str")
 	fmt.Println(strSet.Slice())
-	fmt.Println(strSet.AddIfNotExistFunc("str5", func() bool {
-		return true
-	}))
+	fmt.Println(strSet.Add("str5"))
 
 	// May Output:
 	// [str1 str2 str3 str]
 	// true
 }
 
-// AddIfNotExistFunc checks whether item exists in the set,
+// AddFunc checks whether item exists in the set,
 // it adds the item to set and returns true if it does not exists in the set and function `f` returns true,
 // or else it does nothing and returns false.
 // Note that, the function `f` is executed without writing lock.
@@ -85,9 +83,7 @@ func ExampleStrSet_AddIfNotExistFuncLock() {
 	strSet := gset.NewFrom[string]([]string{"str1", "str2", "str3"}, true)
 	strSet.Add("str")
 	fmt.Println(strSet.Slice())
-	fmt.Println(strSet.AddIfNotExistFuncLock("str4", func() bool {
-		return true
-	}))
+	fmt.Println(strSet.Add("str4"))
 
 	// May Output:
 	// [str1 str2 str3 str]
@@ -194,21 +190,21 @@ func ExampleStrSet_IsSubsetOf() {
 	// true
 }
 
-// Iterator iterates the set readonly with given callback function `f`,
+// ForEach iterates the set readonly with given callback function `f`,
 // if `f` returns true then continue iterating; or false to stop.
 func ExampleStrSet_Iterator() {
 	s1 := gset.NewSet[string](true)
 	s1.Add([]string{"a", "b", "c", "d"}...)
-	s1.Iterator(func(v string) bool {
-		fmt.Println("Iterator", v)
+	s1.ForEach(func(v string) bool {
+		fmt.Println("ForEach", v)
 		return true
 	})
 
 	// May Output:
-	// Iterator a
-	// Iterator b
-	// Iterator c
-	// Iterator d
+	// ForEach a
+	// ForEach b
+	// ForEach c
+	// ForEach d
 }
 
 // Join joins items with a string `glue`.

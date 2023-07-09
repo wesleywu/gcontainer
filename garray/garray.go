@@ -7,6 +7,50 @@
 // Package garray provides most commonly used array containers which also support concurrent-safe/unsafe switch feature.
 package garray
 
+type Collection[T comparable] interface {
+	// Add adds all the elements in the specified slice to this collection.
+	// Returns true if this collection changed as a result of the call
+	Add(...T) bool
+
+	// AddAll adds all the elements in the specified collection to this collection.
+	// Returns true if this collection changed as a result of the call
+	AddAll(Collection[T]) bool
+
+	// Clear removes all the elements from this collection.
+	Clear()
+
+	// Contains returns true if this collection contains the specified element.
+	Contains(T) bool
+
+	// ContainsAll returns true if this collection contains all the elements in the specified collection.
+	ContainsAll(Collection[T]) bool
+
+	// IsEmpty returns true if this collection contains no elements.
+	IsEmpty() bool
+
+	// ForEach iterates all elements in this collection readonly with custom callback function `f`.
+	// If `f` returns true, then it continues iterating; or false to stop.
+	ForEach(func(v T) bool)
+
+	// Remove removes all of this collection's elements that are also contained in the specified slice
+	// if it is present.
+	// Returns true if this collection changed as a result of the call
+	Remove(...T) bool
+
+	// RemoveAll removes all of this collection's elements that are also contained in the specified collection
+	// Returns true if this collection changed as a result of the call
+	RemoveAll(Collection[T]) bool
+
+	// Size returns the number of elements in this collection.
+	Size() int
+
+	// Slice returns an array containing shadow copy of all the elements in this collection.
+	Slice() []T
+
+	// String returns items as a string, which implements like json.Marshal does.
+	String() string
+}
+
 type Array[T comparable] interface {
 	At(index int) (value T)
 	Get(index int) (value T, found bool)

@@ -92,11 +92,11 @@ func TestSet_Iterator(t *testing.T) {
 
 		a1 := garray.New[int](true)
 		a2 := garray.New[int](true)
-		s.Iterator(func(v int) bool {
+		s.ForEach(func(v int) bool {
 			a1.Append(1)
 			return false
 		})
-		s.Iterator(func(v int) bool {
+		s.ForEach(func(v int) bool {
 			a2.Append(1)
 			return true
 		})
@@ -379,10 +379,10 @@ func TestSet_AddIfNotExist(t *testing.T) {
 		s := gset.New[int](true)
 		s.Add(1)
 		t.Assert(s.Contains(1), true)
-		t.Assert(s.AddIfNotExist(1), false)
-		t.Assert(s.AddIfNotExist(2), true)
+		t.Assert(s.Add(1), false)
+		t.Assert(s.Add(2), true)
 		t.Assert(s.Contains(2), true)
-		t.Assert(s.AddIfNotExist(2), false)
+		t.Assert(s.Add(2), false)
 		t.Assert(s.Contains(2), true)
 	})
 }
@@ -393,11 +393,10 @@ func TestSet_AddIfNotExistFunc(t *testing.T) {
 		s.Add(1)
 		t.Assert(s.Contains(1), true)
 		t.Assert(s.Contains(2), false)
-		t.Assert(s.AddIfNotExistFunc(2, func() bool { return false }), false)
 		t.Assert(s.Contains(2), false)
-		t.Assert(s.AddIfNotExistFunc(2, func() bool { return true }), true)
+		t.Assert(s.Add(2), true)
 		t.Assert(s.Contains(2), true)
-		t.Assert(s.AddIfNotExistFunc(2, func() bool { return true }), false)
+		t.Assert(s.Add(2), false)
 		t.Assert(s.Contains(2), true)
 	})
 	gtest.C(t, func(t *gtest.T) {
@@ -406,10 +405,7 @@ func TestSet_AddIfNotExistFunc(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			r := s.AddIfNotExistFunc(1, func() bool {
-				time.Sleep(100 * time.Millisecond)
-				return true
-			})
+			r := s.Add(1)
 			t.Assert(r, false)
 		}()
 		s.Add(1)
@@ -417,7 +413,7 @@ func TestSet_AddIfNotExistFunc(t *testing.T) {
 	})
 	gtest.C(t, func(t *gtest.T) {
 		s := gset.HashSet[int]{}
-		t.Assert(s.AddIfNotExistFunc(1, func() bool { return true }), true)
+		t.Assert(s.Add(1), true)
 	})
 }
 
@@ -441,27 +437,22 @@ func TestSet_AddIfNotExistFuncLock(t *testing.T) {
 		wg.Add(2)
 		go func() {
 			defer wg.Done()
-			r := s.AddIfNotExistFuncLock(1, func() bool {
-				time.Sleep(500 * time.Millisecond)
-				return true
-			})
+			r := s.Add(1)
 			t.Assert(r, true)
 		}()
 		time.Sleep(100 * time.Millisecond)
 		go func() {
 			defer wg.Done()
-			r := s.AddIfNotExistFuncLock(1, func() bool {
-				return true
-			})
+			r := s.Add(1)
 			t.Assert(r, false)
 		}()
 		wg.Wait()
 	})
 	gtest.C(t, func(t *gtest.T) {
 		s := gset.New[*exampleElement](true)
-		t.Assert(s.AddIfNotExistFuncLock(nil, func() bool { return true }), false)
+		t.Assert(s.Add(nil), false)
 		s1 := gset.HashSet[int]{}
-		t.Assert(s1.AddIfNotExistFuncLock(1, func() bool { return true }), true)
+		t.Assert(s1.Add(1), true)
 	})
 }
 

@@ -7,18 +7,8 @@
 // Package gset provides kinds of concurrent-safe/unsafe sets.
 package gset
 
+import "github.com/wesleywu/gcontainer/garray"
+
 type Set[T comparable] interface {
-	Iterator(f func(v T) bool)
-	Add(items ...T)
-	AddIfNotExist(item T) bool
-	AddIfNotExistFunc(item T, f func() bool) bool
-	AddIfNotExistFuncLock(item T, f func() bool) bool
-	Contains(item T) bool
-	ContainsI(item T) bool
-	Remove(item T)
-	Size() int
-	Clear()
-	Slice() []T
-	Join(glue string) string
-	String() string
+	garray.Collection[T]
 }

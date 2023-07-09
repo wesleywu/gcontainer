@@ -9,6 +9,7 @@ package gset
 
 import (
 	"bytes"
+	"github.com/wesleywu/gcontainer/garray"
 	"strings"
 
 	"github.com/wesleywu/gcontainer/internal/json"
@@ -52,9 +53,9 @@ func NewFrom[T comparable](items []T, safe ...bool) *HashSet[T] {
 	}
 }
 
-// Iterator iterates the set readonly with given callback function `f`,
+// ForEach iterates the set readonly with given callback function `f`,
 // if `f` returns true then continue iterating; or false to stop.
-func (set *HashSet[T]) Iterator(f func(v T) bool) {
+func (set *HashSet[T]) ForEach(f func(v T) bool) {
 	set.mu.RLock()
 	defer set.mu.RUnlock()
 	for k := range set.data {
@@ -65,90 +66,46 @@ func (set *HashSet[T]) Iterator(f func(v T) bool) {
 }
 
 // Add adds one or multiple items to the set.
-func (set *HashSet[T]) Add(items ...T) {
+func (set *HashSet[T]) Add(items ...T) bool {
 	set.mu.Lock()
+	defer set.mu.Unlock()
 	if set.data == nil {
 		set.data = make(map[T]struct{})
 	}
-	for _, v := range items {
-		set.data[v] = struct{}{}
+	var setChanged = false
+	for _, item := range items {
+		if empty.IsNil(item) {
+			continue
+		}
+		if _, found := set.data[item]; found {
+			continue
+		}
+		set.data[item] = struct{}{}
+		setChanged = true
 	}
-	set.mu.Unlock()
+	return setChanged
 }
 
-// AddIfNotExist checks whether item exists in the set,
-// it adds the item to set and returns true if it does not exists in the set,
-// or else it does nothing and returns false.
-//
-// Note that, if `item` is nil, it does nothing and returns false.
-func (set *HashSet[T]) AddIfNotExist(item T) bool {
-	if empty.IsNil(item) {
-		return false
+// AddAll adds all the elements in the specified collection to this set.
+func (set *HashSet[T]) AddAll(items garray.Collection[T]) bool {
+	set.mu.Lock()
+	defer set.mu.Unlock()
+	if set.data == nil {
+		set.data = make(map[T]struct{})
 	}
-	if !set.Contains(item) {
-		set.mu.Lock()
-		defer set.mu.Unlock()
-		if set.data == nil {
-			set.data = make(map[T]struct{})
-		}
-		if _, ok := set.data[item]; !ok {
-			set.data[item] = struct{}{}
+	var setChanged = false
+	items.ForEach(func(item T) bool {
+		if empty.IsNil(item) {
 			return true
 		}
-	}
-	return false
-}
-
-// AddIfNotExistFunc checks whether item exists in the set,
-// it adds the item to set and returns true if it does not exist in the set and
-// function `f` returns true, or else it does nothing and returns false.
-//
-// Note that, if `item` is nil, it does nothing and returns false. The function `f`
-// is executed without writing lock.
-func (set *HashSet[T]) AddIfNotExistFunc(item T, f func() bool) bool {
-	if empty.IsNil(item) {
-		return false
-	}
-	if !set.Contains(item) {
-		if f() {
-			set.mu.Lock()
-			defer set.mu.Unlock()
-			if set.data == nil {
-				set.data = make(map[T]struct{})
-			}
-			if _, ok := set.data[item]; !ok {
-				set.data[item] = struct{}{}
-				return true
-			}
+		if _, found := set.data[item]; found {
+			return true
 		}
-	}
-	return false
-}
-
-// AddIfNotExistFuncLock checks whether item exists in the set,
-// it adds the item to set and returns true if it does not exists in the set and
-// function `f` returns true, or else it does nothing and returns false.
-//
-// Note that, if `item` is nil, it does nothing and returns false. The function `f`
-// is executed within writing lock.
-func (set *HashSet[T]) AddIfNotExistFuncLock(item T, f func() bool) bool {
-	if empty.IsNil(item) {
-		return false
-	}
-	if !set.Contains(item) {
-		set.mu.Lock()
-		defer set.mu.Unlock()
-		if set.data == nil {
-			set.data = make(map[T]struct{})
-		}
-		if f() {
-			if _, ok := set.data[item]; !ok {
-				set.data[item] = struct{}{}
-				return true
-			}
-		}
-	}
-	return false
+		set.data[item] = struct{}{}
+		setChanged = true
+		return true
+	})
+	return setChanged
 }
 
 // Contains checks whether the set contains `item`.
@@ -160,6 +117,22 @@ func (set *HashSet[T]) Contains(item T) bool {
 	}
 	set.mu.RUnlock()
 	return ok
+}
+
+// ContainsAll returns true if this collection contains all the elements in the specified collection.
+func (set *HashSet[T]) ContainsAll(items garray.Collection[T]) bool {
+	set.mu.RLock()
+	defer set.mu.RUnlock()
+	if set.data == nil {
+		return false
+	}
+	items.ForEach(func(v T) bool {
+		if _, ok := set.data[v]; !ok {
+			return false
+		}
+		return true
+	})
+	return true
 }
 
 // ContainsI checks whether a value exists in the set with case-insensitively.
@@ -181,13 +154,43 @@ func (set *HashSet[T]) ContainsI(item T) bool {
 	return set.Contains(item)
 }
 
-// Remove deletes `item` from set.
-func (set *HashSet[T]) Remove(item T) {
-	set.mu.Lock()
-	if set.data != nil {
-		delete(set.data, item)
+// IsEmpty returns true if this collection contains no elements.
+func (set *HashSet[T]) IsEmpty() bool {
+	set.mu.RLock()
+	defer set.mu.RUnlock()
+	if set.data == nil {
+		return true
 	}
-	set.mu.Unlock()
+	return len(set.data) == 0
+}
+
+// Remove deletes `items` from set.
+func (set *HashSet[T]) Remove(items ...T) bool {
+	set.mu.Lock()
+	defer set.mu.Unlock()
+	dataChanged := false
+	if set.data != nil {
+		for _, item := range items {
+			delete(set.data, item)
+			dataChanged = true
+		}
+	}
+	return dataChanged
+}
+
+// RemoveAll removes all of this collection's elements that are also contained in the specified collection
+func (set *HashSet[T]) RemoveAll(items garray.Collection[T]) bool {
+	set.mu.Lock()
+	defer set.mu.Unlock()
+	dataChanged := false
+	if set.data != nil {
+		items.ForEach(func(item T) bool {
+			delete(set.data, item)
+			dataChanged = true
+			return true
+		})
+	}
+	return dataChanged
 }
 
 // Size returns the size of the set.

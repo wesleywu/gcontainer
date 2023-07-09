@@ -95,8 +95,8 @@ func ExampleSet_IsSubsetOf() {
 
 func ExampleSet_AddIfNotExist() {
 	var set gset.HashSet[int]
-	fmt.Println(set.AddIfNotExist(1))
-	fmt.Println(set.AddIfNotExist(1))
+	fmt.Println(set.Add(1))
+	fmt.Println(set.Add(1))
 	fmt.Println(set.Slice())
 
 	// Output:

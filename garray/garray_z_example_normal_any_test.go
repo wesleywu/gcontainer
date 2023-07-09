@@ -120,7 +120,7 @@ func ExampleNew() {
 
 func ExampleArray_Iterator() {
 	array := garray.NewArrayFrom[string]([]string{"a", "b", "c"})
-	// Iterator is alias of IteratorAsc, which iterates the array readonly in ascending order
+	// ForEach is alias of IteratorAsc, which iterates the array readonly in ascending order
 	//  with given callback function `f`.
 	// If `f` returns true, then it continues iterating; or false to stop.
 	array.Iterator(func(k int, v string) bool {
