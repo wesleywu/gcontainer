@@ -13,7 +13,7 @@ import (
 	"github.com/wesleywu/gcontainer/internal/json"
 )
 
-func ExampleSet_Intersect() {
+func ExampleHashSet_Intersect() {
 	s1 := gset.NewFrom[int]([]int{1, 2, 3})
 	s2 := gset.NewFrom[int]([]int{4, 5, 6})
 	s3 := gset.NewFrom[int]([]int{1, 2, 3, 4, 5, 6, 7})
@@ -30,7 +30,7 @@ func ExampleSet_Intersect() {
 	// [4 5 6 7]
 }
 
-func ExampleSet_Diff() {
+func ExampleHashSet_Diff() {
 	s1 := gset.NewFrom([]int{1, 2, 3})
 	s2 := gset.NewFrom([]int{4, 5, 6})
 	s3 := gset.NewFrom([]int{1, 2, 3, 4, 5, 6, 7})
@@ -47,7 +47,7 @@ func ExampleSet_Diff() {
 	// [4 5 6 7]
 }
 
-func ExampleSet_Union() {
+func ExampleHashSet_Union() {
 	s1 := gset.NewFrom([]int{1, 2, 3})
 	s2 := gset.NewFrom([]int{4, 5, 6})
 	s3 := gset.NewFrom([]int{1, 2, 3, 4, 5, 6, 7})
@@ -64,7 +64,7 @@ func ExampleSet_Union() {
 	// [4 5 6 7]
 }
 
-func ExampleSet_Complement() {
+func ExampleHashSet_Complement() {
 	s1 := gset.NewFrom([]int{1, 2, 3})
 	s2 := gset.NewFrom([]int{4, 5, 6})
 	s3 := gset.NewFrom([]int{1, 2, 3, 4, 5, 6, 7})
@@ -81,7 +81,7 @@ func ExampleSet_Complement() {
 	// [4 5 6 7]
 }
 
-func ExampleSet_IsSubsetOf() {
+func ExampleHashSet_IsSubsetOf() {
 	var s1, s2 gset.HashSet[int]
 	s1.Add([]int{1, 2, 3}...)
 	s2.Add([]int{2, 3}...)
@@ -93,19 +93,7 @@ func ExampleSet_IsSubsetOf() {
 	// true
 }
 
-func ExampleSet_AddIfNotExist() {
-	var set gset.HashSet[int]
-	fmt.Println(set.Add(1))
-	fmt.Println(set.Add(1))
-	fmt.Println(set.Slice())
-
-	// Output:
-	// true
-	// false
-	// [1]
-}
-
-func ExampleSet_Pop() {
+func ExampleHashSet_Pop() {
 	var set gset.HashSet[int]
 	set.Add(1, 2, 3, 4)
 	fmt.Println(set.Pop())
@@ -118,7 +106,7 @@ func ExampleSet_Pop() {
 	// 1
 }
 
-func ExampleSet_Pops() {
+func ExampleHashSet_Pops() {
 	var set gset.HashSet[int]
 	set.Add(1, 2, 3, 4)
 	fmt.Println(set.Pop())
@@ -131,7 +119,7 @@ func ExampleSet_Pops() {
 	// 1
 }
 
-func ExampleSet_Join() {
+func ExampleHashSet_Join() {
 	var set gset.HashSet[string]
 	set.Add("a", "b", "c", "d")
 	fmt.Println(set.Join(","))
@@ -140,7 +128,7 @@ func ExampleSet_Join() {
 	// a,b,c,d
 }
 
-func ExampleSet_Contains() {
+func ExampleHashSet_Contains() {
 	var set gset.HashSet[string]
 	set.Add("a")
 	fmt.Println(set.Contains("a"))
@@ -153,7 +141,7 @@ func ExampleSet_Contains() {
 	// true
 }
 
-func ExampleSet_ContainsI() {
+func ExampleHashSet_ContainsI() {
 	var set gset.HashSet[string]
 	set.Add("a")
 	fmt.Println(set.Contains("a"))
@@ -167,7 +155,7 @@ func ExampleSet_ContainsI() {
 }
 
 // UnmarshalJSON implements the interface UnmarshalJSON for json.Unmarshal.
-func ExampleIntSet_UnmarshalJSON() {
+func ExampleHashSet_UnmarshalJSON() {
 	b := []byte(`{"Id":1,"Name":"john","Scores":[100,99,98]}`)
 	type Student struct {
 		Id     int
@@ -175,7 +163,7 @@ func ExampleIntSet_UnmarshalJSON() {
 		Scores *gset.HashSet[int]
 	}
 	s := Student{}
-	json.Unmarshal(b, &s)
+	_ = json.Unmarshal(b, &s)
 	fmt.Println(s)
 
 	// May Output:
@@ -183,7 +171,7 @@ func ExampleIntSet_UnmarshalJSON() {
 }
 
 // UnmarshalValue is an interface implement which sets any type of value for set.
-func ExampleIntSet_UnmarshalValue() {
+func ExampleHashSet_UnmarshalValue() {
 	b := []byte(`{"Id":1,"Name":"john","Scores":100,99,98}`)
 	type Student struct {
 		Id     int
@@ -191,7 +179,7 @@ func ExampleIntSet_UnmarshalValue() {
 		Scores *gset.HashSet[int]
 	}
 	s := Student{}
-	json.Unmarshal(b, &s)
+	_ = json.Unmarshal(b, &s)
 	fmt.Println(s)
 
 	// May Output:
@@ -199,7 +187,7 @@ func ExampleIntSet_UnmarshalValue() {
 }
 
 // Walk applies a user supplied function `f` to every item of set.
-func ExampleIntSet_Walk() {
+func ExampleHashSet_Walk() {
 	var (
 		set   gset.HashSet[int]
 		names = []int{1, 0}
