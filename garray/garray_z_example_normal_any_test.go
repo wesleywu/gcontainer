@@ -79,14 +79,14 @@ func ExampleNew() {
 	fmt.Println(a.Contains(100))
 
 	// Insert item before specified index.
-	a.InsertAfter(9, 11)
+	_ = a.InsertAfter(9, 11)
 	// Insert item after specified index.
-	a.InsertBefore(10, 10)
+	_ = a.InsertBefore(10, 10)
 
 	fmt.Println(a.Slice())
 
 	// Modify item by index.
-	a.Set(0, 100)
+	_ = a.Set(0, 100)
 	fmt.Println(a.Slice())
 
 	fmt.Println(a.At(0))
