@@ -100,7 +100,7 @@ func (p *Pool[T]) Clear() {
 			}
 		}
 	} else {
-		p.list.RemoveAll()
+		p.list.Clear()
 	}
 }
 

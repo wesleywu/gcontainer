@@ -22,7 +22,7 @@ func TestTimer_Proceed(t *testing.T) {
 			Interval: time.Hour,
 		})
 		timer.Add(ctx, 10000*time.Hour, func(ctx context.Context) {
-			array.Append(1)
+			array.Add(1)
 		})
 		timer.proceed(10001)
 		time.Sleep(10 * time.Millisecond)
@@ -37,7 +37,7 @@ func TestTimer_Proceed(t *testing.T) {
 			Interval: time.Millisecond * 100,
 		})
 		timer.Add(ctx, 10000*time.Hour, func(ctx context.Context) {
-			array.Append(1)
+			array.Add(1)
 		})
 		ticks := int64((10000 * time.Hour) / (time.Millisecond * 100))
 		timer.proceed(ticks + 1)
@@ -73,7 +73,7 @@ func TestTimer_PriorityQueue_FirstOneInArrayIsTheLeast(t *testing.T) {
 		)
 		array.Shuffle()
 		queue := newPriorityQueue()
-		array.Iterator(func(k int, v int) bool {
+		array.ForEach(func(v int) bool {
 			queue.Push(v, int64(v))
 			return true
 		})

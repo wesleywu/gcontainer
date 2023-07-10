@@ -25,7 +25,7 @@ import (
 )
 
 // Queue is a concurrent-safe queue built on doubly linked list and channel.
-type Queue[T any] struct {
+type Queue[T comparable] struct {
 	limit  int            // Limit for queue size.
 	list   *glist.List[T] // Underlying list structure for data maintaining.
 	closed *gtype.Bool    // Whether queue is closed.
@@ -41,7 +41,7 @@ const (
 // New returns an empty queue object.
 // Optional parameter `limit` is used to limit the size of the queue, which is unlimited in default.
 // When `limit` is given, the queue will be static and high performance which is comparable with stdlib channel.
-func New[T any](limit ...int) *Queue[T] {
+func New[T comparable](limit ...int) *Queue[T] {
 	q := &Queue[T]{
 		closed: gtype.NewBool(),
 	}

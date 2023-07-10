@@ -125,7 +125,7 @@ func TestList(t *testing.T) {
 		checkListPointers(t, l, []*glist.Element[int]{e})
 		l.MoveToBack(e)
 		checkListPointers(t, l, []*glist.Element[int]{e})
-		l.Remove(e)
+		l.Remove(e.Value)
 		checkListPointers(t, l, []*glist.Element[int]{})
 
 		// Bigger list
@@ -135,7 +135,7 @@ func TestList(t *testing.T) {
 		e4 := l.PushBack(88)
 		checkListPointers(t, l, []*glist.Element[int]{e1, e2, e3, e4})
 
-		l.Remove(e2)
+		l.Remove(e2.Value)
 		checkListPointers(t, l, []*glist.Element[int]{e1, e3, e4})
 
 		l.MoveToFront(e3) // move from middle
@@ -157,23 +157,23 @@ func TestList(t *testing.T) {
 
 		e2 = l.InsertBefore(e1, 2) // insert before front
 		checkListPointers(t, l, []*glist.Element[int]{e2, e1, e4, e3})
-		l.Remove(e2)
+		l.Remove(e2.Value)
 		e2 = l.InsertBefore(e4, 2) // insert before middle
 		checkListPointers(t, l, []*glist.Element[int]{e1, e2, e4, e3})
-		l.Remove(e2)
+		l.Remove(e2.Value)
 		e2 = l.InsertBefore(e3, 2) // insert before back
 		checkListPointers(t, l, []*glist.Element[int]{e1, e4, e2, e3})
-		l.Remove(e2)
+		l.Remove(e2.Value)
 
 		e2 = l.InsertAfter(e1, 2) // insert after front
 		checkListPointers(t, l, []*glist.Element[int]{e1, e2, e4, e3})
-		l.Remove(e2)
+		l.Remove(e2.Value)
 		e2 = l.InsertAfter(e4, 2) // insert after middle
 		checkListPointers(t, l, []*glist.Element[int]{e1, e4, e2, e3})
-		l.Remove(e2)
+		l.Remove(e2.Value)
 		e2 = l.InsertAfter(e3, 2) // insert after back
 		checkListPointers(t, l, []*glist.Element[int]{e1, e4, e3, e2})
-		l.Remove(e2)
+		l.Remove(e2.Value)
 
 		// Check standard iteration.
 		sum := 0
@@ -189,7 +189,7 @@ func TestList(t *testing.T) {
 		var next *glist.Element[int]
 		for e := l.Front(); e != nil; e = next {
 			next = e.Next()
-			l.Remove(e)
+			l.Remove(e.Value)
 		}
 		checkListPointers(t, l, []*glist.Element[int]{})
 	})
@@ -281,7 +281,7 @@ func TestIssue4103(t *testing.T) {
 	l2.PushBack(4)
 
 	e := l1.Front()
-	l2.Remove(e) // l2 should not change because e is not an element of l2
+	l2.Remove(e.Value) // l2 should not change because e is not an element of l2
 	if n := l2.Len(); n != 2 {
 		t.Errorf("l2.Len() = %d, want 2", n)
 	}
@@ -298,7 +298,7 @@ func TestIssue6349(t *testing.T) {
 	l.PushBack(2)
 
 	e := l.Front()
-	l.Remove(e)
+	l.Remove(e.Value)
 	if e.Value != 1 {
 		t.Errorf("e.value = %d, want 1", e.Value)
 	}
@@ -410,11 +410,11 @@ func TestMoveUnknownMark(t *testing.T) {
 	})
 }
 
-func TestList_RemoveAll(t *testing.T) {
+func TestList_Clear(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := glist.New[int]()
 		l.PushBack(1)
-		l.RemoveAll()
+		l.Clear()
 		checkList(t, l, []int{})
 		l.PushBack(2)
 		checkList(t, l, []int{2})
@@ -573,11 +573,11 @@ func TestList_Removes(t *testing.T) {
 		a1 := []int{1, 2, 3, 4}
 		l.PushFronts(a1)
 		e1 := l.Back()
-		l.Removes([]*glist.Element[int]{e1})
+		l.Remove(e1.Value)
 		t.Assert(l.Len(), 3)
 
 		e2 := l.Back()
-		l.Removes([]*glist.Element[int]{e2})
+		l.Remove(e2.Value)
 		t.Assert(l.Len(), 2)
 		checkList(t, l, []int{4, 3})
 	})
@@ -591,16 +591,6 @@ func TestList_Pop(t *testing.T) {
 		t.Assert(l.PopBacks(2), []int{8, 7})
 		t.Assert(l.PopFront(), 1)
 		t.Assert(l.PopFronts(2), []int{2, 3})
-	})
-}
-
-func TestList_Clear(t *testing.T) {
-	gtest.C(t, func(t *gtest.T) {
-		l := glist.New[int]()
-		a1 := []int{1, 2, 3, 4}
-		l.PushFronts(a1)
-		l.Clear()
-		t.Assert(l.Len(), 0)
 	})
 }
 
@@ -734,7 +724,7 @@ func TestList_UnmarshalValue(t *testing.T) {
 func TestList_DeepCopy(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := glist.NewFrom([]int{1, 2, 3, 4, 5})
-		copyList := l.DeepCopy()
+		copyList := l.DeepCopy().(*glist.List[int])
 		copyList.PopBack()
 		t.AssertNE(l.Size(), copyList.Size())
 	})
