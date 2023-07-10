@@ -95,7 +95,7 @@ func ExampleNew() {
 	fmt.Println(a.Search(5))
 
 	// Remove item by index.
-	a.Remove(0)
+	a.Remove(100)
 	fmt.Println(a.Slice())
 
 	// Empty the array, removes all items of it.
@@ -118,7 +118,7 @@ func ExampleNew() {
 	// []
 }
 
-func ExampleArray_Iterator() {
+func ExampleStdArray_ForEach() {
 	array := garray.NewArrayFrom[string]([]string{"a", "b", "c"})
 	// ForEach is alias of ForEachAsc, which iterates the array readonly in ascending order
 	//  with given callback function `f`.

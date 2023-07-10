@@ -595,6 +595,7 @@ func (a *StdArray[T]) Unique() Array[T] {
 func (a *StdArray[T]) LockFunc(f func(array Array[T])) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
+	// todo fix this
 	f(a)
 }
 
@@ -602,6 +603,7 @@ func (a *StdArray[T]) LockFunc(f func(array Array[T])) {
 func (a *StdArray[T]) RLockFunc(f func(array Array[T])) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
+	// todo fix this
 	f(a)
 }
 

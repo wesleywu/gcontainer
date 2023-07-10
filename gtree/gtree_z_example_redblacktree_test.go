@@ -15,7 +15,7 @@ import (
 	"github.com/wesleywu/gcontainer/utils/gconv"
 )
 
-func ExampleRedBlackTree_SetComparator() {
+func ExampleRedBlackTree_PutComparator() {
 	var tree gtree.RedBlackTree[string, string]
 	tree.SetComparator(comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
@@ -46,7 +46,7 @@ func ExampleRedBlackTree_Clone() {
 	// 6
 }
 
-func ExampleRedBlackTree_Set() {
+func ExampleRedBlackTree_Put() {
 	tree := gtree.NewRedBlackTree[string, string](comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -60,7 +60,7 @@ func ExampleRedBlackTree_Set() {
 	// 6
 }
 
-func ExampleRedBlackTree_Sets() {
+func ExampleRedBlackTree_Puts() {
 	tree := gtree.NewRedBlackTree[string, string](comparator.ComparatorString)
 
 	tree.Puts(map[string]string{
@@ -90,7 +90,7 @@ func ExampleRedBlackTree_Get() {
 	//
 }
 
-func ExampleRedBlackTree_GetOrSet() {
+func ExampleRedBlackTree_GetOrPut() {
 	tree := gtree.NewRedBlackTree[string, string](comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -104,7 +104,7 @@ func ExampleRedBlackTree_GetOrSet() {
 	// val6
 }
 
-func ExampleRedBlackTree_GetOrSetFunc() {
+func ExampleRedBlackTree_GetOrPutFunc() {
 	tree := gtree.NewRedBlackTree[string, string](comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -122,25 +122,7 @@ func ExampleRedBlackTree_GetOrSetFunc() {
 	// val6
 }
 
-func ExampleRedBlackTree_GetOrSetFuncLock() {
-	tree := gtree.NewRedBlackTree[string, string](comparator.ComparatorString)
-	for i := 0; i < 6; i++ {
-		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
-	}
-
-	fmt.Println(tree.GetOrPutFunc("key1", func() string {
-		return "newVal1"
-	}))
-	fmt.Println(tree.GetOrPutFunc("key6", func() string {
-		return "val6"
-	}))
-
-	// Output:
-	// val1
-	// val6
-}
-
-func ExampleRedBlackTree_SetIfNotExist() {
+func ExampleRedBlackTree_PutIfAbsent() {
 	tree := gtree.NewRedBlackTree[string, string](comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -154,7 +136,7 @@ func ExampleRedBlackTree_SetIfNotExist() {
 	// true
 }
 
-func ExampleRedBlackTree_SetIfNotExistFunc() {
+func ExampleRedBlackTree_PutIfAbsentFunc() {
 	tree := gtree.NewRedBlackTree[string, string](comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -172,25 +154,7 @@ func ExampleRedBlackTree_SetIfNotExistFunc() {
 	// true
 }
 
-func ExampleRedBlackTree_SetIfNotExistFuncLock() {
-	tree := gtree.NewRedBlackTree[string, string](comparator.ComparatorString)
-	for i := 0; i < 6; i++ {
-		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
-	}
-
-	fmt.Println(tree.PutIfAbsentFunc("key1", func() string {
-		return "newVal1"
-	}))
-	fmt.Println(tree.PutIfAbsentFunc("key6", func() string {
-		return "val6"
-	}))
-
-	// Output:
-	// false
-	// true
-}
-
-func ExampleRedBlackTree_Contains() {
+func ExampleRedBlackTree_ContainsKey() {
 	tree := gtree.NewRedBlackTree[string, string](comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))

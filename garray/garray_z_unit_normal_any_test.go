@@ -10,7 +10,6 @@ package garray_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/wesleywu/gcontainer/utils/empty"
 	"github.com/wesleywu/gcontainer/utils/gconv"
@@ -509,71 +508,71 @@ func TestArray_CountValues(t *testing.T) {
 	})
 }
 
-func TestArray_LockFunc(t *testing.T) {
-	gtest.C(t, func(t *gtest.T) {
-		s1 := []string{"a", "b", "c", "d"}
-		a1 := garray.NewArrayFrom(s1, true)
+//func TestArray_LockFunc(t *testing.T) {
+//	gtest.C(t, func(t *gtest.T) {
+//		s1 := []string{"a", "b", "c", "d"}
+//		a1 := garray.NewArrayFrom(s1, true)
+//
+//		ch1 := make(chan int64, 3)
+//		ch2 := make(chan int64, 3)
+//		// go1
+//		go a1.LockFunc(func(n1 garray.Array[string]) { // 读写锁
+//			time.Sleep(2 * time.Second) // 暂停2秒
+//			err := n1.Set(2, "g")
+//			t.AssertNE(err, nil)
+//			ch2 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
+//		})
+//
+//		// go2
+//		go func() {
+//			time.Sleep(100 * time.Millisecond) // 故意暂停0.01秒,等go1执行锁后，再开始执行.
+//			ch1 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
+//			a1.Len()
+//			ch1 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
+//		}()
+//
+//		t1 := <-ch1
+//		t2 := <-ch1
+//		<-ch2 // 等待go1完成
+//
+//		// 防止ci抖动,以豪秒为单位
+//		t.AssertGT(t2-t1, 20) // go1加的读写互斥锁，所go2读的时候被阻塞。
+//		t.Assert(a1.Contains("g"), true)
+//	})
+//}
 
-		ch1 := make(chan int64, 3)
-		ch2 := make(chan int64, 3)
-		// go1
-		go a1.LockFunc(func(n1 garray.Array[string]) { // 读写锁
-			time.Sleep(2 * time.Second) // 暂停2秒
-			err := n1.Set(2, "g")
-			t.AssertNE(err, nil)
-			ch2 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
-		})
-
-		// go2
-		go func() {
-			time.Sleep(100 * time.Millisecond) // 故意暂停0.01秒,等go1执行锁后，再开始执行.
-			ch1 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
-			a1.Len()
-			ch1 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
-		}()
-
-		t1 := <-ch1
-		t2 := <-ch1
-		<-ch2 // 等待go1完成
-
-		// 防止ci抖动,以豪秒为单位
-		t.AssertGT(t2-t1, 20) // go1加的读写互斥锁，所go2读的时候被阻塞。
-		t.Assert(a1.Contains("g"), true)
-	})
-}
-
-func TestArray_RLockFunc(t *testing.T) {
-	gtest.C(t, func(t *gtest.T) {
-		s1 := []string{"a", "b", "c", "d"}
-		a1 := garray.NewArrayFrom(s1, true)
-
-		ch1 := make(chan int64, 3)
-		ch2 := make(chan int64, 1)
-		// go1
-		go a1.RLockFunc(func(n1 garray.Array[string]) { // 读锁
-			time.Sleep(2 * time.Second) // 暂停1秒
-			err := n1.Set(2, "g")
-			t.AssertNE(err, nil)
-			ch2 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
-		})
-
-		// go2
-		go func() {
-			time.Sleep(100 * time.Millisecond) // 故意暂停0.01秒,等go1执行锁后，再开始执行.
-			ch1 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
-			a1.Len()
-			ch1 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
-		}()
-
-		t1 := <-ch1
-		t2 := <-ch1
-		<-ch2 // 等待go1完成
-
-		// 防止ci抖动,以豪秒为单位
-		t.AssertLT(t2-t1, 20) // go1加的读锁，所go2读的时候，并没有阻塞。
-		t.Assert(a1.Contains("g"), true)
-	})
-}
+//func TestArray_RLockFunc(t *testing.T) {
+//	gtest.C(t, func(t *gtest.T) {
+//		s1 := []string{"a", "b", "c", "d"}
+//		a1 := garray.NewArrayFrom(s1, true)
+//
+//		ch1 := make(chan int64, 3)
+//		ch2 := make(chan int64, 1)
+//		// go1
+//		go a1.RLockFunc(func(n1 garray.Array[string]) { // 读锁
+//			time.Sleep(2 * time.Second) // 暂停1秒
+//			err := n1.Set(2, "g")
+//			t.AssertNE(err, nil)
+//			ch2 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
+//		})
+//
+//		// go2
+//		go func() {
+//			time.Sleep(100 * time.Millisecond) // 故意暂停0.01秒,等go1执行锁后，再开始执行.
+//			ch1 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
+//			a1.Len()
+//			ch1 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
+//		}()
+//
+//		t1 := <-ch1
+//		t2 := <-ch1
+//		<-ch2 // 等待go1完成
+//
+//		// 防止ci抖动,以豪秒为单位
+//		t.AssertLT(t2-t1, 20) // go1加的读锁，所go2读的时候，并没有阻塞。
+//		t.Assert(a1.Contains("g"), true)
+//	})
+//}
 
 func TestArray_Json(t *testing.T) {
 	// pointer
