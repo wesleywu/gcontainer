@@ -172,7 +172,7 @@ func (m *ListMap[K, V]) FilterEmpty() {
 			for _, key := range keys {
 				if e, ok := m.data[key]; ok {
 					delete(m.data, key)
-					m.list.Remove(e)
+					m.list.Remove(e.Value)
 				}
 			}
 		}
@@ -245,7 +245,7 @@ func (m *ListMap[K, V]) Pop() (key K, value V) {
 	for k, e := range m.data {
 		value = e.Value.value
 		delete(m.data, k)
-		m.list.Remove(e)
+		m.list.Remove(e.Value)
 		return k, value
 	}
 	return
@@ -267,7 +267,7 @@ func (m *ListMap[K, V]) Pops(size int) map[K]V {
 	for k, e := range m.data {
 		value := e.Value.value
 		delete(m.data, k)
-		m.list.Remove(e)
+		m.list.Remove(e.Value)
 		newMap[k] = value
 		index++
 		if index == size {
@@ -377,13 +377,14 @@ func (m *ListMap[K, V]) PutIfAbsentFunc(key K, f func() V) bool {
 }
 
 // Remove deletes value from map by given `key`, and return this deleted value.
-func (m *ListMap[K, V]) Remove(key K) (value V) {
+func (m *ListMap[K, V]) Remove(key K) (value V, removed bool) {
 	m.mu.Lock()
 	if m.data != nil {
 		if e, ok := m.data[key]; ok {
 			value = e.Value.value
 			delete(m.data, key)
-			m.list.Remove(e)
+			m.list.Remove(e.Value)
+			removed = true
 		}
 	}
 	m.mu.Unlock()
@@ -397,7 +398,7 @@ func (m *ListMap[K, V]) Removes(keys []K) {
 		for _, key := range keys {
 			if e, ok := m.data[key]; ok {
 				delete(m.data, key)
-				m.list.Remove(e)
+				m.list.Remove(e.Value)
 			}
 		}
 	}

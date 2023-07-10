@@ -18,23 +18,11 @@ type anySortedArrayItem struct {
 }
 
 var (
-	anyArray       = garray.NewArray[int]()
-	anySortedArray = garray.NewSortedArray[anySortedArrayItem](func(a, b anySortedArrayItem) int {
-		return int(a.priority - b.priority)
-	})
+	anyArray = garray.NewArray[int]()
 )
 
 func Benchmark_AnyArray_Add(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		anyArray.Append(i)
-	}
-}
-
-func Benchmark_AnySortedArray_Add(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		anySortedArray.Add(anySortedArrayItem{
-			priority: int64(i),
-			value:    i,
-		})
+		anyArray.Add(i)
 	}
 }

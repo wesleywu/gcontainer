@@ -93,11 +93,11 @@ func TestHashSet_ForEach(t *testing.T) {
 		a1 := garray.New[int](true)
 		a2 := garray.New[int](true)
 		s.ForEach(func(v int) bool {
-			a1.Append(1)
+			a1.Add(1)
 			return false
 		})
 		s.ForEach(func(v int) bool {
-			a2.Append(1)
+			a2.Add(1)
 			return true
 		})
 		t.Assert(a1.Len(), 1)
@@ -374,7 +374,7 @@ func TestHashSet_Json(t *testing.T) {
 	})
 }
 
-func TestHashSet_AddIfNotExist(t *testing.T) {
+func TestHashSet_Add(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		s := gset.New[int](true)
 		s.Add(1)
@@ -384,36 +384,6 @@ func TestHashSet_AddIfNotExist(t *testing.T) {
 		t.Assert(s.Contains(2), true)
 		t.Assert(s.Add(2), false)
 		t.Assert(s.Contains(2), true)
-	})
-}
-
-func TestHashSet_AddIfNotExistFunc(t *testing.T) {
-	gtest.C(t, func(t *gtest.T) {
-		s := gset.New[int](true)
-		s.Add(1)
-		t.Assert(s.Contains(1), true)
-		t.Assert(s.Contains(2), false)
-		t.Assert(s.Contains(2), false)
-		t.Assert(s.Add(2), true)
-		t.Assert(s.Contains(2), true)
-		t.Assert(s.Add(2), false)
-		t.Assert(s.Contains(2), true)
-	})
-	gtest.C(t, func(t *gtest.T) {
-		s := gset.New[int](true)
-		wg := sync.WaitGroup{}
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			r := s.Add(1)
-			t.Assert(r, false)
-		}()
-		s.Add(1)
-		wg.Wait()
-	})
-	gtest.C(t, func(t *gtest.T) {
-		s := gset.HashSet[int]{}
-		t.Assert(s.Add(1), true)
 	})
 }
 

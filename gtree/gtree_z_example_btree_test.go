@@ -200,8 +200,8 @@ func ExampleBTree_Remove() {
 	fmt.Println(tree.Map())
 
 	// Output:
-	// val1
-	//
+	// val1 true
+	//  false
 	// map[key0:val0 key2:val2 key3:val3 key4:val4 key5:val5]
 }
 

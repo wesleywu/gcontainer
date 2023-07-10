@@ -81,11 +81,11 @@ func TestStrSet_Iterator(t *testing.T) {
 		a1 := garray.New[string](true)
 		a2 := garray.New[string](true)
 		s.ForEach(func(v string) bool {
-			a1.Append("1")
+			a1.Add("1")
 			return false
 		})
 		s.ForEach(func(v string) bool {
-			a2.Append("1")
+			a2.Add("1")
 			return true
 		})
 		t.Assert(a1.Len(), 1)

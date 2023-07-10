@@ -9,8 +9,10 @@ package gset
 
 import (
 	"bytes"
-	"github.com/wesleywu/gcontainer/garray"
 	"strings"
+
+	"github.com/wesleywu/gcontainer/garray"
+	"github.com/wesleywu/gcontainer/internal/deepcopy"
 
 	"github.com/wesleywu/gcontainer/internal/json"
 	"github.com/wesleywu/gcontainer/internal/rwmutex"
@@ -536,15 +538,15 @@ func (set *HashSet[T]) UnmarshalValue(value interface{}) (err error) {
 }
 
 // DeepCopy implements interface for deep copy of current type.
-func (set *HashSet[T]) DeepCopy() interface{} {
+func (set *HashSet[T]) DeepCopy() garray.Collection[T] {
 	if set == nil {
 		return nil
 	}
 	set.mu.RLock()
 	defer set.mu.RUnlock()
 	data := make([]T, 0)
-	for k := range set.data {
-		data = append(data, k)
+	for k, _ := range set.data {
+		data = append(data, deepcopy.Copy(k).(T))
 	}
 	return NewFrom[T](data, set.mu.IsSafe())
 }

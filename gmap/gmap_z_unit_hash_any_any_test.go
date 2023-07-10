@@ -57,7 +57,9 @@ func Test_AnyAnyMap_Var(t *testing.T) {
 
 		t.Assert(m.PutIfAbsent(exampleKey{Key: "3"}, element3), true)
 
-		t.Assert(m.Remove(exampleKey{Key: "2"}), element2)
+		val, removed := m.Remove(exampleKey{Key: "2"})
+		t.Assert(val, element2)
+		t.Assert(removed, true)
 		t.Assert(m.ContainsKey(exampleKey{Key: "2"}), false)
 
 		t.AssertIN(exampleKey{Key: "3"}, m.Keys())
@@ -85,7 +87,9 @@ func Test_AnyAnyMap_Var(t *testing.T) {
 
 		t.Assert(m.PutIfAbsent("3", "3"), true)
 
-		t.Assert(m.Remove("2"), "2")
+		val, removed := m.Remove("2")
+		t.Assert(val, "2")
+		t.Assert(removed, true)
 		t.Assert(m.ContainsKey("2"), false)
 
 		t.AssertIN(3, m.Keys())
@@ -115,7 +119,9 @@ func Test_AnyAnyMap_Basic(t *testing.T) {
 
 		t.Assert(m.PutIfAbsent(3, 3), true)
 
-		t.Assert(m.Remove(2), 2)
+		val, removed := m.Remove(2)
+		t.Assert(val, 2)
+		t.Assert(removed, true)
 		t.Assert(m.ContainsKey(2), false)
 
 		t.AssertIN(3, m.Keys())
@@ -353,20 +359,20 @@ func Test_AnyAnyMap_Pops(t *testing.T) {
 		for k, v := range m.Pops(1) {
 			t.AssertIN(k, []string{"k1", "k2", "k3"})
 			t.AssertIN(v, []string{"v1", "v2", "v3"})
-			kArray.Append(k)
-			vArray.Append(v)
+			kArray.Add(k)
+			vArray.Add(v)
 		}
 		t.Assert(m.Size(), 2)
 		for k, v := range m.Pops(2) {
 			t.AssertIN(k, []string{"k1", "k2", "k3"})
 			t.AssertIN(v, []string{"v1", "v2", "v3"})
-			kArray.Append(k)
-			vArray.Append(v)
+			kArray.Add(k)
+			vArray.Add(v)
 		}
 		t.Assert(m.Size(), 0)
 
-		t.Assert(kArray.Unique().Len(), 3)
-		t.Assert(vArray.Unique().Len(), 3)
+		t.Assert(kArray.Unique().Size(), 3)
+		t.Assert(vArray.Unique().Size(), 3)
 
 		v := m.Pops(1)
 		t.AssertNil(v)

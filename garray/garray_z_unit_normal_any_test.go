@@ -12,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/wesleywu/gcontainer/utils/comparator"
 	"github.com/wesleywu/gcontainer/utils/empty"
 	"github.com/wesleywu/gcontainer/utils/gconv"
 
@@ -40,8 +39,8 @@ func Test_Array_Basic(t *testing.T) {
 		t.Assert(array.IsEmpty(), false)
 
 		copyArray := array.DeepCopy()
-		ca := copyArray
-		ca.(*garray.StdArray[int]).Set(0, 1)
+		ca := copyArray.(*garray.StdArray[int])
+		ca.Set(0, 1)
 		cval, _ := ca.Get(0)
 		val, _ := array.Get(0)
 		t.AssertNE(cval, val)
@@ -62,28 +61,26 @@ func Test_Array_Basic(t *testing.T) {
 		t.Assert(array3.Search(100), -1)
 		t.Assert(array.Contains(100), true)
 
-		v, ok = array.Remove(0)
-		t.Assert(v, 100)
-		t.Assert(ok, true)
-
-		v, ok = array.Remove(-1)
-		t.Assert(v, 0)
+		ok = array.Remove(0) // element 0->0 was replaced by 0->100
 		t.Assert(ok, false)
 
-		v, ok = array.Remove(100000)
-		t.Assert(v, 0)
-		t.Assert(ok, false)
-
-		v, ok = array2.Remove(3)
-		t.Assert(v, 3)
+		ok = array.Remove(100) // element 0->0 was replaced by 0->100
 		t.Assert(ok, true)
 
-		v, ok = array2.Remove(1)
-		t.Assert(v, 1)
+		ok = array.Remove(-1)
+		t.Assert(ok, false)
+
+		ok = array.Remove(100000)
+		t.Assert(ok, false)
+
+		ok = array2.Remove(3)
+		t.Assert(ok, true)
+
+		ok = array2.Remove(1)
 		t.Assert(ok, true)
 
 		t.Assert(array.Contains(100), false)
-		array.Append(4)
+		array.Add(4)
 		t.Assert(array.Len(), 4)
 		array.InsertBefore(0, 100)
 		array.InsertAfter(0, 200)
@@ -91,7 +88,8 @@ func Test_Array_Basic(t *testing.T) {
 		array.InsertBefore(5, 300)
 		array.InsertAfter(6, 400)
 		t.Assert(array.Slice(), []int{100, 200, 2, 2, 3, 300, 4, 400})
-		t.Assert(array.Clear().Len(), 0)
+		array.Clear()
+		t.Assert(array.Size(), 0)
 		err = array.InsertBefore(99, 9900)
 		t.AssertNE(err, nil)
 		err = array.InsertAfter(99, 9900)
@@ -107,7 +105,7 @@ func TestArray_Sort(t *testing.T) {
 		expect2 := []int{3, 2, 1, 0}
 		array := garray.NewArray[int]()
 		for i := 3; i >= 0; i-- {
-			array.Append(i)
+			array.Add(i)
 		}
 		array.SortFunc(func(v1, v2 int) bool {
 			return v1 < v2
@@ -284,25 +282,24 @@ func TestArray_Merge(t *testing.T) {
 		i2 := []int{4, 5, 6, 7}
 		array1 := garray.NewArrayFrom[int](i1)
 		array2 := garray.NewArrayFrom[int](i2)
-		t.Assert(array1.Merge(array2).Slice(), []int{0, 1, 2, 3, 4, 5, 6, 7})
+		array1.AddAll(array2)
+		t.Assert(array1.Slice(), []int{0, 1, 2, 3, 4, 5, 6, 7})
 
 		s1 := garray.NewArrayFrom[string]([]string{"a", "b", "c", "d"})
 		s2 := []int{8, 9}
 		i3 := garray.NewArrayFrom[int]([]int{1, 2, 3})
 		i4 := garray.NewArrayFrom[int]([]int{3})
 		s3 := garray.NewArrayFrom[string]([]string{"g", "h"})
-		s4 := garray.NewSortedArrayFrom[int]([]int{4, 5}, comparator.ComparatorInt)
-		s5 := garray.NewSortedArrayFrom[int](s2, comparator.ComparatorInt)
-		s6 := garray.NewSortedArrayFrom[int]([]int{1, 2, 3}, comparator.ComparatorInt)
 		a1 := garray.NewArrayFrom[int](i1)
 
-		t.Assert(s1.Merge(s3).Len(), 6)
-		t.Assert(a1.Merge(i3).Len(), 7)
-		t.Assert(a1.Merge(i4).Len(), 8)
-		t.Assert(a1.MergeSlice(s2).Len(), 10)
-		t.Assert(a1.Merge(s4).Len(), 12)
-		t.Assert(a1.Merge(s5).Len(), 14)
-		t.Assert(a1.Merge(s6).Len(), 17)
+		s1.AddAll(s3)
+		t.Assert(s1.Len(), 6)
+		a1.AddAll(i3)
+		t.Assert(a1.Len(), 7)
+		a1.AddAll(i4)
+		t.Assert(a1.Len(), 8)
+		a1.Add(s2...)
+		t.Assert(a1.Len(), 10)
 	})
 }
 
@@ -429,7 +426,7 @@ func TestArray_Shuffle(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []int{0, 1, 2, 3, 4, 5, 6}
 		array1 := garray.NewArrayFrom(a1)
-		t.Assert(array1.Shuffle().Len(), 7)
+		t.Assert(array1.Shuffle().Size(), 7)
 	})
 }
 
@@ -468,38 +465,6 @@ func TestArray_String(t *testing.T) {
 		t.Assert(array1.String(), `[0,1,2,3,4,5,6]`)
 		array1 = nil
 		t.Assert(array1.String(), "")
-	})
-}
-
-func TestArray_Replace(t *testing.T) {
-	gtest.C(t, func(t *gtest.T) {
-		a1 := []string{"0", "1", "2", "3", "4", "5", "6"}
-		a2 := []string{"a", "b", "c"}
-		a3 := []string{"m", "n", "p", "z", "x", "y", "d", "u"}
-		array1 := garray.NewArrayFrom(a1)
-		array2 := array1.Replace(a2)
-		t.Assert(array2.Len(), 7)
-		t.Assert(array2.Contains("b"), true)
-		t.Assert(array2.Contains("4"), true)
-		t.Assert(array2.Contains("v"), false)
-		array3 := array1.Replace(a3)
-		t.Assert(array3.Len(), 7)
-		t.Assert(array3.Contains("4"), false)
-		t.Assert(array3.Contains("p"), true)
-		t.Assert(array3.Contains("u"), false)
-	})
-}
-
-func TestArray_SetArray(t *testing.T) {
-	gtest.C(t, func(t *gtest.T) {
-		a1 := []string{"0", "1", "2", "3", "4", "5", "6"}
-		a2 := []string{"a", "b", "c"}
-
-		array1 := garray.NewArrayFrom[string](a1)
-		array2 := array1.SetArray(a2)
-		t.Assert(array2.Len(), 3)
-		t.Assert(array2.Contains("b"), true)
-		t.Assert(array2.Contains("5"), false)
 	})
 }
 
@@ -552,9 +517,10 @@ func TestArray_LockFunc(t *testing.T) {
 		ch1 := make(chan int64, 3)
 		ch2 := make(chan int64, 3)
 		// go1
-		go a1.LockFunc(func(n1 []string) { // 读写锁
+		go a1.LockFunc(func(n1 garray.Array[string]) { // 读写锁
 			time.Sleep(2 * time.Second) // 暂停2秒
-			n1[2] = "g"
+			err := n1.Set(2, "g")
+			t.AssertNE(err, nil)
 			ch2 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
 		})
 
@@ -584,9 +550,10 @@ func TestArray_RLockFunc(t *testing.T) {
 		ch1 := make(chan int64, 3)
 		ch2 := make(chan int64, 1)
 		// go1
-		go a1.RLockFunc(func(n1 []string) { // 读锁
+		go a1.RLockFunc(func(n1 garray.Array[string]) { // 读锁
 			time.Sleep(2 * time.Second) // 暂停1秒
-			n1[2] = "g"
+			err := n1.Set(2, "g")
+			t.AssertNE(err, nil)
 			ch2 <- gconv.Int64(time.Now().UnixNano() / 1000 / 1000)
 		})
 
@@ -691,26 +658,26 @@ func TestArray_Iterator(t *testing.T) {
 	slice := []string{"a", "b", "d", "c"}
 	array := garray.NewArrayFrom[string](slice)
 	gtest.C(t, func(t *gtest.T) {
-		array.Iterator(func(k int, v string) bool {
+		array.ForEachAsc(func(k int, v string) bool {
 			t.Assert(v, slice[k])
 			return true
 		})
 	})
 	gtest.C(t, func(t *gtest.T) {
-		array.IteratorAsc(func(k int, v string) bool {
+		array.ForEachAsc(func(k int, v string) bool {
 			t.Assert(v, slice[k])
 			return true
 		})
 	})
 	gtest.C(t, func(t *gtest.T) {
-		array.IteratorDesc(func(k int, v string) bool {
+		array.ForEachDesc(func(k int, v string) bool {
 			t.Assert(v, slice[k])
 			return true
 		})
 	})
 	gtest.C(t, func(t *gtest.T) {
 		index := 0
-		array.Iterator(func(k int, v string) bool {
+		array.ForEachAsc(func(k int, v string) bool {
 			index++
 			return false
 		})
@@ -718,7 +685,7 @@ func TestArray_Iterator(t *testing.T) {
 	})
 	gtest.C(t, func(t *gtest.T) {
 		index := 0
-		array.IteratorAsc(func(k int, v string) bool {
+		array.ForEachAsc(func(k int, v string) bool {
 			index++
 			return false
 		})
@@ -726,7 +693,7 @@ func TestArray_Iterator(t *testing.T) {
 	})
 	gtest.C(t, func(t *gtest.T) {
 		index := 0
-		array.IteratorDesc(func(k int, v string) bool {
+		array.ForEachDesc(func(k int, v string) bool {
 			index++
 			return false
 		})
@@ -750,7 +717,7 @@ func TestArray_RemoveValues(t *testing.T) {
 	slice := []string{"a", "b", "d", "c"}
 	array := garray.NewArrayFrom[string](slice)
 	gtest.C(t, func(t *gtest.T) {
-		array.RemoveValues("a", "b", "c")
+		array.Remove("a", "b", "c")
 		t.Assert(array.Slice(), []string{"d"})
 	})
 }

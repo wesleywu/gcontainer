@@ -62,7 +62,7 @@ func ExampleNew() {
 
 	// Adding items.
 	for i := 0; i < 10; i++ {
-		a.Append(i)
+		a.Add(i)
 	}
 
 	// Print the array length.
@@ -89,7 +89,7 @@ func ExampleNew() {
 	_ = a.Set(0, 100)
 	fmt.Println(a.Slice())
 
-	fmt.Println(a.At(0))
+	fmt.Println(a.MustGet(0))
 
 	// Search item and return its index.
 	fmt.Println(a.Search(5))
@@ -120,16 +120,16 @@ func ExampleNew() {
 
 func ExampleArray_Iterator() {
 	array := garray.NewArrayFrom[string]([]string{"a", "b", "c"})
-	// ForEach is alias of IteratorAsc, which iterates the array readonly in ascending order
+	// ForEach is alias of ForEachAsc, which iterates the array readonly in ascending order
 	//  with given callback function `f`.
 	// If `f` returns true, then it continues iterating; or false to stop.
-	array.Iterator(func(k int, v string) bool {
+	array.ForEachAsc(func(k int, v string) bool {
 		fmt.Println(k, v)
 		return true
 	})
-	// IteratorDesc iterates the array readonly in descending order with given callback function `f`.
+	// ForEachDesc iterates the array readonly in descending order with given callback function `f`.
 	// If `f` returns true, then it continues iterating; or false to stop.
-	array.IteratorDesc(func(k int, v string) bool {
+	array.ForEachDesc(func(k int, v string) bool {
 		fmt.Println(k, v)
 		return true
 	})
@@ -274,7 +274,7 @@ func ExampleArray_PopRights() {
 
 func ExampleArray_Contains() {
 	var array garray.StdArray[string]
-	array.Append("a")
+	array.Add("a")
 	fmt.Println(array.Contains("a"))
 	fmt.Println(array.Contains("A"))
 	fmt.Println(array.ContainsI("A"))
@@ -292,11 +292,11 @@ func ExampleArray_Merge() {
 	slice2 := []int{7, 8}
 	slice3 := []int{9, 0}
 	fmt.Println(array1.Slice())
-	array1.Merge(array1)
-	array1.Merge(array2)
-	array1.MergeSlice(slice1)
-	array1.MergeSlice(slice2)
-	array1.MergeSlice(slice3)
+	array1.AddAll(array1)
+	array1.AddAll(array2)
+	array1.Add(slice1...)
+	array1.Add(slice2...)
+	array1.Add(slice3...)
 	fmt.Println(array1.Slice())
 
 	// Output:

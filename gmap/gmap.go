@@ -39,7 +39,7 @@ type Map[K comparable, V comparable] interface {
 	GetOrPutFunc(key K, f func() V) V
 
 	// Remove removes the node from the tree by `key`.
-	Remove(key K) (value V)
+	Remove(key K) (value V, removed bool)
 
 	// Removes batch deletes values of the tree by `keys`.
 	Removes(keys []K)

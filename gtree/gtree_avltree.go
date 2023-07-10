@@ -204,11 +204,10 @@ func (tree *AVLTree[K, V]) ContainsKey(key K) bool {
 
 // Remove removes the node from the tree by key.
 // Key should adhere to the comparator's type assertion, otherwise method panics.
-func (tree *AVLTree[K, V]) Remove(key K) (value V) {
+func (tree *AVLTree[K, V]) Remove(key K) (value V, removed bool) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
-	value, _ = tree.remove(key, &tree.root)
-	return
+	return tree.remove(key, &tree.root)
 }
 
 // Removes batch deletes values of the tree by `keys`.
@@ -543,7 +542,8 @@ func (tree *AVLTree[K, V]) remove(key K, qp **AVLTreeNode[K, V]) (value V, fix b
 			return
 		}
 		if removeMin(&q.children[1], &q.Key, &q.Value) {
-			return value, removeFix(-1, qp)
+			removeFix(-1, qp)
+			return value, true
 		}
 		return
 	}
@@ -556,7 +556,8 @@ func (tree *AVLTree[K, V]) remove(key K, qp **AVLTreeNode[K, V]) (value V, fix b
 	a := (c + 1) / 2
 	value, fix = tree.remove(key, &q.children[a])
 	if fix {
-		return value, removeFix(int8(-c), qp)
+		removeFix(int8(-c), qp)
+		return value, true
 	}
 	return value, false
 }

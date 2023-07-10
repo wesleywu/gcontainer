@@ -272,12 +272,13 @@ func (m *HashMap[K, V]) PutIfAbsentFunc(key K, f func() V) bool {
 }
 
 // Remove deletes value from map by given `key`, and return this deleted value.
-func (m *HashMap[K, V]) Remove(key K) (value V) {
+func (m *HashMap[K, V]) Remove(key K) (value V, removed bool) {
 	m.mu.Lock()
 	if m.data != nil {
 		var ok bool
 		if value, ok = m.data[key]; ok {
 			delete(m.data, key)
+			removed = true
 		}
 	}
 	m.mu.Unlock()

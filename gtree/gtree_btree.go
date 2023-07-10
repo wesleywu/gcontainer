@@ -202,18 +202,19 @@ func (tree *BTree[K, V]) ContainsKey(key K) bool {
 
 // doRemove removes the node from the tree by key.
 // Key should adhere to the comparator's type assertion, otherwise method panics.
-func (tree *BTree[K, V]) doRemove(key K) (value V) {
+func (tree *BTree[K, V]) doRemove(key K) (value V, removed bool) {
 	node, index, found := tree.searchRecursively(tree.root, key)
 	if found {
 		value = node.Entries[index].Value
 		tree.delete(node, index)
 		tree.size--
+		removed = true
 	}
 	return
 }
 
 // Remove removes the node from the tree by `key`.
-func (tree *BTree[K, V]) Remove(key K) (value V) {
+func (tree *BTree[K, V]) Remove(key K) (value V, removed bool) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	return tree.doRemove(key)

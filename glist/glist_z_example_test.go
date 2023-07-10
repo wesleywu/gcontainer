@@ -556,8 +556,8 @@ func ExampleList_Remove() {
 	fmt.Println(l.Len())
 	fmt.Println(l)
 
-	fmt.Println(l.Remove(l.Front()))
-	fmt.Println(l.Remove(l.Back()))
+	fmt.Println(l.Remove(l.Front().Value))
+	fmt.Println(l.Remove(l.Back().Value))
 
 	fmt.Println(l.Len())
 	fmt.Println(l)
@@ -565,8 +565,8 @@ func ExampleList_Remove() {
 	// Output:
 	// 5
 	// [1,2,3,4,5]
-	// 1
-	// 5
+	// true
+	// true
 	// 3
 	// [2,3,4]
 }
@@ -577,7 +577,7 @@ func ExampleList_Removes() {
 	fmt.Println(l.Len())
 	fmt.Println(l)
 
-	l.Removes([]*glist.Element[int]{l.Front(), l.Back()})
+	l.Remove(l.Front().Value, l.Back().Value)
 
 	fmt.Println(l.Len())
 	fmt.Println(l)
@@ -595,7 +595,7 @@ func ExampleList_RemoveAll() {
 	fmt.Println(l.Len())
 	fmt.Println(l)
 
-	l.RemoveAll()
+	l.Clear()
 
 	fmt.Println(l.Len())
 
@@ -608,7 +608,7 @@ func ExampleList_RemoveAll() {
 func ExampleList_IteratorAsc() {
 	// concurrent-safe list.
 	l := glist.NewFrom[int](garray.NewArrayRange(1, 10, 1).Slice(), true)
-	// iterate reading from head using IteratorAsc.
+	// iterate reading from head using ForEachAsc.
 	l.IteratorAsc(func(e *glist.Element[int]) bool {
 		fmt.Print(e.Value)
 		return true
@@ -621,7 +621,7 @@ func ExampleList_IteratorAsc() {
 func ExampleList_IteratorDesc() {
 	// concurrent-safe list.
 	l := glist.NewFrom[int](garray.NewArrayRange(1, 10, 1).Slice(), true)
-	// iterate reading from tail using IteratorDesc.
+	// iterate reading from tail using ForEachDesc.
 	l.IteratorDesc(func(e *glist.Element[int]) bool {
 		fmt.Print(e.Value)
 		return true

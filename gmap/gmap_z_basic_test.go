@@ -56,7 +56,9 @@ func Test_Map_Basic(t *testing.T) {
 
 		t.Assert(m.PutIfAbsent("key3", "val3"), true)
 
-		t.Assert(m.Remove("key2"), "val2")
+		val, removed := m.Remove("key2")
+		t.Assert(val, "val2")
+		t.Assert(removed, true)
 		t.Assert(m.ContainsKey("key2"), false)
 
 		t.AssertIN("key3", m.Keys())

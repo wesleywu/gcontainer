@@ -29,7 +29,7 @@ type RedBlackTree[K comparable, V comparable] struct {
 	mu         rwmutex.RWMutex
 	root       *RedBlackTreeNode[K, V]
 	size       int
-	comparator func(v1, v2 K) int
+	comparator comparator.Comparator[K]
 }
 
 // RedBlackTreeNode is a single element within the tree.
@@ -52,6 +52,16 @@ func NewRedBlackTree[K comparable, V comparable](comparator func(v1, v2 K) int, 
 	}
 }
 
+// NewRedBlackTreeDefault instantiates a red-black tree with default key comparator.
+// The parameter `safe` is used to specify whether using tree in concurrent-safety,
+// which is false in default.
+func NewRedBlackTreeDefault[K comparable, V comparable](safe ...bool) *RedBlackTree[K, V] {
+	return &RedBlackTree[K, V]{
+		mu:         rwmutex.Create(safe...),
+		comparator: comparator.ComparatorAny[K],
+	}
+}
+
 // NewRedBlackTreeFrom instantiates a red-black tree with the custom key comparator and `data` map.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
@@ -63,8 +73,12 @@ func NewRedBlackTreeFrom[K comparable, V comparable](comparator func(v1, v2 K) i
 	return tree
 }
 
+func (tree *RedBlackTree[K, V]) Comparator() comparator.Comparator[K] {
+	return tree.comparator
+}
+
 // SetComparator sets/changes the comparator for sorting.
-func (tree *RedBlackTree[K, V]) SetComparator(comparator func(a, b K) int) {
+func (tree *RedBlackTree[K, V]) SetComparator(comparator comparator.Comparator[K]) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	tree.comparator = comparator
@@ -248,7 +262,7 @@ func (tree *RedBlackTree[K, V]) ContainsKey(key K) bool {
 }
 
 // doRemove removes the node from the tree by `key` without mutex.
-func (tree *RedBlackTree[K, V]) doRemove(key K) (value V) {
+func (tree *RedBlackTree[K, V]) doRemove(key K) (value V, removed bool) {
 	child := (*RedBlackTreeNode[K, V])(nil)
 	node, found := tree.doSearch(key)
 	if !found {
@@ -277,11 +291,12 @@ func (tree *RedBlackTree[K, V]) doRemove(key K) (value V) {
 		}
 	}
 	tree.size--
+	removed = true
 	return
 }
 
 // Remove removes the node from the tree by `key`.
-func (tree *RedBlackTree[K, V]) Remove(key K) (value V) {
+func (tree *RedBlackTree[K, V]) Remove(key K) (value V, removed bool) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	return tree.doRemove(key)
@@ -406,30 +421,38 @@ func (tree *RedBlackTree[K, V]) rightNode() *RedBlackTreeNode[K, V] {
 	return p
 }
 
-// Floor Finds floor node of the input key, return the floor node or nil if no floor node is found.
-// Second return parameter is true if floor was found, otherwise false.
+// Floor returns the tree node associated with the greatest key less than or equal to the given key, or nil if there is no such key.
+// Second return parameter is true if Floor was found, otherwise false.
 //
-// Floor node is defined as the largest node that its key is smaller than or equal to the given `key`.
-// A floor node may not be found, either because the tree is empty, or because
+// A Floor node may not be found, either because the tree is empty, or because
 // all nodes in the tree are larger than the given node.
 func (tree *RedBlackTree[K, V]) Floor(key K) (floor *RedBlackTreeNode[K, V], found bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
-	n := tree.root
-	for n != nil {
-		compare := tree.getComparator()(key, n.Key)
-		switch {
-		case compare == 0:
-			return n, true
-		case compare < 0:
-			n = n.left
-		case compare > 0:
-			floor, found = n, true
-			n = n.right
+	p := tree.root
+	for p != nil {
+		cmp := tree.getComparator()(key, p.Key)
+		if cmp > 0 {
+			if p.right != nil {
+				p = p.right
+			} else {
+				return p, true
+			}
+		} else if cmp < 0 {
+			if p.left != nil {
+				p = p.left
+			} else {
+				parent := p.parent
+				ch := p
+				for parent != nil && ch == parent.left {
+					ch = parent
+					parent = parent.parent
+				}
+				return parent, parent != nil
+			}
+		} else {
+			return p, true
 		}
-	}
-	if found {
-		return
 	}
 	return nil, false
 }
@@ -443,21 +466,98 @@ func (tree *RedBlackTree[K, V]) Floor(key K) (floor *RedBlackTreeNode[K, V], fou
 func (tree *RedBlackTree[K, V]) Ceiling(key K) (ceiling *RedBlackTreeNode[K, V], found bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
-	n := tree.root
-	for n != nil {
-		compare := tree.getComparator()(key, n.Key)
-		switch {
-		case compare == 0:
-			return n, true
-		case compare > 0:
-			n = n.right
-		case compare < 0:
-			ceiling, found = n, true
-			n = n.left
+	p := tree.root
+	for p != nil {
+		cmp := tree.getComparator()(key, p.Key)
+		if cmp < 0 {
+			if p.left != nil {
+				p = p.left
+			} else {
+				return p, true
+			}
+		} else if cmp > 0 {
+			if p.right != nil {
+				p = p.right
+			} else {
+				parent := p.parent
+				ch := p
+				for parent != nil && ch == parent.right {
+					ch = parent
+					parent = parent.parent
+				}
+				return parent, parent != nil
+			}
+		} else {
+			return p, true
 		}
 	}
-	if found {
-		return
+	return nil, false
+}
+
+// Lower returns the tree node associated with the greatest key strictly less than the given key, or nil if there is no such key.
+// Second return parameter is true if Lower was found, otherwise false.
+//
+// A Lower node may not be found, either because the tree is empty, or because
+// all nodes in the tree are larger than or equal to the given node.
+func (tree *RedBlackTree[K, V]) Lower(key K) (floor *RedBlackTreeNode[K, V], found bool) {
+	tree.mu.RLock()
+	defer tree.mu.RUnlock()
+	p := tree.root
+	for p != nil {
+		cmp := tree.getComparator()(key, p.Key)
+		if cmp > 0 {
+			if p.right != nil {
+				p = p.right
+			} else {
+				return p, p != nil
+			}
+		} else {
+			if p.left != nil {
+				p = p.left
+			} else {
+				parent := p.parent
+				ch := p
+				for parent != nil && ch == parent.left {
+					ch = parent
+					parent = parent.parent
+				}
+				return parent, parent != nil
+			}
+		}
+	}
+	return nil, false
+}
+
+// Higher returns the tree node associated with the least key strictly greater than the given key, or nil if there is no such key.
+// Second return parameter is true if Higher was found, otherwise false.
+//
+// A Higher node may not be found, either because the tree is empty, or because
+// all nodes in the tree are smaller than or equal to the given node.
+func (tree *RedBlackTree[K, V]) Higher(key K) (ceiling *RedBlackTreeNode[K, V], found bool) {
+	tree.mu.RLock()
+	defer tree.mu.RUnlock()
+	p := tree.root
+	for p != nil {
+		cmp := tree.getComparator()(key, p.Key)
+		if cmp < 0 {
+			if p.left != nil {
+				p = p.left
+			} else {
+				return p, true
+			}
+		} else {
+			if p.right != nil {
+				p = p.right
+			} else {
+				parent := p.parent
+				ch := p
+				for parent != nil && ch == parent.right {
+					ch = parent
+					parent = parent.parent
+				}
+				return parent, parent != nil
+			}
+		}
 	}
 	return nil, false
 }
@@ -468,8 +568,8 @@ func (tree *RedBlackTree[K, V]) Iterator(f func(key K, value V) bool) {
 }
 
 // IteratorFrom is alias of IteratorAscFrom.
-func (tree *RedBlackTree[K, V]) IteratorFrom(key K, match bool, f func(key K, value V) bool) {
-	tree.IteratorAscFrom(key, match, f)
+func (tree *RedBlackTree[K, V]) IteratorFrom(key K, inclusive bool, f func(key K, value V) bool) {
+	tree.IteratorAscFrom(key, inclusive, f)
 }
 
 // IteratorAsc iterates the tree readonly in ascending order with given callback function `f`.
@@ -484,17 +584,22 @@ func (tree *RedBlackTree[K, V]) IteratorAsc(f func(key K, value V) bool) {
 // The parameter `key` specifies the start entry for iterating. The `match` specifies whether
 // starting iterating if the `key` is fully matched, or else using index searching iterating.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *RedBlackTree[K, V]) IteratorAscFrom(key K, match bool, f func(key K, value V) bool) {
+func (tree *RedBlackTree[K, V]) IteratorAscFrom(key K, inclusive bool, f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
-	node, found := tree.doSearch(key)
-	if match {
-		if found {
-			tree.doIteratorAsc(node, f)
-		}
+	var (
+		startElement *RedBlackTreeNode[K, V]
+		found        bool
+	)
+	if inclusive {
+		startElement, found = tree.Ceiling(key)
 	} else {
-		tree.doIteratorAsc(node, f)
+		startElement, found = tree.Higher(key)
 	}
+	if !found {
+		return
+	}
+	tree.doIteratorAsc(startElement, f)
 }
 
 func (tree *RedBlackTree[K, V]) doIteratorAsc(node *RedBlackTreeNode[K, V], f func(key K, value V) bool) {
@@ -535,17 +640,22 @@ func (tree *RedBlackTree[K, V]) IteratorDesc(f func(key K, value V) bool) {
 // The parameter `key` specifies the start entry for iterating. The `match` specifies whether
 // starting iterating if the `key` is fully matched, or else using index searching iterating.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *RedBlackTree[K, V]) IteratorDescFrom(key K, match bool, f func(key K, value V) bool) {
+func (tree *RedBlackTree[K, V]) IteratorDescFrom(key K, inclusive bool, f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
-	node, found := tree.doSearch(key)
-	if match {
-		if found {
-			tree.doIteratorDesc(node, f)
-		}
+	var (
+		startElement *RedBlackTreeNode[K, V]
+		found        bool
+	)
+	if inclusive {
+		startElement, found = tree.Floor(key)
 	} else {
-		tree.doIteratorDesc(node, f)
+		startElement, found = tree.Lower(key)
 	}
+	if !found {
+		return
+	}
+	tree.doIteratorDesc(startElement, f)
 }
 
 func (tree *RedBlackTree[K, V]) doIteratorDesc(node *RedBlackTreeNode[K, V], f func(key K, value V) bool) {
@@ -572,6 +682,51 @@ loop:
 			}
 		}
 	}
+}
+
+// SubMap returns a view of the portion of this map whose keys range from fromKey to toKey.
+func (tree *RedBlackTree[K, V]) SubMap(fromKey K, fromInclusive bool, toKey K, toInclusive bool) *RedBlackTree[K, V] {
+	tree.mu.RLock()
+	defer tree.mu.RUnlock()
+	var (
+		startElement *RedBlackTreeNode[K, V]
+		endElement   *RedBlackTreeNode[K, V]
+		found        bool
+		outOfBound   bool
+		result       = NewRedBlackTree[K, V](tree.getComparator(), tree.mu.IsSafe())
+	)
+	if fromInclusive {
+		if startElement, found = tree.Ceiling(fromKey); !found {
+			outOfBound = true
+		}
+	} else {
+		if startElement, found = tree.Higher(fromKey); !found {
+			outOfBound = true
+		}
+	}
+	if outOfBound {
+		return result
+	}
+	if toInclusive {
+		if endElement, found = tree.Floor(toKey); !found {
+			outOfBound = true
+		}
+	} else {
+		if endElement, found = tree.Lower(toKey); !found {
+			outOfBound = true
+		}
+	}
+	if outOfBound {
+		return result
+	}
+	tree.doIteratorAsc(startElement, func(key K, value V) bool {
+		if tree.getComparator()(key, endElement.Key) > 0 {
+			return false
+		}
+		result.Put(key, value)
+		return true
+	})
+	return result
 }
 
 // Clear removes all nodes from the tree.
@@ -963,7 +1118,7 @@ func (tree *RedBlackTree[K, V]) UnmarshalValue(value interface{}) (err error) {
 // or else it panics.
 func (tree *RedBlackTree[K, V]) getComparator() func(a, b K) int {
 	if tree.comparator == nil {
-		panic("comparator is missing for tree")
+		return comparator.ComparatorAny[K]
 	}
 	return tree.comparator
 }

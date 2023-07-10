@@ -30,7 +30,9 @@ func Test_ListMap_Var(t *testing.T) {
 		t.Assert(m.PutIfAbsent("key2", "val2"), false)
 
 		t.Assert(m.PutIfAbsent("key3", "val3"), true)
-		t.Assert(m.Remove("key2"), "val2")
+		val, removed := m.Remove("key2")
+		t.Assert(val, "val2")
+		t.Assert(removed, true)
 		t.Assert(m.ContainsKey("key2"), false)
 
 		t.AssertIN("key3", m.Keys())
@@ -62,7 +64,9 @@ func Test_ListMap_Basic(t *testing.T) {
 		t.Assert(m.PutIfAbsent("key2", "val2"), false)
 
 		t.Assert(m.PutIfAbsent("key3", "val3"), true)
-		t.Assert(m.Remove("key2"), "val2")
+		val, removed := m.Remove("key2")
+		t.Assert(val, "val2")
+		t.Assert(removed, true)
 		t.Assert(m.ContainsKey("key2"), false)
 
 		t.AssertIN("key3", m.Keys())
@@ -290,20 +294,20 @@ func Test_ListMap_Pops(t *testing.T) {
 		for k, v := range m.Pops(1) {
 			t.AssertIN(k, []string{"k1", "k2", "k3"})
 			t.AssertIN(v, []string{"v1", "v2", "v3"})
-			kArray.Append(k)
-			vArray.Append(v)
+			kArray.Add(k)
+			vArray.Add(v)
 		}
 		t.Assert(m.Size(), 2)
 		for k, v := range m.Pops(2) {
 			t.AssertIN(k, []string{"k1", "k2", "k3"})
 			t.AssertIN(v, []string{"v1", "v2", "v3"})
-			kArray.Append(k)
-			vArray.Append(v)
+			kArray.Add(k)
+			vArray.Add(v)
 		}
 		t.Assert(m.Size(), 0)
 
-		t.Assert(kArray.Unique().Len(), 3)
-		t.Assert(vArray.Unique().Len(), 3)
+		t.Assert(kArray.Unique().Size(), 3)
+		t.Assert(vArray.Unique().Size(), 3)
 
 		v := m.Pops(1)
 		t.AssertNil(v)

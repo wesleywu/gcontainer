@@ -12,6 +12,7 @@ import (
 	"bytes"
 	json2 "encoding/json"
 
+	"github.com/wesleywu/gcontainer/garray"
 	"github.com/wesleywu/gcontainer/internal/deepcopy"
 	"github.com/wesleywu/gcontainer/internal/json"
 	"github.com/wesleywu/gcontainer/internal/rwmutex"
@@ -20,14 +21,14 @@ import (
 
 // List represents a doubly linked list.
 // The zero value for List is an empty list ready to use.
-type List[T any] struct {
+type List[T comparable] struct {
 	mu   rwmutex.RWMutex
 	root Element[T] // sentinel list element, only &root, root.prev, and root.next are used
 	len  int        // current list length excluding (this) sentinel element
 }
 
 // Element is an element of a linked list.
-type Element[T any] struct {
+type Element[T comparable] struct {
 	// Next and previous pointers in the doubly-linked list of elements.
 	// To simplify the implementation, internally a list l is implemented
 	// as a ring, such that &l.root is both the next element of the last
@@ -51,7 +52,7 @@ func (l *List[T]) Init() *List[T] {
 }
 
 // New returns an initialized list.
-func New[T any](safe ...bool) *List[T] {
+func New[T comparable](safe ...bool) *List[T] {
 	l := new(List[T]).Init()
 	l.mu = rwmutex.Create(safe...)
 	return l
@@ -60,12 +61,122 @@ func New[T any](safe ...bool) *List[T] {
 // NewFrom creates and returns a list from a copy of given slice `array`.
 // The parameter `safe` is used to specify whether using list in concurrent-safety,
 // which is false in default.
-func NewFrom[T any](array []T, safe ...bool) *List[T] {
+func NewFrom[T comparable](array []T, safe ...bool) *List[T] {
 	l := New[T](safe...)
 	for _, v := range array {
 		l.PushBack(v)
 	}
 	return l
+}
+
+// Add append a new element e with value v at the back of list l and returns true.
+func (l *List[T]) Add(values ...T) bool {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	l.lazyInit()
+	for _, value := range values {
+		_ = l.insertValue(value, l.root.prev)
+	}
+	return true
+}
+
+// AddAll adds all the elements in the specified collection to this list.
+// Returns true if this collection changed as a result of the call
+func (l *List[T]) AddAll(values garray.Collection[T]) bool {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	l.lazyInit()
+	values.ForEach(func(value T) bool {
+		_ = l.insertValue(value, l.root.prev)
+		return true
+	})
+	return true
+}
+
+// Contains returns true if this collection contains the specified element.
+func (l *List[T]) Contains(value T) bool {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	l.lazyInit()
+	found := false
+	length := l.len
+	if length > 0 {
+		for i, e := 0, l.root.next; i < length; i, e = i+1, e.Next() {
+			if e.Value == value {
+				found = true
+				break
+			}
+		}
+	}
+	return found
+}
+
+// ContainsAll returns true if this collection contains all the elements in the specified collection.
+func (l *List[T]) ContainsAll(values garray.Collection[T]) bool {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	l.lazyInit()
+	foundMap := make(map[T]bool, 0)
+	values.ForEach(func(t T) bool {
+		foundMap[t] = false
+		return true
+	})
+	length := l.len
+	if length > 0 {
+		for i, e := 0, l.root.next; i < length; i, e = i+1, e.Next() {
+			if _, ok := foundMap[e.Value]; ok {
+				foundMap[e.Value] = true
+				break
+			}
+		}
+	}
+	for _, found := range foundMap {
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+// ForEach iterates all elements in this collection readonly with custom callback function `f`.
+// If `f` returns true, then it continues iterating; or false to stop.
+func (l *List[T]) ForEach(f func(T) bool) {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	l.lazyInit()
+	length := l.len
+	if length > 0 {
+		for i, e := 0, l.root.next; i < length; i, e = i+1, e.Next() {
+			if !f(e.Value) {
+				break
+			}
+		}
+	}
+}
+
+// IsEmpty returns true if this collection contains no elements.
+func (l *List[T]) IsEmpty() bool {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	l.lazyInit()
+	return l.len == 0
+}
+
+// Slice returns an array containing shadow copy of all the elements in this list.
+func (l *List[T]) Slice() []T {
+	return l.FrontAll()
+}
+
+// search returns the matching element in this list, or nil if the element can not be found.
+func (l *List[T]) search(value T) *Element[T] {
+	if l.len > 0 {
+		for i, e := 0, l.root.next; i < l.len; i, e = i+1, e.Next() {
+			if e.Value == value {
+				return e
+			}
+		}
+	}
+	return nil
 }
 
 // Next returns the next list element or nil.
@@ -164,18 +275,38 @@ func (l *List[T]) move(e, at *Element[T]) {
 	e.next.prev = e
 }
 
-// Remove removes e from l if e is an element of list l.
-// It returns the element value e.Value.
-// The element must not be nil.
-func (l *List[T]) Remove(e *Element[T]) T {
+// Remove removes all of this list's elements that are also contained in the specified slice
+// if it is present.
+// Returns true if this collection changed as a result of the call
+func (l *List[T]) Remove(values ...T) (changed bool) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
-	if e.list == l {
-		// if e.list == l, l must have been initialized when e was inserted
-		// in l or l == nil (e is a zero Element) and l.remove will crash
-		l.remove(e)
+	changed = false
+	for _, value := range values {
+		existing := l.search(value)
+		if existing != nil {
+			l.remove(existing)
+			changed = true
+		}
 	}
-	return e.Value
+	return
+}
+
+// RemoveAll removes all of this list's elements that are also contained in the specified collection
+// Returns true if this collection changed as a result of the call
+func (l *List[T]) RemoveAll(values garray.Collection[T]) (changed bool) {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	changed = false
+	values.ForEach(func(value T) bool {
+		existing := l.search(value)
+		if existing != nil {
+			l.remove(existing)
+			changed = true
+		}
+		return true
+	})
+	return
 }
 
 // PushBack inserts a new element e with value v at the back of list l and returns e.
@@ -466,26 +597,11 @@ func (l *List[T]) PushFrontList(other *List[T]) {
 	}
 }
 
-// Removes removes multiple elements `es` from `l` if `es` are elements of list `l`.
-func (l *List[T]) Removes(es []*Element[T]) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	l.lazyInit()
-	for _, e := range es {
-		l.remove(e)
-	}
-}
-
-// RemoveAll removes all elements from list `l`.
-func (l *List[T]) RemoveAll() {
+// Clear removes all the elements from this collection.
+func (l *List[T]) Clear() {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.Init()
-}
-
-// Clear is alias of RemoveAll.
-func (l *List[T]) Clear() {
-	l.RemoveAll()
 }
 
 // Iterator is alias of IteratorAsc.
@@ -588,7 +704,7 @@ func (l *List[T]) UnmarshalValue(value interface{}) (err error) {
 }
 
 // DeepCopy implements interface for deep copy of current type.
-func (l *List[T]) DeepCopy() *List[T] {
+func (l *List[T]) DeepCopy() garray.Collection[T] {
 	if l == nil {
 		return nil
 	}

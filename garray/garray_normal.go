@@ -104,9 +104,9 @@ func NewArrayFromCopy[T comparable](array []T, safe ...bool) *StdArray[T] {
 	}
 }
 
-// At returns the value by the specified index.
-// If the given `index` is out of range of the array, it returns `nil`.
-func (a *StdArray[T]) At(index int) (value T) {
+// MustGet returns the value by the specified index.
+// If the given `index` is out of range of the array, it returns empty value of type T.
+func (a *StdArray[T]) MustGet(index int) (value T) {
 	value, _ = a.Get(index)
 	return
 }
@@ -132,28 +132,6 @@ func (a *StdArray[T]) Set(index int, value T) error {
 	}
 	a.array[index] = value
 	return nil
-}
-
-// SetArray sets the underlying slice array with the given `array`.
-func (a *StdArray[T]) SetArray(array []T) Array[T] {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.array = array
-	return a
-}
-
-// Replace replaces the array items by given `array` from the beginning of array.
-func (a *StdArray[T]) Replace(array []T) Array[T] {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	max := len(array)
-	if max > len(a.array) {
-		max = len(a.array)
-	}
-	for i := 0; i < max; i++ {
-		a.array[i] = array[i]
-	}
-	return a
 }
 
 // Sum returns the sum of values in an array.
@@ -202,9 +180,9 @@ func (a *StdArray[T]) InsertAfter(index int, values ...T) error {
 	return nil
 }
 
-// Remove removes an item by index.
+// RemoveAt removes an item by index.
 // If the given `index` is out of range of the array, the `found` is false.
-func (a *StdArray[T]) Remove(index int) (value T, found bool) {
+func (a *StdArray[T]) RemoveAt(index int) (value T, found bool) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	return a.doRemoveWithoutLock(index)
@@ -246,15 +224,37 @@ func (a *StdArray[T]) RemoveValue(value T) bool {
 	return false
 }
 
-// RemoveValues removes multiple items by `values`.
-func (a *StdArray[T]) RemoveValues(values ...T) {
+// Remove removes multiple items by `values`.
+func (a *StdArray[T]) Remove(values ...T) bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()
+	changed := false
 	for _, value := range values {
 		if i := a.doSearchWithoutLock(value); i != -1 {
-			a.doRemoveWithoutLock(i)
+			_, found := a.doRemoveWithoutLock(i)
+			if found {
+				changed = true
+			}
 		}
 	}
+	return changed
+}
+
+// RemoveAll removes multiple items by `values`.
+func (a *StdArray[T]) RemoveAll(values Collection[T]) bool {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	changed := false
+	values.ForEach(func(value T) bool {
+		if i := a.doSearchWithoutLock(value); i != -1 {
+			_, found := a.doRemoveWithoutLock(i)
+			if found {
+				changed = true
+			}
+		}
+		return true
+	})
+	return changed
 }
 
 // PushLeft pushes one or multiple items to the beginning of array.
@@ -443,14 +443,26 @@ func (a *StdArray[T]) SubSlice(offset int, length ...int) []T {
 	}
 }
 
-// Append is alias of PushRight, please See PushRight.
-func (a *StdArray[T]) Append(value ...T) Array[T] {
-	a.PushRight(value...)
-	return a
+// Add is alias of PushRight, please See PushRight.
+func (a *StdArray[T]) Add(values ...T) bool {
+	a.PushRight(values...)
+	return true
+}
+
+// AddAll adds all the elements in the specified collection to this collection.
+// Returns true if this collection changed as a result of the call
+func (a *StdArray[T]) AddAll(values Collection[T]) bool {
+	a.PushRight(values.Slice()...)
+	return true
 }
 
 // Len returns the length of array.
 func (a *StdArray[T]) Len() int {
+	return a.Size()
+}
+
+// Size returns the length of array.
+func (a *StdArray[T]) Size() int {
 	a.mu.RLock()
 	length := len(a.array)
 	a.mu.RUnlock()
@@ -487,18 +499,29 @@ func (a *StdArray[T]) Clone() (newArray Array[T]) {
 }
 
 // Clear deletes all items of current array.
-func (a *StdArray[T]) Clear() Array[T] {
+func (a *StdArray[T]) Clear() {
 	a.mu.Lock()
 	if len(a.array) > 0 {
 		a.array = make([]T, 0)
 	}
 	a.mu.Unlock()
-	return a
 }
 
 // Contains checks whether a value exists in the array.
 func (a *StdArray[T]) Contains(value T) bool {
 	return a.Search(value) != -1
+}
+
+// ContainsAll checks whether a value exists in the array.
+func (a *StdArray[T]) ContainsAll(values Collection[T]) bool {
+	values.ForEach(func(value T) bool {
+		found := a.Search(value) != -1
+		if !found {
+			return false
+		}
+		return true
+	})
+	return true
 }
 
 // ContainsI checks whether a value exists in the array with case-insensitively.
@@ -569,41 +592,17 @@ func (a *StdArray[T]) Unique() Array[T] {
 }
 
 // LockFunc locks writing by callback function `f`.
-func (a *StdArray[T]) LockFunc(f func(array []T)) Array[T] {
+func (a *StdArray[T]) LockFunc(f func(array Array[T])) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	f(a.array)
-	return a
+	f(a)
 }
 
 // RLockFunc locks reading by callback function `f`.
-func (a *StdArray[T]) RLockFunc(f func(array []T)) Array[T] {
+func (a *StdArray[T]) RLockFunc(f func(array Array[T])) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
-	f(a.array)
-	return a
-}
-
-// Merge merges `array` into current array.
-// The parameter `array` can be another StdArray
-// The difference between Merge and Append is Append supports only specified slice type,
-// but Merge supports more parameter types.
-func (a *StdArray[T]) Merge(array Array[T]) Array[T] {
-	if array == nil {
-		return a
-	}
-	return a.Append(array.Slice()...)
-}
-
-// MergeSlice merges slice into current array.
-// The parameter `array` can be another StdArray
-// The difference between Merge and Append is Append supports only specified slice type,
-// but Merge supports more parameter types.
-func (a *StdArray[T]) MergeSlice(slice []T) Array[T] {
-	if len(slice) == 0 {
-		return a
-	}
-	return a.Append(slice...)
+	f(a)
 }
 
 // Fill fills an array with num entries of the value `value`,
@@ -747,14 +746,21 @@ func (a *StdArray[T]) CountValues() map[T]int {
 	return m
 }
 
-// Iterator is alias of IteratorAsc.
-func (a *StdArray[T]) Iterator(f func(k int, v T) bool) {
-	a.IteratorAsc(f)
+// ForEach iterates all elements in this collection readonly with custom callback function `f`.
+// If `f` returns true, then it continues iterating; or false to stop.
+func (a *StdArray[T]) ForEach(f func(value T) bool) {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	for _, v := range a.array {
+		if !f(v) {
+			break
+		}
+	}
 }
 
-// IteratorAsc iterates the array readonly in ascending order with given callback function `f`.
+// ForEachAsc iterates the array readonly in ascending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (a *StdArray[T]) IteratorAsc(f func(k int, v T) bool) {
+func (a *StdArray[T]) ForEachAsc(f func(index int, value T) bool) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	for k, v := range a.array {
@@ -764,9 +770,9 @@ func (a *StdArray[T]) IteratorAsc(f func(k int, v T) bool) {
 	}
 }
 
-// IteratorDesc iterates the array readonly in descending order with given callback function `f`.
+// ForEachDesc iterates the array readonly in descending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (a *StdArray[T]) IteratorDesc(f func(k int, v T) bool) {
+func (a *StdArray[T]) ForEachDesc(f func(k int, v T) bool) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	for i := len(a.array) - 1; i >= 0; i-- {
@@ -896,7 +902,7 @@ func (a *StdArray[T]) IsEmpty() bool {
 }
 
 // DeepCopy implements interface for deep copy of current type.
-func (a *StdArray[T]) DeepCopy() Array[T] {
+func (a *StdArray[T]) DeepCopy() Collection[T] {
 	if a == nil {
 		return nil
 	}

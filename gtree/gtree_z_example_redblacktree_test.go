@@ -215,8 +215,8 @@ func ExampleRedBlackTree_Remove() {
 	fmt.Println(tree.Map())
 
 	// Output:
-	// val1
-	//
+	// val1 true
+	//  false
 	// map[key0:val0 key2:val2 key3:val3 key4:val4 key5:val5]
 }
 
@@ -416,6 +416,80 @@ func ExampleRedBlackTree_Ceiling() {
 	// Ceiling -1: 1
 }
 
+func ExampleRedBlackTree_Lower() {
+	tree := gtree.NewRedBlackTree[int, int](comparator.ComparatorInt)
+	for i := 1; i < 100; i++ {
+		if i != 50 {
+			tree.Put(i, i)
+		}
+	}
+
+	node, found := tree.Lower(95)
+	if found {
+		fmt.Println("Lower 95:", node.Key)
+	}
+
+	node, found = tree.Lower(50)
+	if found {
+		fmt.Println("Lower 50:", node.Key)
+	}
+
+	node, found = tree.Lower(100)
+	if found {
+		fmt.Println("Lower 100:", node.Key)
+	}
+
+	node, found = tree.Lower(0)
+	if found {
+		fmt.Println("Lower 0:", node.Key)
+	}
+
+	// Output:
+	// Lower 95: 94
+	// Lower 50: 49
+	// Lower 100: 99
+}
+
+func ExampleRedBlackTree_Higher() {
+	tree := gtree.NewRedBlackTree[int, int](comparator.ComparatorInt)
+	for i := 1; i < 100; i++ {
+		if i != 50 {
+			tree.Put(i, i)
+		}
+	}
+
+	node, found := tree.Higher(1)
+	if found {
+		fmt.Println("Higher 1:", node.Key)
+	}
+
+	node, found = tree.Higher(95)
+	if found {
+		fmt.Println("Higher 95:", node.Key)
+	}
+
+	node, found = tree.Higher(50)
+	if found {
+		fmt.Println("Higher 50:", node.Key)
+	}
+
+	node, found = tree.Higher(100)
+	if found {
+		fmt.Println("Higher 100:", node.Key)
+	}
+
+	node, found = tree.Higher(-1)
+	if found {
+		fmt.Println("Higher -1:", node.Key)
+	}
+
+	// Output:
+	// Higher 1: 2
+	// Higher 95: 96
+	// Higher 50: 51
+	// Higher -1: 1
+}
+
 func ExampleRedBlackTree_Iterator() {
 	tree := gtree.NewRedBlackTree[int, int](comparator.ComparatorInt)
 	for i := 0; i < 10; i++ {
@@ -482,9 +556,12 @@ func ExampleRedBlackTree_IteratorAsc() {
 	// key: 9 , value: 1
 }
 
-func ExampleRedBlackTree_IteratorAscFrom_normal() {
+func ExampleRedBlackTree_IteratorAscFrom_inclusive() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
+		if i == 3 {
+			continue
+		}
 		m[i] = i * 10
 	}
 	tree := gtree.NewRedBlackTreeFrom(comparator.ComparatorInt, m)
@@ -494,42 +571,45 @@ func ExampleRedBlackTree_IteratorAscFrom_normal() {
 		return true
 	})
 
+	tree.IteratorAscFrom(3, true, func(key, value int) bool {
+		fmt.Println("key:", key, ", value:", value)
+		return true
+	})
+
 	// Output:
 	// key: 1 , value: 10
 	// key: 2 , value: 20
-	// key: 3 , value: 30
+	// key: 4 , value: 40
+	// key: 5 , value: 50
 	// key: 4 , value: 40
 	// key: 5 , value: 50
 }
 
-func ExampleRedBlackTree_IteratorAscFrom_noExistKey() {
+func ExampleRedBlackTree_IteratorAscFrom_nonInclusive() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
+		if i == 3 {
+			continue
+		}
 		m[i] = i * 10
 	}
 	tree := gtree.NewRedBlackTreeFrom(comparator.ComparatorInt, m)
 
-	tree.IteratorAscFrom(0, true, func(key, value int) bool {
+	tree.IteratorAscFrom(1, false, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
 		return true
 	})
 
-	// Output:
-}
-
-func ExampleRedBlackTree_IteratorAscFrom_noExistKeyAndMatchFalse() {
-	m := make(map[int]int)
-	for i := 1; i <= 5; i++ {
-		m[i] = i * 10
-	}
-	tree := gtree.NewRedBlackTreeFrom(comparator.ComparatorInt, m)
-
-	tree.IteratorAscFrom(0, false, func(key, value int) bool {
+	tree.IteratorAscFrom(3, false, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
 		return true
 	})
-
 	// Output:
+	// key: 2 , value: 20
+	// key: 4 , value: 40
+	// key: 5 , value: 50
+	// key: 4 , value: 40
+	// key: 5 , value: 50
 }
 
 func ExampleRedBlackTree_IteratorDesc() {
@@ -556,7 +636,7 @@ func ExampleRedBlackTree_IteratorDesc() {
 	// key: 0 , value: 10
 }
 
-func ExampleRedBlackTree_IteratorDescFrom() {
+func ExampleRedBlackTree_IteratorDescFrom_inclusive() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
@@ -574,6 +654,76 @@ func ExampleRedBlackTree_IteratorDescFrom() {
 	// key: 3 , value: 30
 	// key: 2 , value: 20
 	// key: 1 , value: 10
+}
+
+func ExampleRedBlackTree_IteratorDescFrom_nonInclusive() {
+	m := make(map[int]int)
+	for i := 1; i <= 5; i++ {
+		m[i] = i * 10
+	}
+	tree := gtree.NewRedBlackTreeFrom(comparator.ComparatorInt, m)
+
+	tree.IteratorDescFrom(5, false, func(key, value int) bool {
+		fmt.Println("key:", key, ", value:", value)
+		return true
+	})
+
+	// Output:
+	// key: 4 , value: 40
+	// key: 3 , value: 30
+	// key: 2 , value: 20
+	// key: 1 , value: 10
+}
+
+func ExampleRedBlackTree_SubMap() {
+	m := make(map[string]int)
+	for i := 0; i < 10; i++ {
+		m["key"+gconv.String(i)] = i * 10
+	}
+	tree := gtree.NewRedBlackTreeFrom(comparator.ComparatorString, m)
+
+	fmt.Println(tree.SubMap("key5", true, "key7", true).Values())
+	fmt.Println(tree.SubMap("key5", false, "key7", true).Values())
+	fmt.Println(tree.SubMap("key5", true, "key7", false).Values())
+	fmt.Println(tree.SubMap("key5", false, "key7", false).Values())
+	fmt.Println(tree.SubMap("key5.1", true, "key7", true).Values())
+	fmt.Println(tree.SubMap("key5.1", false, "key7", true).Values())
+	fmt.Println(tree.SubMap("key5.1", true, "key7", false).Values())
+	fmt.Println(tree.SubMap("key5.1", false, "key7", false).Values())
+	fmt.Println(tree.SubMap("key5.1", true, "key7.1", true).Values())
+	fmt.Println(tree.SubMap("key5.1", false, "key7.1", true).Values())
+	fmt.Println(tree.SubMap("key5.1", true, "key7.1", false).Values())
+	fmt.Println(tree.SubMap("key5.1", false, "key7.1", false).Values())
+	fmt.Println(tree.SubMap("key9.1", false, "key7.1", false).Values())
+	fmt.Println(tree.SubMap("key9.1", false, "key9.1", false).Values())
+	fmt.Println(tree.SubMap("aa", false, "key0.1", false).Values())
+	fmt.Println(tree.SubMap("aa", false, "bb", false).Values())
+	fmt.Println(tree.SubMap("bb", false, "aa", false).Values())
+	fmt.Println(tree.SubMap("yy", false, "zz", false).Values())
+	fmt.Println(tree.SubMap("zz", false, "yy", false).Values())
+	fmt.Println(tree.SubMap("key9", true, "zz", false).Values())
+
+	// Output:
+	// [50 60 70]
+	// [60 70]
+	// [50 60]
+	// [60]
+	// [60 70]
+	// [60 70]
+	// [60]
+	// [60]
+	// [60 70]
+	// [60 70]
+	// [60 70]
+	// [60 70]
+	// []
+	// []
+	// [0]
+	// []
+	// []
+	// []
+	// []
+	// [90]
 }
 
 func ExampleRedBlackTree_Clear() {
