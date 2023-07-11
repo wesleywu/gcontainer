@@ -30,7 +30,7 @@ func Convert(fromValue interface{}, toTypeName string, extraParams ...interface{
 }
 
 type doConvertInput struct {
-	FromValue  interface{}   // Value that is converted from.
+	FromValue  interface{}   // value that is converted from.
 	ToTypeName string        // Target value type name in string.
 	ReferValue interface{}   // Referred value, a value in type `ToTypeName`.
 	Extra      []interface{} // Extra values for implementing the converting.

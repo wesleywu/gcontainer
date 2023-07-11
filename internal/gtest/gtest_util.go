@@ -59,7 +59,7 @@ func Assert(value, expect interface{}) {
 
 // AssertEQ checks `value` and `expect` EQUAL, including their TYPES.
 func AssertEQ(value, expect interface{}) {
-	// Value assert.
+	// value assert.
 	rvExpect := reflect.ValueOf(expect)
 	if empty.IsNil(value) {
 		value = nil
@@ -117,7 +117,7 @@ func AssertNQ(value, expect interface{}) {
 			),
 		)
 	}
-	// Value assert.
+	// value assert.
 	AssertNE(value, expect)
 }
 

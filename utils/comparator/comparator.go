@@ -26,6 +26,12 @@ type IComparable[T any] interface {
 	Compare(other T) int
 }
 
+func Reverse[T comparable](comp Comparator[T]) Comparator[T] {
+	return func(a, b T) int {
+		return 0 - comp(a, b)
+	}
+}
+
 // ComparatorAny provides a comparison on any types
 func ComparatorAny[T comparable](a, b T) int {
 	if any(a) == nil && any(b) == nil {

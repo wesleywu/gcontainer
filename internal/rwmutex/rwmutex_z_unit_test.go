@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/wesleywu/gcontainer/garray"
+	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/internal/gtest"
 	"github.com/wesleywu/gcontainer/internal/rwmutex"
 )
@@ -41,7 +41,7 @@ func TestSafeRWMutex(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		var (
 			localSafeLock = rwmutex.New(true)
-			array         = garray.New[int](true)
+			array         = g.NewArrayList[int](true)
 		)
 
 		go func() {
@@ -74,7 +74,7 @@ func TestSafeReaderRWMutex(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		var (
 			localSafeLock = rwmutex.New(true)
-			array         = garray.New[int](true)
+			array         = g.NewArrayList[int](true)
 		)
 		go func() {
 			localSafeLock.RLock()
@@ -114,7 +114,7 @@ func TestUnsafeRWMutex(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		var (
 			localUnsafeLock = rwmutex.New()
-			array           = garray.New[int](true)
+			array           = g.NewArrayList[int](true)
 		)
 		go func() {
 			localUnsafeLock.Lock()

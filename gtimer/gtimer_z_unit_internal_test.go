@@ -11,13 +11,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/wesleywu/gcontainer/garray"
+	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/internal/gtest"
 )
 
 func TestTimer_Proceed(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		array := garray.New[int](true)
+		array := g.NewArrayList[int](true)
 		timer := New(TimerOptions{
 			Interval: time.Hour,
 		})
@@ -32,7 +32,7 @@ func TestTimer_Proceed(t *testing.T) {
 		t.Assert(array.Len(), 2)
 	})
 	gtest.C(t, func(t *gtest.T) {
-		array := garray.New[int](true)
+		array := g.NewArrayList[int](true)
 		timer := New(TimerOptions{
 			Interval: time.Millisecond * 100,
 		})
@@ -69,7 +69,7 @@ func TestTimer_PriorityQueue_FirstOneInArrayIsTheLeast(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		var (
 			size  = 1000000
-			array = garray.NewArrayRange(0, size, 1)
+			array = g.NewArrayListRange(0, size, 1)
 		)
 		array.Shuffle()
 		queue := newPriorityQueue()

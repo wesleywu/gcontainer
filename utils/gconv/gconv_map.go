@@ -263,7 +263,7 @@ func doMapConvertForMapOrStructValue(in doMapConvertForMapOrStructValueInput) in
 		var dataMap = make(map[string]interface{})
 		// Map converting interface check.
 		if v, ok := in.Value.(iMapStrAny); ok {
-			// Value copy, in case of concurrent safety.
+			// value copy, in case of concurrent safety.
 			for mapK, mapV := range v.MapStrAny() {
 				if in.RecursiveOption {
 					dataMap[mapK] = doMapConvertForMapOrStructValue(

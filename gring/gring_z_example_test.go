@@ -224,7 +224,7 @@ func ExampleRing_RLockIteratorNext() {
 
 	r.RLockIteratorNext(func(value int) bool {
 		if value < 5 {
-			fmt.Println("IteratorNext Success, Value:", value)
+			fmt.Println("IteratorNext Success, value:", value)
 			return true
 		}
 
@@ -232,11 +232,11 @@ func ExampleRing_RLockIteratorNext() {
 	})
 
 	// Output:
-	// IteratorNext Success, Value: 0
-	// IteratorNext Success, Value: 1
-	// IteratorNext Success, Value: 2
-	// IteratorNext Success, Value: 3
-	// IteratorNext Success, Value: 4
+	// IteratorNext Success, value: 0
+	// IteratorNext Success, value: 1
+	// IteratorNext Success, value: 2
+	// IteratorNext Success, value: 3
+	// IteratorNext Success, value: 4
 }
 
 func ExampleRing_RLockIteratorPrev() {
@@ -250,7 +250,7 @@ func ExampleRing_RLockIteratorPrev() {
 
 	r.RLockIteratorPrev(func(value int) bool {
 		if value >= 5 {
-			fmt.Println("IteratorPrev Success, Value:", value)
+			fmt.Println("IteratorPrev Success, value:", value)
 			return true
 		}
 
@@ -258,11 +258,11 @@ func ExampleRing_RLockIteratorPrev() {
 	})
 
 	// Output:
-	// IteratorPrev Success, Value: 9
-	// IteratorPrev Success, Value: 8
-	// IteratorPrev Success, Value: 7
-	// IteratorPrev Success, Value: 6
-	// IteratorPrev Success, Value: 5
+	// IteratorPrev Success, value: 9
+	// IteratorPrev Success, value: 8
+	// IteratorPrev Success, value: 7
+	// IteratorPrev Success, value: 6
+	// IteratorPrev Success, value: 5
 }
 
 func ExampleRing_SliceNext() {

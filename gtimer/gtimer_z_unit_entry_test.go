@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/wesleywu/gcontainer/garray"
+	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/gtimer"
 	"github.com/wesleywu/gcontainer/internal/gtest"
 )
@@ -21,7 +21,7 @@ import (
 func TestJob_Start_Stop_Close(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		timer := gtimer.New()
-		array := garray.New[int](true)
+		array := g.NewArrayList[int](true)
 		job := timer.Add(ctx, 200*time.Millisecond, func(ctx context.Context) {
 			array.Add(1)
 		})
@@ -44,7 +44,7 @@ func TestJob_Start_Stop_Close(t *testing.T) {
 func TestJob_Singleton(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		timer := gtimer.New()
-		array := garray.New[int](true)
+		array := g.NewArrayList[int](true)
 		job := timer.Add(ctx, 200*time.Millisecond, func(ctx context.Context) {
 			array.Add(1)
 			time.Sleep(10 * time.Second)
@@ -65,7 +65,7 @@ func TestJob_SingletonQuick(t *testing.T) {
 		timer := gtimer.New(gtimer.TimerOptions{
 			Quick: true,
 		})
-		array := garray.New[int](true)
+		array := g.NewArrayList[int](true)
 		job := timer.Add(ctx, 5*time.Second, func(ctx context.Context) {
 			array.Add(1)
 			time.Sleep(10 * time.Second)
@@ -84,7 +84,7 @@ func TestJob_SingletonQuick(t *testing.T) {
 func TestJob_SetTimes(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		timer := gtimer.New()
-		array := garray.New[int](true)
+		array := g.NewArrayList[int](true)
 		job := timer.Add(ctx, 200*time.Millisecond, func(ctx context.Context) {
 			array.Add(1)
 		})
@@ -98,7 +98,7 @@ func TestJob_SetTimes(t *testing.T) {
 func TestJob_Run(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		timer := gtimer.New()
-		array := garray.New[int](true)
+		array := g.NewArrayList[int](true)
 		job := timer.Add(ctx, 1000*time.Millisecond, func(ctx context.Context) {
 			array.Add(1)
 		})

@@ -11,7 +11,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/wesleywu/gcontainer/glist"
+	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/gtimer"
 	"github.com/wesleywu/gcontainer/gtype"
 	"github.com/wesleywu/gcontainer/utils/gerror"
@@ -19,10 +19,10 @@ import (
 
 // Pool is an Object-Reusable Pool.
 type Pool[T any] struct {
-	list    *glist.List[*poolItem[T]] // Available/idle items list.
-	closed  *gtype.Bool               // Whether the pool is closed.
-	TTL     time.Duration             // Time To Live for pool items.
-	NewFunc func() (T, error)         // Callback function to create pool item.
+	list    *g.LinkedList[*poolItem[T]] // Available/idle items list.
+	closed  *gtype.Bool                 // Whether the pool is closed.
+	TTL     time.Duration               // Time To Live for pool items.
+	NewFunc func() (T, error)           // Callback function to create pool item.
 	// ExpireFunc is the for expired items destruction.
 	// This function needs to be defined when the pool items
 	// need to perform additional destruction operations.
@@ -51,7 +51,7 @@ type ExpireFunc[T any] func(T)
 // ttl > 0 : timeout expired;
 func New[T any](ttl time.Duration, newFunc NewFunc[T], expireFunc ...ExpireFunc[T]) *Pool[T] {
 	r := &Pool[T]{
-		list:    glist.New[*poolItem[T]](true),
+		list:    g.NewLinkedList[*poolItem[T]](true),
 		closed:  gtype.NewBool(),
 		TTL:     ttl,
 		NewFunc: newFunc,

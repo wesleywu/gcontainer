@@ -43,7 +43,7 @@ func Copy(src interface{}) interface{} {
 			return v.DeepCopy()
 		}
 		var (
-			original = reflect.ValueOf(src)                // Make the interface a reflect.Value
+			original = reflect.ValueOf(src)                // Make the interface a reflect.value
 			dst      = reflect.New(original.Type()).Elem() // Make a copy of the same type as the original.
 		)
 		// Recursively copy the original.

@@ -20,17 +20,17 @@ package gqueue
 import (
 	"math"
 
-	"github.com/wesleywu/gcontainer/glist"
+	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/gtype"
 )
 
 // Queue is a concurrent-safe queue built on doubly linked list and channel.
 type Queue[T comparable] struct {
-	limit  int            // Limit for queue size.
-	list   *glist.List[T] // Underlying list structure for data maintaining.
-	closed *gtype.Bool    // Whether queue is closed.
-	events chan struct{}  // Events for data writing.
-	C      chan T         // Underlying channel for data reading.
+	limit  int              // Limit for queue size.
+	list   *g.LinkedList[T] // Underlying list structure for data maintaining.
+	closed *gtype.Bool      // Whether queue is closed.
+	events chan struct{}    // Events for data writing.
+	C      chan T           // Underlying channel for data reading.
 }
 
 const (
@@ -49,7 +49,7 @@ func New[T comparable](limit ...int) *Queue[T] {
 		q.limit = limit[0]
 		q.C = make(chan T, limit[0])
 	} else {
-		q.list = glist.New[T](true)
+		q.list = g.NewLinkedList[T](true)
 		q.events = make(chan struct{}, math.MaxInt32)
 		q.C = make(chan T, defaultQueueSize)
 		go q.asyncLoopFromListToChannel()

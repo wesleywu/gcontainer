@@ -114,7 +114,7 @@ func doStruct(params interface{}, pointer interface{}, mapping map[string]string
 
 	var (
 		paramsReflectValue      reflect.Value
-		paramsInterface         interface{} // DO NOT use `params` directly as it might be type `reflect.Value`
+		paramsInterface         interface{} // DO NOT use `params` directly as it might be type `reflect.value`
 		pointerReflectValue     reflect.Value
 		pointerReflectKind      reflect.Kind
 		pointerElemReflectValue reflect.Value // The pointed element.
@@ -495,7 +495,7 @@ func bindVarToReflectValue(structFieldValue reflect.Value, value interface{}, ma
 			)
 			switch reflectValue.Kind() {
 			case reflect.String:
-				// Value is empty string.
+				// value is empty string.
 				if reflectValue.IsZero() {
 					var elemKind = elemType.Kind()
 					// Try to find the original type kind of the slice element.
