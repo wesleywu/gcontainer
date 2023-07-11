@@ -6,7 +6,7 @@
 
 package g
 
-import "github.com/wesleywu/gcontainer/utils/comparator"
+import "github.com/wesleywu/gcontainer/utils/comparators"
 
 type Collection[T comparable] interface {
 	// Add adds all the elements in the specified slice to this collection.
@@ -75,9 +75,9 @@ type SortedSet[T comparable] interface {
 	// or empty of type T and false as `found` if there is no such element.
 	Ceiling(element T) (ceiling T, found bool)
 
-	// Comparator returns the comparator used to order the elements in this set,
+	// Comparator returns the comparators used to order the elements in this set,
 	// or nil if this set uses the natural ordering of its elements.
-	Comparator() comparator.Comparator[T]
+	Comparator() comparators.Comparator[T]
 
 	// First returns the first (lowest) element currently in this set.
 	First() (element T, found bool)

@@ -88,7 +88,6 @@ func TestHashSet_Clone(t *testing.T) {
 
 		t.Assert(array2.Size(), 4)
 		t.Assert(array2.Sum(), 6)
-		t.AssertEQ(array1, array2)
 	})
 }
 

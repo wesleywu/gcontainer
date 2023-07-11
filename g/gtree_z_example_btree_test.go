@@ -11,12 +11,12 @@ import (
 
 	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/internal/json"
-	"github.com/wesleywu/gcontainer/utils/comparator"
+	"github.com/wesleywu/gcontainer/utils/comparators"
 	"github.com/wesleywu/gcontainer/utils/gconv"
 )
 
 func ExampleBTree_Clone() {
-	b := g.NewBTree[string, string](3, comparator.ComparatorString)
+	b := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		b.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -32,7 +32,7 @@ func ExampleBTree_Clone() {
 }
 
 func ExampleBTree_Put() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -46,7 +46,7 @@ func ExampleBTree_Put() {
 }
 
 func ExampleBTree_Puts() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 
 	tree.Puts(map[string]string{
 		"key1": "val1",
@@ -62,7 +62,7 @@ func ExampleBTree_Puts() {
 }
 
 func ExampleBTree_Get() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -76,7 +76,7 @@ func ExampleBTree_Get() {
 }
 
 func ExampleBTree_GetOrPut() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -90,7 +90,7 @@ func ExampleBTree_GetOrPut() {
 }
 
 func ExampleBTree_GetOrPutFunc() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -108,7 +108,7 @@ func ExampleBTree_GetOrPutFunc() {
 }
 
 func ExampleBTree_PutIfAbsent() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -122,7 +122,7 @@ func ExampleBTree_PutIfAbsent() {
 }
 
 func ExampleBTree_PutIfAbsentFunc() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -140,7 +140,7 @@ func ExampleBTree_PutIfAbsentFunc() {
 }
 
 func ExampleBTree_ContainsKey() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -154,7 +154,7 @@ func ExampleBTree_ContainsKey() {
 }
 
 func ExampleBTree_Remove() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -170,7 +170,7 @@ func ExampleBTree_Remove() {
 }
 
 func ExampleBTree_Removes() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -188,7 +188,7 @@ func ExampleBTree_Removes() {
 }
 
 func ExampleBTree_IsEmpty() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 
 	fmt.Println(tree.IsEmpty())
 
@@ -204,7 +204,7 @@ func ExampleBTree_IsEmpty() {
 }
 
 func ExampleBTree_Size() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 
 	fmt.Println(tree.Size())
 
@@ -220,7 +220,7 @@ func ExampleBTree_Size() {
 }
 
 func ExampleBTree_Keys() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 6; i > 0; i-- {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -232,7 +232,7 @@ func ExampleBTree_Keys() {
 }
 
 func ExampleBTree_Values() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 6; i > 0; i-- {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -244,7 +244,7 @@ func ExampleBTree_Values() {
 }
 
 func ExampleBTree_Map() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -256,7 +256,7 @@ func ExampleBTree_Map() {
 }
 
 func ExampleBTree_MapStrAny() {
-	tree := g.NewBTree[int, string](3, comparator.ComparatorInt)
+	tree := g.NewBTree[int, string](3, comparators.ComparatorInt)
 	for i := 0; i < 6; i++ {
 		tree.Put(1000+i, "val"+gconv.String(i))
 	}
@@ -268,7 +268,7 @@ func ExampleBTree_MapStrAny() {
 }
 
 func ExampleBTree_Clear() {
-	tree := g.NewBTree[int, string](3, comparator.ComparatorInt)
+	tree := g.NewBTree[int, string](3, comparators.ComparatorInt)
 	for i := 0; i < 6; i++ {
 		tree.Put(1000+i, "val"+gconv.String(i))
 	}
@@ -283,7 +283,7 @@ func ExampleBTree_Clear() {
 }
 
 func ExampleBTree_Replace() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -306,7 +306,7 @@ func ExampleBTree_Replace() {
 }
 
 func ExampleBTree_Height() {
-	tree := g.NewBTree[int, int](3, comparator.ComparatorInt)
+	tree := g.NewBTree[int, int](3, comparators.ComparatorInt)
 	for i := 0; i < 100; i++ {
 		tree.Put(i, i)
 	}
@@ -317,13 +317,13 @@ func ExampleBTree_Height() {
 }
 
 func ExampleBTree_Left() {
-	tree := g.NewBTree[int, int](3, comparator.ComparatorInt)
+	tree := g.NewBTree[int, int](3, comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		tree.Put(i, i)
 	}
 	fmt.Println(tree.Left().Key(), tree.Left().Value())
 
-	emptyTree := g.NewBTree[int, int](3, comparator.ComparatorInt)
+	emptyTree := g.NewBTree[int, int](3, comparators.ComparatorInt)
 	fmt.Println(emptyTree.Left())
 
 	// Output:
@@ -332,13 +332,13 @@ func ExampleBTree_Left() {
 }
 
 func ExampleBTree_Right() {
-	tree := g.NewBTree[int, int](3, comparator.ComparatorInt)
+	tree := g.NewBTree[int, int](3, comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		tree.Put(i, i)
 	}
 	fmt.Println(tree.Right().Key(), tree.Right().Value())
 
-	emptyTree := g.NewBTree[int, int](3, comparator.ComparatorInt)
+	emptyTree := g.NewBTree[int, int](3, comparators.ComparatorInt)
 	fmt.Println(emptyTree.Left())
 
 	// Output:
@@ -347,7 +347,7 @@ func ExampleBTree_Right() {
 }
 
 func ExampleBTree_String() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -364,7 +364,7 @@ func ExampleBTree_String() {
 }
 
 func ExampleBTree_Search() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -378,7 +378,7 @@ func ExampleBTree_Search() {
 }
 
 func ExampleBTree_Print() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -395,7 +395,7 @@ func ExampleBTree_Print() {
 }
 
 func ExampleBTree_Iterator() {
-	tree := g.NewBTree[int, int](3, comparator.ComparatorInt)
+	tree := g.NewBTree[int, int](3, comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
 	}
@@ -421,7 +421,7 @@ func ExampleBTree_IteratorFrom() {
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewBTreeFrom(3, comparator.ComparatorInt, m)
+	tree := g.NewBTreeFrom(3, comparators.ComparatorInt, m)
 
 	tree.IteratorFrom(1, true, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
@@ -437,7 +437,7 @@ func ExampleBTree_IteratorFrom() {
 }
 
 func ExampleBTree_IteratorAsc() {
-	tree := g.NewBTree[int, int](3, comparator.ComparatorInt)
+	tree := g.NewBTree[int, int](3, comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
 	}
@@ -465,7 +465,7 @@ func ExampleBTree_IteratorAscFrom_Normal() {
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewBTreeFrom(3, comparator.ComparatorInt, m)
+	tree := g.NewBTreeFrom(3, comparators.ComparatorInt, m)
 
 	tree.IteratorAscFrom(1, true, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
@@ -485,7 +485,7 @@ func ExampleBTree_IteratorAscFrom_NoExistKey() {
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewBTreeFrom(3, comparator.ComparatorInt, m)
+	tree := g.NewBTreeFrom(3, comparators.ComparatorInt, m)
 
 	tree.IteratorAscFrom(0, true, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
@@ -500,7 +500,7 @@ func ExampleBTree_IteratorAscFrom_NoExistKeyAndMatchFalse() {
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewBTreeFrom(3, comparator.ComparatorInt, m)
+	tree := g.NewBTreeFrom(3, comparators.ComparatorInt, m)
 
 	tree.IteratorAscFrom(0, false, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
@@ -516,7 +516,7 @@ func ExampleBTree_IteratorAscFrom_NoExistKeyAndMatchFalse() {
 }
 
 func ExampleBTree_IteratorDesc() {
-	tree := g.NewBTree[int, int](3, comparator.ComparatorInt)
+	tree := g.NewBTree[int, int](3, comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
 	}
@@ -544,7 +544,7 @@ func ExampleBTree_IteratorDescFrom() {
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewBTreeFrom(3, comparator.ComparatorInt, m)
+	tree := g.NewBTreeFrom(3, comparators.ComparatorInt, m)
 
 	tree.IteratorDescFrom(5, true, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
@@ -560,7 +560,7 @@ func ExampleBTree_IteratorDescFrom() {
 }
 
 func ExampleBTree_MarshalJSON() {
-	tree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	tree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}

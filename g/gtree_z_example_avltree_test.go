@@ -11,12 +11,12 @@ import (
 
 	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/internal/json"
-	"github.com/wesleywu/gcontainer/utils/comparator"
+	"github.com/wesleywu/gcontainer/utils/comparators"
 	"github.com/wesleywu/gcontainer/utils/gconv"
 )
 
 func ExampleAVLTree_Clone() {
-	avl := g.NewAVLTree[string, string](comparator.ComparatorString)
+	avl := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		avl.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -32,7 +32,7 @@ func ExampleAVLTree_Clone() {
 }
 
 func ExampleAVLTree_Put() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -46,7 +46,7 @@ func ExampleAVLTree_Put() {
 }
 
 func ExampleAVLTree_Puts() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 
 	tree.Puts(map[string]string{
 		"key1": "val1",
@@ -62,7 +62,7 @@ func ExampleAVLTree_Puts() {
 }
 
 func ExampleAVLTree_Get() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -76,7 +76,7 @@ func ExampleAVLTree_Get() {
 }
 
 func ExampleAVLTree_GetOrPut() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -90,7 +90,7 @@ func ExampleAVLTree_GetOrPut() {
 }
 
 func ExampleAVLTree_GetOrPutFunc() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -108,7 +108,7 @@ func ExampleAVLTree_GetOrPutFunc() {
 }
 
 func ExampleAVLTree_PutIfAbsent() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -122,7 +122,7 @@ func ExampleAVLTree_PutIfAbsent() {
 }
 
 func ExampleAVLTree_PutIfAbsentFunc() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -140,7 +140,7 @@ func ExampleAVLTree_PutIfAbsentFunc() {
 }
 
 func ExampleAVLTree_ContainsKey() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -154,7 +154,7 @@ func ExampleAVLTree_ContainsKey() {
 }
 
 func ExampleAVLTree_Remove() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -170,7 +170,7 @@ func ExampleAVLTree_Remove() {
 }
 
 func ExampleAVLTree_Removes() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -188,7 +188,7 @@ func ExampleAVLTree_Removes() {
 }
 
 func ExampleAVLTree_IsEmpty() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 
 	fmt.Println(tree.IsEmpty())
 
@@ -204,7 +204,7 @@ func ExampleAVLTree_IsEmpty() {
 }
 
 func ExampleAVLTree_Size() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 
 	fmt.Println(tree.Size())
 
@@ -220,7 +220,7 @@ func ExampleAVLTree_Size() {
 }
 
 func ExampleAVLTree_Keys() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 6; i > 0; i-- {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -232,7 +232,7 @@ func ExampleAVLTree_Keys() {
 }
 
 func ExampleAVLTree_Values() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 6; i > 0; i-- {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -244,7 +244,7 @@ func ExampleAVLTree_Values() {
 }
 
 func ExampleAVLTree_Map() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -256,7 +256,7 @@ func ExampleAVLTree_Map() {
 }
 
 func ExampleAVLTree_MapStrAny() {
-	tree := g.NewAVLTree[int, string](comparator.ComparatorInt)
+	tree := g.NewAVLTree[int, string](comparators.ComparatorInt)
 	for i := 0; i < 6; i++ {
 		tree.Put(1000+i, "val"+gconv.String(i))
 	}
@@ -268,14 +268,14 @@ func ExampleAVLTree_MapStrAny() {
 }
 
 func ExampleAVLTree_Flip() {
-	tree := g.NewAVLTree[int, int](comparator.ComparatorInt)
+	tree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 6; i++ {
 		tree.Put(i, i*10)
 	}
 
 	fmt.Println("Before Flip", tree.Map())
 
-	newTree := tree.Flip(comparator.ComparatorInt)
+	newTree := tree.Flip(comparators.ComparatorInt)
 
 	fmt.Println("After Flip", newTree.Map())
 
@@ -285,7 +285,7 @@ func ExampleAVLTree_Flip() {
 }
 
 func ExampleAVLTree_Clear() {
-	tree := g.NewAVLTree[int, string](comparator.ComparatorInt)
+	tree := g.NewAVLTree[int, string](comparators.ComparatorInt)
 	for i := 0; i < 6; i++ {
 		tree.Put(1000+i, "val"+gconv.String(i))
 	}
@@ -300,7 +300,7 @@ func ExampleAVLTree_Clear() {
 }
 
 func ExampleAVLTree_Replace() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -323,13 +323,13 @@ func ExampleAVLTree_Replace() {
 }
 
 func ExampleAVLTree_Left() {
-	tree := g.NewAVLTree[int, int](comparator.ComparatorInt)
+	tree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		tree.Put(i, i)
 	}
 	fmt.Println(tree.Left().Key(), tree.Left().Value())
 
-	emptyTree := g.NewAVLTree[int, int](comparator.ComparatorInt)
+	emptyTree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	fmt.Println(emptyTree.Left())
 
 	// Output:
@@ -338,13 +338,13 @@ func ExampleAVLTree_Left() {
 }
 
 func ExampleAVLTree_Right() {
-	tree := g.NewAVLTree[int, int](comparator.ComparatorInt)
+	tree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		tree.Put(i, i)
 	}
 	fmt.Println(tree.Right().Key(), tree.Right().Value())
 
-	emptyTree := g.NewAVLTree[int, int](comparator.ComparatorInt)
+	emptyTree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	fmt.Println(emptyTree.Left())
 
 	// Output:
@@ -353,7 +353,7 @@ func ExampleAVLTree_Right() {
 }
 
 func ExampleAVLTree_Floor() {
-	tree := g.NewAVLTree[int, int](comparator.ComparatorInt)
+	tree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		if i != 50 {
 			tree.Put(i, i)
@@ -387,7 +387,7 @@ func ExampleAVLTree_Floor() {
 }
 
 func ExampleAVLTree_Ceiling() {
-	tree := g.NewAVLTree[int, int](comparator.ComparatorInt)
+	tree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		if i != 50 {
 			tree.Put(i, i)
@@ -421,7 +421,7 @@ func ExampleAVLTree_Ceiling() {
 }
 
 func ExampleAVLTree_String() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -438,7 +438,7 @@ func ExampleAVLTree_String() {
 }
 
 func ExampleAVLTree_Search() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -452,7 +452,7 @@ func ExampleAVLTree_Search() {
 }
 
 func ExampleAVLTree_Print() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -469,7 +469,7 @@ func ExampleAVLTree_Print() {
 }
 
 func ExampleAVLTree_Iterator() {
-	tree := g.NewAVLTree[int, int](comparator.ComparatorInt)
+	tree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
 	}
@@ -495,7 +495,7 @@ func ExampleAVLTree_IteratorFrom() {
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewAVLTreeFrom[int, int](comparator.ComparatorInt, m)
+	tree := g.NewAVLTreeFrom[int, int](comparators.ComparatorInt, m)
 
 	tree.IteratorFrom(1, true, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
@@ -511,7 +511,7 @@ func ExampleAVLTree_IteratorFrom() {
 }
 
 func ExampleAVLTree_IteratorAsc() {
-	tree := g.NewAVLTree[int, int](comparator.ComparatorInt)
+	tree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
 	}
@@ -539,7 +539,7 @@ func ExampleAVLTree_IteratorAscFrom_normal() {
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewAVLTreeFrom(comparator.ComparatorInt, m)
+	tree := g.NewAVLTreeFrom(comparators.ComparatorInt, m)
 
 	tree.IteratorAscFrom(1, true, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
@@ -559,7 +559,7 @@ func ExampleAVLTree_IteratorAscFrom_noExistKey() {
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewAVLTreeFrom(comparator.ComparatorInt, m)
+	tree := g.NewAVLTreeFrom(comparators.ComparatorInt, m)
 
 	tree.IteratorAscFrom(0, true, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
@@ -574,7 +574,7 @@ func ExampleAVLTree_IteratorAscFrom_noExistKeyAndMatchFalse() {
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewAVLTreeFrom(comparator.ComparatorInt, m)
+	tree := g.NewAVLTreeFrom(comparators.ComparatorInt, m)
 
 	tree.IteratorAscFrom(6, false, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
@@ -585,7 +585,7 @@ func ExampleAVLTree_IteratorAscFrom_noExistKeyAndMatchFalse() {
 }
 
 func ExampleAVLTree_IteratorDesc() {
-	tree := g.NewAVLTree[int, int](comparator.ComparatorInt)
+	tree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
 	}
@@ -613,7 +613,7 @@ func ExampleAVLTree_IteratorDescFrom() {
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewAVLTreeFrom(comparator.ComparatorInt, m)
+	tree := g.NewAVLTreeFrom(comparators.ComparatorInt, m)
 
 	tree.IteratorDescFrom(5, true, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
@@ -629,7 +629,7 @@ func ExampleAVLTree_IteratorDescFrom() {
 }
 
 func ExampleAVLTree_MarshalJSON() {
-	tree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	tree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}

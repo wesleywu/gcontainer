@@ -32,7 +32,7 @@ type AVLTreeNode[K comparable, V comparable] struct {
 	b        int8
 }
 
-// NewAVLTree instantiates an AVL tree with the custom key comparator.
+// NewAVLTree instantiates an AVL tree with the custom key comparators.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
 func NewAVLTree[K comparable, V comparable](comparator func(v1, v2 K) int, safe ...bool) *AVLTree[K, V] {
@@ -42,7 +42,7 @@ func NewAVLTree[K comparable, V comparable](comparator func(v1, v2 K) int, safe 
 	}
 }
 
-// NewAVLTreeFrom instantiates an AVL tree with the custom key comparator and data map.
+// NewAVLTreeFrom instantiates an AVL tree with the custom key comparators and data map.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
 func NewAVLTreeFrom[K comparable, V comparable](comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *AVLTree[K, V] {
@@ -210,7 +210,7 @@ func (tree *AVLTree[K, V]) ContainsKey(key K) bool {
 }
 
 // Remove removes the node from the tree by key.
-// key should adhere to the comparator's type assertion, otherwise method panics.
+// key should adhere to the comparators's type assertion, otherwise method panics.
 func (tree *AVLTree[K, V]) Remove(key K) (value V, removed bool) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
@@ -299,7 +299,7 @@ func (tree *AVLTree[K, V]) Right() *AVLTreeNode[K, V] {
 // A floor node may not be found, either because the tree is empty, or because
 // all nodes in the tree is larger than the given node.
 //
-// key should adhere to the comparator's type assertion, otherwise method panics.
+// key should adhere to the comparators's type assertion, otherwise method panics.
 func (tree *AVLTree[K, V]) Floor(key K) (floor *AVLTreeNode[K, V], found bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
@@ -329,7 +329,7 @@ func (tree *AVLTree[K, V]) Floor(key K) (floor *AVLTreeNode[K, V], found bool) {
 // A ceiling node may not be found, either because the tree is empty, or because
 // all nodes in the tree is smaller than the given node.
 //
-// key should adhere to the comparator's type assertion, otherwise method panics.
+// key should adhere to the comparators's type assertion, otherwise method panics.
 func (tree *AVLTree[K, V]) Ceiling(key K) (ceiling *AVLTreeNode[K, V], found bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
@@ -412,9 +412,9 @@ func (tree *AVLTree[K, V]) MapStrAny() map[string]V {
 
 // Flip exchanges key-value of the tree to value-key.
 // Note that you should guarantee the value is the same type as key,
-// or else the comparator would panic.
+// or else the comparators would panic.
 //
-// If the type of value is different with key, you pass the new `comparator`.
+// If the type of value is different with key, you pass the new `comparators`.
 func (tree *AVLTree[K, V]) Flip(comparator func(v1, v2 V) int) *AVLTree[V, K] {
 	t := (*AVLTree[V, K])(nil)
 	t = NewAVLTree[V, K](comparator, tree.mu.IsSafe())
@@ -779,7 +779,7 @@ func (tree AVLTree[K, V]) MarshalJSON() (jsonBytes []byte, err error) {
 // or else it panics.
 func (tree *AVLTree[K, V]) getComparator() func(a, b K) int {
 	if tree.comparator == nil {
-		panic("comparator is missing for tree")
+		panic("comparators is missing for tree")
 	}
 	return tree.comparator
 }

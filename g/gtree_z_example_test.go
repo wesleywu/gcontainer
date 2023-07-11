@@ -10,12 +10,12 @@ import (
 	"fmt"
 
 	"github.com/wesleywu/gcontainer/g"
-	"github.com/wesleywu/gcontainer/utils/comparator"
+	"github.com/wesleywu/gcontainer/utils/comparators"
 	"github.com/wesleywu/gcontainer/utils/gconv"
 )
 
 func ExampleNewAVLTree() {
-	avlTree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	avlTree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		avlTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -32,12 +32,12 @@ func ExampleNewAVLTree() {
 }
 
 func ExampleNewAVLTreeFrom() {
-	avlTree := g.NewAVLTree[string, string](comparator.ComparatorString)
+	avlTree := g.NewAVLTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		avlTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
 
-	otherAvlTree := g.NewAVLTreeFrom(comparator.ComparatorString, avlTree.Map())
+	otherAvlTree := g.NewAVLTreeFrom(comparators.ComparatorString, avlTree.Map())
 	fmt.Println(otherAvlTree)
 
 	// May Output:
@@ -50,7 +50,7 @@ func ExampleNewAVLTreeFrom() {
 }
 
 func ExampleNewBTree() {
-	bTree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	bTree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		bTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -61,12 +61,12 @@ func ExampleNewBTree() {
 }
 
 func ExampleNewBTreeFrom() {
-	bTree := g.NewBTree[string, string](3, comparator.ComparatorString)
+	bTree := g.NewBTree[string, string](3, comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		bTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
 
-	otherBTree := g.NewBTreeFrom(3, comparator.ComparatorString, bTree.Map())
+	otherBTree := g.NewBTreeFrom(3, comparators.ComparatorString, bTree.Map())
 	fmt.Println(otherBTree.Map())
 
 	// Output:
@@ -74,7 +74,7 @@ func ExampleNewBTreeFrom() {
 }
 
 func ExampleNewRedBlackTree() {
-	rbTree := g.NewRedBlackTree[string, string](comparator.ComparatorString)
+	rbTree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		rbTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
@@ -91,12 +91,12 @@ func ExampleNewRedBlackTree() {
 }
 
 func ExampleNewRedBlackTreeFrom() {
-	rbTree := g.NewRedBlackTree[string, string](comparator.ComparatorString)
+	rbTree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		rbTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
 
-	otherRBTree := g.NewRedBlackTreeFrom[string, string](comparator.ComparatorString, rbTree.Map())
+	otherRBTree := g.NewRedBlackTreeFrom[string, string](comparators.ComparatorString, rbTree.Map())
 	fmt.Println(otherRBTree)
 
 	// May Output:

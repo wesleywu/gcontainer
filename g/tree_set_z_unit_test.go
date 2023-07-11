@@ -14,13 +14,13 @@ import (
 
 	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/internal/gtest"
-	"github.com/wesleywu/gcontainer/utils/comparator"
+	"github.com/wesleywu/gcontainer/utils/comparators"
 	"github.com/wesleywu/gcontainer/utils/gconv"
 )
 
 func TestTreeSet_NewTreeSet(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		s := g.NewTreeSet[int](comparator.ComparatorInt)
+		s := g.NewTreeSet[int](comparators.ComparatorInt)
 		s.Add(1, 1, 2)
 		s.Add([]int{3, 4}...)
 		t.Assert(s.Size(), 4)
@@ -65,7 +65,7 @@ func TestTreeSet_NewTreeSetFrom(t *testing.T) {
 		func2 := func(v1, v2 string) int {
 			return strings.Compare(v2, v1)
 		}
-		array1 := g.NewTreeSetFrom(a1, comparator.ComparatorString)
+		array1 := g.NewTreeSetFrom(a1, comparators.ComparatorString)
 		array2 := g.NewTreeSetFrom(a2, func2)
 
 		t.Assert(array1.Size(), 3)
@@ -104,7 +104,7 @@ func TestTreeSet_Ceiling(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array1 := g.NewTreeSetFrom(
 			[]string{"a", "d", "c", "b"},
-			comparator.ComparatorString,
+			comparators.ComparatorString,
 		)
 		s1, ok := array1.Ceiling("z")
 		t.Assert(ok, false)
@@ -123,7 +123,7 @@ func TestTreeSet_Ceiling(t *testing.T) {
 func TestTreeSet_Clear(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []string{"a", "d", "c", "b", "e", "f"}
-		array1 := g.NewTreeSetFrom(a1, comparator.ComparatorString)
+		array1 := g.NewTreeSetFrom(a1, comparators.ComparatorString)
 		t.Assert(array1.Size(), 6)
 		array1.Clear()
 		t.Assert(array1.Size(), 0)
@@ -133,7 +133,7 @@ func TestTreeSet_Clear(t *testing.T) {
 func TestTreeSet_Clone(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []string{"a", "d", "c", "b", "e", "f"}
-		array1 := g.NewTreeSetFrom(a1, comparator.ComparatorString)
+		array1 := g.NewTreeSetFrom(a1, comparators.ComparatorString)
 		array2 := array1.Clone()
 		t.Assert(array1, array2)
 		array1.Remove("a")
@@ -164,7 +164,7 @@ func TestTreeSet_ContainsAll(t *testing.T) {
 
 func TestTreeSet_DeepCopy(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		array := g.NewTreeSetFrom([]int{1, 2, 3, 4, 5}, comparator.ComparatorInt)
+		array := g.NewTreeSetFrom([]int{1, 2, 3, 4, 5}, comparators.ComparatorInt)
 		copyArray := array.DeepCopy().(*g.TreeSet[int])
 		array.Add(6)
 		copyArray.Add(7)
@@ -196,14 +196,14 @@ func TestTreeSet_First(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array1 := g.NewTreeSetFrom(
 			[]string{"a", "d", "c", "b"},
-			comparator.ComparatorString,
+			comparators.ComparatorString,
 		)
 		i1, ok := array1.First()
 		t.Assert(ok, true)
 		t.Assert(i1, "a")
 	})
 	gtest.C(t, func(t *gtest.T) {
-		array := g.NewTreeSetFrom[int]([]int{3, 1, 2}, comparator.ComparatorInt)
+		array := g.NewTreeSetFrom[int]([]int{3, 1, 2}, comparators.ComparatorInt)
 		v, ok := array.First()
 		t.Assert(v, 1)
 		t.Assert(ok, true)
@@ -214,7 +214,7 @@ func TestTreeSet_Floor(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array1 := g.NewTreeSetFrom(
 			[]string{"a", "d", "c", "b"},
-			comparator.ComparatorString,
+			comparators.ComparatorString,
 		)
 		s1, ok := array1.Floor("_")
 		t.Assert(ok, false)
@@ -233,7 +233,7 @@ func TestTreeSet_Floor(t *testing.T) {
 func TestTreeSet_ForEach(t *testing.T) {
 	slice := []string{"a", "b", "d", "c"}
 	sliceSorted := []string{"a", "b", "c", "d"}
-	treeSet := g.NewTreeSetFrom(slice, comparator.ComparatorString)
+	treeSet := g.NewTreeSetFrom(slice, comparators.ComparatorString)
 	gtest.C(t, func(t *gtest.T) {
 		index := 0
 		treeSet.ForEach(func(v string) bool {
@@ -256,7 +256,7 @@ func TestTreeSet_ForEach(t *testing.T) {
 func TestTreeSet_ForEachDescending(t *testing.T) {
 	slice := []string{"a", "b", "d", "c"}
 	sliceSortedDescending := []string{"d", "c", "b", "a"}
-	treeSet := g.NewTreeSetFrom(slice, comparator.ComparatorString)
+	treeSet := g.NewTreeSetFrom(slice, comparators.ComparatorString)
 	gtest.C(t, func(t *gtest.T) {
 		index := 0
 		treeSet.ForEachDescending(func(v string) bool {
@@ -279,7 +279,7 @@ func TestTreeSet_ForEachDescending(t *testing.T) {
 func TestTreeSet_HeadSet(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []string{"a", "d", "c", "b", "e"}
-		array1 := g.NewTreeSetFrom(a1, comparator.ComparatorString)
+		array1 := g.NewTreeSetFrom(a1, comparators.ComparatorString)
 
 		var i1 g.SortedSet[string]
 		i1 = array1.HeadSet("c", false)
@@ -300,7 +300,7 @@ func TestTreeSet_Higher(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array1 := g.NewTreeSetFrom(
 			[]string{"a", "d", "c", "b"},
-			comparator.ComparatorString,
+			comparators.ComparatorString,
 		)
 		s1, ok := array1.Higher("d")
 		t.Assert(ok, false)
@@ -318,7 +318,7 @@ func TestTreeSet_Higher(t *testing.T) {
 
 func TestTreeSet_IsEmpty(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		array := g.NewTreeSetFrom([]string{}, comparator.ComparatorString)
+		array := g.NewTreeSetFrom([]string{}, comparators.ComparatorString)
 		t.Assert(array.IsEmpty(), true)
 	})
 }
@@ -326,20 +326,20 @@ func TestTreeSet_IsEmpty(t *testing.T) {
 func TestTreeSet_Join(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []string{"a", "d", "c"}
-		array1 := g.NewTreeSetFrom(a1, comparator.ComparatorString)
+		array1 := g.NewTreeSetFrom(a1, comparators.ComparatorString)
 		t.Assert(array1.Join(","), `a,c,d`)
 		t.Assert(array1.Join("."), `a.c.d`)
 	})
 
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []int{0, 1, 2, 3}
-		array1 := g.NewTreeSetFrom(a1, comparator.ComparatorInt)
+		array1 := g.NewTreeSetFrom(a1, comparators.ComparatorInt)
 		t.Assert(array1.Join("."), `0.1.2.3`)
 	})
 
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []string{}
-		array1 := g.NewTreeSetFrom(a1, comparator.ComparatorString)
+		array1 := g.NewTreeSetFrom(a1, comparators.ComparatorString)
 		t.Assert(array1.Join("."), "")
 	})
 }
@@ -348,14 +348,14 @@ func TestTreeSet_Last(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array1 := g.NewTreeSetFrom(
 			[]string{"a", "d", "c", "b"},
-			comparator.ComparatorString,
+			comparators.ComparatorString,
 		)
 		i1, ok := array1.Last()
 		t.Assert(ok, true)
 		t.Assert(i1, "d")
 	})
 	gtest.C(t, func(t *gtest.T) {
-		array := g.NewTreeSetFrom[int]([]int{3, 1, 2}, comparator.ComparatorInt)
+		array := g.NewTreeSetFrom[int]([]int{3, 1, 2}, comparators.ComparatorInt)
 		v, ok := array.Last()
 		t.Assert(v, 3)
 		t.Assert(ok, true)
@@ -366,7 +366,7 @@ func TestTreeSet_Lower(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array1 := g.NewTreeSetFrom(
 			[]string{"a", "d", "c", "b"},
-			comparator.ComparatorString,
+			comparators.ComparatorString,
 		)
 		s1, ok := array1.Lower("a")
 		t.Assert(ok, false)
@@ -386,7 +386,7 @@ func TestTreeSet_PollFirst(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array1 := g.NewTreeSetFrom(
 			[]string{"a", "d", "c", "b"},
-			comparator.ComparatorString,
+			comparators.ComparatorString,
 		)
 		i1, ok := array1.PollFirst()
 		t.Assert(ok, true)
@@ -395,7 +395,7 @@ func TestTreeSet_PollFirst(t *testing.T) {
 		t.Assert(array1.Slice(), []string{"b", "c", "d"})
 	})
 	gtest.C(t, func(t *gtest.T) {
-		array := g.NewTreeSetFrom[int]([]int{1, 2, 3}, comparator.ComparatorInt)
+		array := g.NewTreeSetFrom[int]([]int{1, 2, 3}, comparators.ComparatorInt)
 		v, ok := array.PollFirst()
 		t.Assert(v, 1)
 		t.Assert(ok, true)
@@ -415,7 +415,7 @@ func TestTreeSet_PollLast(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array1 := g.NewTreeSetFrom(
 			[]string{"a", "d", "c", "b"},
-			comparator.ComparatorString,
+			comparators.ComparatorString,
 		)
 		i1, ok := array1.PollLast()
 		t.Assert(ok, true)
@@ -424,7 +424,7 @@ func TestTreeSet_PollLast(t *testing.T) {
 		t.Assert(array1.Slice(), []string{"a", "b", "c"})
 	})
 	gtest.C(t, func(t *gtest.T) {
-		array := g.NewTreeSetFrom[int]([]int{1, 2, 3}, comparator.ComparatorInt)
+		array := g.NewTreeSetFrom[int]([]int{1, 2, 3}, comparators.ComparatorInt)
 		v, ok := array.PollLast()
 		t.Assert(v, 3)
 		t.Assert(ok, true)
@@ -445,7 +445,7 @@ func TestTreeSet_PollLast(t *testing.T) {
 func TestTreeSet_Remove(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []string{"a", "d", "c", "b"}
-		array1 := g.NewTreeSetFrom(a1, comparator.ComparatorString)
+		array1 := g.NewTreeSetFrom(a1, comparators.ComparatorString)
 		changed := array1.Remove("b")
 		t.Assert(changed, true)
 		t.Assert(array1.Size(), 3)
@@ -476,7 +476,7 @@ func TestTreeSet_Remove(t *testing.T) {
 func TestTreeSet_RemoveAll(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []string{"a", "d", "c", "b"}
-		array1 := g.NewTreeSetFrom(a1, comparator.ComparatorString)
+		array1 := g.NewTreeSetFrom(a1, comparators.ComparatorString)
 		changed := array1.RemoveAll(g.NewArrayListFrom([]string{"b"}))
 		t.Assert(changed, true)
 		t.Assert(array1.Size(), 3)
@@ -507,7 +507,7 @@ func TestTreeSet_RemoveAll(t *testing.T) {
 func TestTreeSet_String(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []int{0, 1, 2, 3}
-		array1 := g.NewTreeSetFrom(a1, comparator.ComparatorInt)
+		array1 := g.NewTreeSetFrom(a1, comparators.ComparatorInt)
 		t.Assert(array1.String(), `[0,1,2,3]`)
 
 		array1 = nil
@@ -524,7 +524,7 @@ func TestTreeSet_String(t *testing.T) {
 func TestTreeSet_TailSet(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []string{"a", "d", "c", "b", "e"}
-		array1 := g.NewTreeSetFrom(a1, comparator.ComparatorString)
+		array1 := g.NewTreeSetFrom(a1, comparators.ComparatorString)
 
 		var i1 g.SortedSet[string]
 		i1 = array1.TailSet("c", false)
@@ -547,7 +547,7 @@ func TestTreeSet_SubSet(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			m[i] = "key" + gconv.String(i)
 		}
-		treeSet := g.NewTreeSetFrom(m, comparator.ComparatorString)
+		treeSet := g.NewTreeSetFrom(m, comparators.ComparatorString)
 		// both key exists in map
 		t.Assert(treeSet.SubSet("key5", true, "key7", true).Slice(), []string{"key5", "key6", "key7"})
 		t.Assert(treeSet.SubSet("key5", false, "key7", true).Slice(), []string{"key6", "key7"})
@@ -620,7 +620,7 @@ func TestTreeSet_SubSet(t *testing.T) {
 //
 //func TestTreeSet_Empty(t *testing.T) {
 //	gtest.C(t, func(t *gtest.T) {
-//		array := gset.NewTreeSet[int](comparator.ComparatorInt)
+//		array := gset.NewTreeSet[int](comparators.ComparatorInt)
 //		v, ok := array.PopLeft()
 //		t.Assert(v, 0)
 //		t.Assert(ok, false)
@@ -714,7 +714,7 @@ func TestTreeSet_SubSet(t *testing.T) {
 //	})
 //	gtest.C(t, func(t *gtest.T) {
 //		a1 := []int{1, 2, 3, 4, 5}
-//		array1 := gset.NewTreeSetFrom[int](a1, comparator.ComparatorInt)
+//		array1 := gset.NewTreeSetFrom[int](a1, comparators.ComparatorInt)
 //		chunks := array1.Chunk(3)
 //		t.Assert(len(chunks), 2)
 //		t.Assert(chunks[0], []int{1, 2, 3})
@@ -723,7 +723,7 @@ func TestTreeSet_SubSet(t *testing.T) {
 //	})
 //	gtest.C(t, func(t *gtest.T) {
 //		a1 := []int{1, 2, 3, 4, 5, 6}
-//		array1 := gset.NewTreeSetFrom(a1, comparator.ComparatorInt)
+//		array1 := gset.NewTreeSetFrom(a1, comparators.ComparatorInt)
 //		chunks := array1.Chunk(2)
 //		t.Assert(len(chunks), 3)
 //		t.Assert(chunks[0], []int{1, 2})
@@ -733,7 +733,7 @@ func TestTreeSet_SubSet(t *testing.T) {
 //	})
 //	gtest.C(t, func(t *gtest.T) {
 //		a1 := []int{1, 2, 3, 4, 5, 6}
-//		array1 := gset.NewTreeSetFrom(a1, comparator.ComparatorInt)
+//		array1 := gset.NewTreeSetFrom(a1, comparators.ComparatorInt)
 //		chunks := array1.Chunk(3)
 //		t.Assert(len(chunks), 2)
 //		t.Assert(chunks[0], []int{1, 2, 3})
@@ -834,7 +834,7 @@ func TestTreeSet_SubSet(t *testing.T) {
 //func TestTreeSet_SetUnique(t *testing.T) {
 //	gtest.C(t, func(t *gtest.T) {
 //		a1 := []int{1, 2, 3, 4, 5, 3, 2, 2, 3, 5, 5}
-//		array1 := gset.NewTreeSetFrom(a1, comparator.ComparatorInt)
+//		array1 := gset.NewTreeSetFrom(a1, comparators.ComparatorInt)
 //		array1.SetUnique(true)
 //		t.Assert(array1.Size(), 5)
 //		t.Assert(array1, []int{1, 2, 3, 4, 5})
@@ -844,12 +844,12 @@ func TestTreeSet_SubSet(t *testing.T) {
 //func TestTreeSet_Unique(t *testing.T) {
 //	gtest.C(t, func(t *gtest.T) {
 //		a1 := []int{1, 2, 3, 4, 5, 3, 2, 2, 3, 5, 5}
-//		array1 := gset.NewTreeSetFrom(a1, comparator.ComparatorInt)
+//		array1 := gset.NewTreeSetFrom(a1, comparators.ComparatorInt)
 //		array1.Unique()
 //		t.Assert(array1.Size(), 5)
 //		t.Assert(array1, []int{1, 2, 3, 4, 5})
 //
-//		array2 := gset.NewTreeSetFrom([]int{}, comparator.ComparatorInt)
+//		array2 := gset.NewTreeSetFrom([]int{}, comparators.ComparatorInt)
 //		array2.Unique()
 //		t.Assert(array2.Size(), 0)
 //		t.Assert(array2, []int{})
@@ -932,11 +932,11 @@ func TestTreeSet_SubSet(t *testing.T) {
 //		s2 := []string{"e", "f"}
 //		i2 := garray.NewArrayFrom([]string{"3"})
 //		s3 := garray.NewArrayFrom([]string{"g", "h"})
-//		s4 := gset.NewTreeSetFrom([]string{"4", "5"}, comparator.ComparatorString)
-//		s5 := gset.NewTreeSetFrom(s2, comparator.ComparatorString)
-//		s6 := gset.NewTreeSetFrom([]string{"1", "2", "3"}, comparator.ComparatorString)
+//		s4 := gset.NewTreeSetFrom([]string{"4", "5"}, comparators.ComparatorString)
+//		s5 := gset.NewTreeSetFrom(s2, comparators.ComparatorString)
+//		s6 := gset.NewTreeSetFrom([]string{"1", "2", "3"}, comparators.ComparatorString)
 //
-//		a1 := gset.NewTreeSetFrom(s1, comparator.ComparatorString)
+//		a1 := gset.NewTreeSetFrom(s1, comparators.ComparatorString)
 //
 //		t.Assert(a1.MergeSlice(s2).Size(), 6)
 //		t.Assert(a1.Merge(s3).Size(), 8)
@@ -953,13 +953,13 @@ func TestTreeSet_SubSet(t *testing.T) {
 //	gtest.C(t, func(t *gtest.T) {
 //		s1 := []string{"a", "b", "d", "c"}
 //		s2 := []string{"a", "b", "c", "d"}
-//		a1 := gset.NewTreeSetFrom(s1, comparator.ComparatorString)
+//		a1 := gset.NewTreeSetFrom(s1, comparators.ComparatorString)
 //		b1, err1 := json.Marshal(a1)
 //		b2, err2 := json.Marshal(s1)
 //		t.Assert(b1, b2)
 //		t.Assert(err1, err2)
 //
-//		a2 := gset.NewTreeSet(comparator.ComparatorString)
+//		a2 := gset.NewTreeSet(comparators.ComparatorString)
 //		err1 = json.UnmarshalUseNumber(b2, &a2)
 //		t.AssertNil(err1)
 //		t.Assert(a2.Slice(), s2)
@@ -974,13 +974,13 @@ func TestTreeSet_SubSet(t *testing.T) {
 //	gtest.C(t, func(t *gtest.T) {
 //		s1 := []string{"a", "b", "d", "c"}
 //		s2 := []string{"a", "b", "c", "d"}
-//		a1 := *gset.NewTreeSetFrom(s1, comparator.ComparatorString)
+//		a1 := *gset.NewTreeSetFrom(s1, comparators.ComparatorString)
 //		b1, err1 := json.Marshal(a1)
 //		b2, err2 := json.Marshal(s1)
 //		t.Assert(b1, b2)
 //		t.Assert(err1, err2)
 //
-//		a2 := gset.NewTreeSet(comparator.ComparatorString)
+//		a2 := gset.NewTreeSet(comparators.ComparatorString)
 //		err1 = json.UnmarshalUseNumber(b2, &a2)
 //		t.AssertNil(err1)
 //		t.Assert(a2.Slice(), s2)
@@ -1068,7 +1068,7 @@ func TestTreeSet_SubSet(t *testing.T) {
 
 //	func TestTreeSet_RemoveValue(t *testing.T) {
 //		slice := []string{"a", "b", "d", "c"}
-//		array := gset.NewTreeSetFrom(slice, comparator.ComparatorString)
+//		array := gset.NewTreeSetFrom(slice, comparators.ComparatorString)
 //		gtest.C(t, func(t *gtest.T) {
 //			t.Assert(array.RemoveValue("e"), false)
 //			t.Assert(array.RemoveValue("b"), true)
@@ -1080,7 +1080,7 @@ func TestTreeSet_SubSet(t *testing.T) {
 //
 //	func TestTreeSet_RemoveValues(t *testing.T) {
 //		slice := []string{"a", "b", "d", "c"}
-//		array := gset.NewTreeSetFrom(slice, comparator.ComparatorString)
+//		array := gset.NewTreeSetFrom(slice, comparators.ComparatorString)
 //		gtest.C(t, func(t *gtest.T) {
 //			array.RemoveValues("a", "b", "c")
 //			t.Assert(array.Slice(), []string{"d"})
@@ -1259,7 +1259,7 @@ func TestTreeSet_UnmarshalValue(t *testing.T) {
 //
 //func TestTreeSet_Walk(t *testing.T) {
 //	gtest.C(t, func(t *gtest.T) {
-//		array := gset.NewTreeSetFrom([]string{"1", "2"}, comparator.ComparatorString)
+//		array := gset.NewTreeSetFrom([]string{"1", "2"}, comparators.ComparatorString)
 //		t.Assert(array.Walk(func(value string) string {
 //			return "key-" + gconv.String(value)
 //		}), []string{"key-1", "key-2"})

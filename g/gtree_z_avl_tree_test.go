@@ -12,12 +12,12 @@ import (
 
 	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/internal/gtest"
-	"github.com/wesleywu/gcontainer/utils/comparator"
+	"github.com/wesleywu/gcontainer/utils/comparators"
 )
 
 func Test_AVLTree_Basic(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewAVLTree[string, string](comparator.ComparatorString)
+		m := g.NewAVLTree[string, string](comparators.ComparatorString)
 		m.Put("key1", "val1")
 		t.Assert(m.Keys(), []interface{}{"key1"})
 
@@ -42,17 +42,17 @@ func Test_AVLTree_Basic(t *testing.T) {
 
 		m.Puts(map[string]string{"key3": "val3", "key1": "val1"})
 
-		mFlipped := m.Flip(comparator.ComparatorString)
+		mFlipped := m.Flip(comparators.ComparatorString)
 		t.Assert(mFlipped.Map(), map[string]string{"val3": "key3", "val1": "key1"})
 
-		m = mFlipped.Flip(comparator.ComparatorString)
+		m = mFlipped.Flip(comparators.ComparatorString)
 		t.Assert(m.Map(), map[string]string{"key3": "val3", "key1": "val1"})
 
 		m.Clear()
 		t.Assert(m.Size(), 0)
 		t.Assert(m.IsEmpty(), true)
 
-		m2 := g.NewAVLTreeFrom(comparator.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
+		m2 := g.NewAVLTreeFrom(comparators.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
 		t.Assert(m2.Map(), map[string]string{"1": "1", "key1": "val1"})
 	})
 }
@@ -60,7 +60,7 @@ func Test_AVLTree_Basic(t *testing.T) {
 func Test_AVLTree_Set_Fun(t *testing.T) {
 	//GetOrPutFunc lock or unlock
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewAVLTree[string, int](comparator.ComparatorString)
+		m := g.NewAVLTree[string, int](comparators.ComparatorString)
 		t.Assert(m.GetOrPutFunc("fun", getValue), 3)
 		t.Assert(m.GetOrPutFunc("fun", getValue), 3)
 		t.Assert(m.GetOrPutFunc("funlock", getValue), 3)
@@ -70,7 +70,7 @@ func Test_AVLTree_Set_Fun(t *testing.T) {
 	})
 	//PutIfAbsentFunc lock or unlock
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewAVLTree[string, int](comparator.ComparatorString)
+		m := g.NewAVLTree[string, int](comparators.ComparatorString)
 		t.Assert(m.PutIfAbsentFunc("fun", getValue), true)
 		t.Assert(m.PutIfAbsentFunc("fun", getValue), false)
 		t.Assert(m.PutIfAbsentFunc("funlock", getValue), true)
@@ -83,7 +83,7 @@ func Test_AVLTree_Set_Fun(t *testing.T) {
 
 func Test_AVLTree_Batch(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewAVLTree[string, string](comparator.ComparatorString)
+		m := g.NewAVLTree[string, string](comparators.ComparatorString)
 		m.Puts(map[string]string{"1": "1", "key1": "val1", "key2": "val2", "key3": "val3"})
 		t.Assert(m.Map(), map[string]string{"1": "1", "key1": "val1", "key2": "val2", "key3": "val3"})
 		m.Removes([]string{"key1", "1"})
@@ -99,7 +99,7 @@ func Test_AVLTree_Iterator(t *testing.T) {
 
 	expect := map[string]string{"key4": "val4", "1": "1", "key1": "val1", "key2": "val2", "key3": "val3"}
 
-	m := g.NewAVLTreeFrom(comparator.ComparatorString, expect)
+	m := g.NewAVLTreeFrom(comparators.ComparatorString, expect)
 
 	gtest.C(t, func(t *gtest.T) {
 		m.Iterator(func(k string, v string) bool {
@@ -156,7 +156,7 @@ func Test_AVLTree_IteratorFrom(t *testing.T) {
 	for i := 1; i <= 10; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewAVLTreeFrom(comparator.ComparatorInt, m)
+	tree := g.NewAVLTreeFrom(comparators.ComparatorInt, m)
 
 	gtest.C(t, func(t *gtest.T) {
 		n := 5
@@ -188,7 +188,7 @@ func Test_AVLTree_IteratorFrom(t *testing.T) {
 func Test_AVLTree_Clone(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		//clone 方法是深克隆
-		m := g.NewAVLTreeFrom(comparator.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
+		m := g.NewAVLTreeFrom(comparators.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
 		m_clone := m.Clone()
 		m.Remove("1")
 		//修改原 map,clone 后的 map 不影响
@@ -204,13 +204,13 @@ func Test_AVLTree_LRNode(t *testing.T) {
 	expect := map[string]string{"key4": "val4", "key1": "val1", "key2": "val2", "key3": "val3"}
 	//safe
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewAVLTreeFrom(comparator.ComparatorString, expect)
+		m := g.NewAVLTreeFrom(comparators.ComparatorString, expect)
 		t.Assert(m.Left().Key(), "key1")
 		t.Assert(m.Right().Key(), "key4")
 	})
 	//unsafe
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewAVLTreeFrom(comparator.ComparatorString, expect, true)
+		m := g.NewAVLTreeFrom(comparators.ComparatorString, expect, true)
 		t.Assert(m.Left().Key(), "key1")
 		t.Assert(m.Right().Key(), "key4")
 	})
@@ -229,7 +229,7 @@ func Test_AVLTree_CeilingFloor(t *testing.T) {
 		4:  "val4"}
 	//found and eq
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewAVLTreeFrom(comparator.ComparatorInt, expect)
+		m := g.NewAVLTreeFrom(comparators.ComparatorInt, expect)
 		c, cf := m.Ceiling(8)
 		t.Assert(cf, true)
 		t.Assert(c.Value(), "val8")
@@ -239,7 +239,7 @@ func Test_AVLTree_CeilingFloor(t *testing.T) {
 	})
 	//found and neq
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewAVLTreeFrom(comparator.ComparatorInt, expect)
+		m := g.NewAVLTreeFrom(comparators.ComparatorInt, expect)
 		c, cf := m.Ceiling(9)
 		t.Assert(cf, true)
 		t.Assert(c.Value(), "val10")
@@ -249,7 +249,7 @@ func Test_AVLTree_CeilingFloor(t *testing.T) {
 	})
 	//nofound
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewAVLTreeFrom(comparator.ComparatorInt, expect)
+		m := g.NewAVLTreeFrom(comparators.ComparatorInt, expect)
 		c, cf := m.Ceiling(21)
 		t.Assert(cf, false)
 		t.Assert(c, nil)
@@ -260,7 +260,7 @@ func Test_AVLTree_CeilingFloor(t *testing.T) {
 }
 
 func Test_AVLTree_Remove(t *testing.T) {
-	m := g.NewAVLTree[int, string](comparator.ComparatorInt)
+	m := g.NewAVLTree[int, string](comparators.ComparatorInt)
 	for i := 1; i <= 50; i++ {
 		m.Put(i, fmt.Sprintf("val%d", i))
 	}

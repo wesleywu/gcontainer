@@ -13,7 +13,7 @@ import (
 
 	"github.com/wesleywu/gcontainer/internal/json"
 	"github.com/wesleywu/gcontainer/internal/rwmutex"
-	"github.com/wesleywu/gcontainer/utils/comparator"
+	"github.com/wesleywu/gcontainer/utils/comparators"
 	"github.com/wesleywu/gcontainer/utils/gconv"
 )
 
@@ -28,7 +28,7 @@ type RedBlackTree[K comparable, V comparable] struct {
 	mu         rwmutex.RWMutex
 	root       *RedBlackTreeNode[K, V]
 	size       int
-	comparator comparator.Comparator[K]
+	comparator comparators.Comparator[K]
 }
 
 // RedBlackTreeNode is a single element within the tree.
@@ -41,27 +41,27 @@ type RedBlackTreeNode[K comparable, V comparable] struct {
 	parent *RedBlackTreeNode[K, V]
 }
 
-// NewRedBlackTree instantiates a red-black tree with the custom key comparator.
+// NewRedBlackTree instantiates a red-black tree with the custom key comparators.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewRedBlackTree[K comparable, V comparable](comparator comparator.Comparator[K], safe ...bool) *RedBlackTree[K, V] {
+func NewRedBlackTree[K comparable, V comparable](comparator comparators.Comparator[K], safe ...bool) *RedBlackTree[K, V] {
 	return &RedBlackTree[K, V]{
 		mu:         rwmutex.Create(safe...),
 		comparator: comparator,
 	}
 }
 
-// NewRedBlackTreeDefault instantiates a red-black tree with default key comparator.
+// NewRedBlackTreeDefault instantiates a red-black tree with default key comparators.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
 func NewRedBlackTreeDefault[K comparable, V comparable](safe ...bool) *RedBlackTree[K, V] {
 	return &RedBlackTree[K, V]{
 		mu:         rwmutex.Create(safe...),
-		comparator: comparator.ComparatorAny[K],
+		comparator: comparators.ComparatorAny[K],
 	}
 }
 
-// NewRedBlackTreeFrom instantiates a red-black tree with the custom key comparator and `data` map.
+// NewRedBlackTreeFrom instantiates a red-black tree with the custom key comparators and `data` map.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
 func NewRedBlackTreeFrom[K comparable, V comparable](comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *RedBlackTree[K, V] {
@@ -94,12 +94,12 @@ func (tree *RedBlackTree[K, V]) AscendingKeySet() SortedSet[K] {
 	return keySet
 }
 
-func (tree *RedBlackTree[K, V]) Comparator() comparator.Comparator[K] {
+func (tree *RedBlackTree[K, V]) Comparator() comparators.Comparator[K] {
 	return tree.comparator
 }
 
-// SetComparator sets/changes the comparator for sorting.
-func (tree *RedBlackTree[K, V]) SetComparator(comparator comparator.Comparator[K]) {
+// SetComparator sets/changes the comparators for sorting.
+func (tree *RedBlackTree[K, V]) SetComparator(comparator comparators.Comparator[K]) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	tree.comparator = comparator
@@ -109,7 +109,7 @@ func (tree *RedBlackTree[K, V]) SetComparator(comparator comparator.Comparator[K
 			data[key] = value
 			return true
 		})
-		// Resort the tree if comparator is changed.
+		// Resort the tree if comparators is changed.
 		tree.root = nil
 		tree.size = 0
 		for k, v := range data {
@@ -128,7 +128,7 @@ func (tree *RedBlackTree[K, V]) Clone(safe ...bool) Map[K, V] {
 // DescendingKeySet returns a reversed order view of the keys contained in this map.
 func (tree *RedBlackTree[K, V]) DescendingKeySet() SortedSet[K] {
 	var (
-		keySet = NewTreeSet[K](comparator.Reverse(tree.Comparator()), tree.mu.IsSafe())
+		keySet = NewTreeSet[K](comparators.Reverse(tree.Comparator()), tree.mu.IsSafe())
 		index  = 0
 	)
 	tree.IteratorDesc(func(key K, value V) bool {
@@ -165,7 +165,7 @@ func (tree *RedBlackTree[K, V]) Puts(data map[K]V) {
 func (tree *RedBlackTree[K, V]) doSet(key K, value V) {
 	insertedNode := (*RedBlackTreeNode[K, V])(nil)
 	if tree.root == nil {
-		// Assert key is of comparator's type for initial tree
+		// Assert key is of comparators's type for initial tree
 		tree.getComparator()(key, key)
 		tree.root = &RedBlackTreeNode[K, V]{key: key, value: value, color: red}
 		insertedNode = tree.root
@@ -395,7 +395,7 @@ func (tree *RedBlackTree[K, V]) Removes(keys []K) {
 
 // Reverse returns a reverse order view of the mappings contained in this map.
 func (tree *RedBlackTree[K, V]) Reverse() SortedMap[K, V] {
-	newTree := NewRedBlackTree[K, V](comparator.Reverse(tree.comparator), tree.mu.IsSafe())
+	newTree := NewRedBlackTree[K, V](comparators.Reverse(tree.comparator), tree.mu.IsSafe())
 	newTree.Puts(tree.Map())
 	return newTree
 }
@@ -948,9 +948,9 @@ func (tree *RedBlackTree[K, V]) TailMap(fromKey K, inclusive bool) SortedMap[K, 
 
 // Flip exchanges key-value of the tree to value-key.
 // Note that you should guarantee the value is the same type as key,
-// or else the comparator would panic.
+// or else the comparators would panic.
 //
-// If the type of value is different with key, you pass the new `comparator`.
+// If the type of value is different with key, you pass the new `comparators`.
 func (tree *RedBlackTree[K, V]) Flip(comparator func(v1, v2 V) int) *RedBlackTree[V, K] {
 	t := (*RedBlackTree[V, K])(nil)
 	t = NewRedBlackTree[V, K](comparator, tree.mu.IsSafe())
@@ -1243,7 +1243,7 @@ func (tree *RedBlackTree[K, V]) UnmarshalJSON(b []byte) error {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	if tree.comparator == nil {
-		tree.comparator = comparator.ComparatorAny[K]
+		tree.comparator = comparators.ComparatorAny[K]
 	}
 	var data map[K]V
 	if err := json.UnmarshalUseNumber(b, &data); err != nil {
@@ -1260,7 +1260,7 @@ func (tree *RedBlackTree[K, V]) UnmarshalValue(value interface{}) (err error) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	if tree.comparator == nil {
-		tree.comparator = comparator.ComparatorAny[K]
+		tree.comparator = comparators.ComparatorAny[K]
 	}
 	for k, v := range gconv.Map(value) {
 		kt := gconv.ConvertGeneric[K](k)
@@ -1285,7 +1285,7 @@ func (tree *RedBlackTree[K, V]) UnmarshalValue(value interface{}) (err error) {
 // or else it panics.
 func (tree *RedBlackTree[K, V]) getComparator() func(a, b K) int {
 	if tree.comparator == nil {
-		return comparator.ComparatorAny[K]
+		return comparators.ComparatorAny[K]
 	}
 	return tree.comparator
 }

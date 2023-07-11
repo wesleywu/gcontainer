@@ -12,12 +12,12 @@ import (
 
 	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/internal/gtest"
-	"github.com/wesleywu/gcontainer/utils/comparator"
+	"github.com/wesleywu/gcontainer/utils/comparators"
 )
 
 func Test_BTree_Basic(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewBTree[string, string](3, comparator.ComparatorString)
+		m := g.NewBTree[string, string](3, comparators.ComparatorString)
 		m.Put("key1", "val1")
 
 		t.Assert(m.Height(), 1)
@@ -47,7 +47,7 @@ func Test_BTree_Basic(t *testing.T) {
 		t.Assert(m.Size(), 0)
 		t.Assert(m.IsEmpty(), true)
 
-		m2 := g.NewBTreeFrom[string, string](3, comparator.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
+		m2 := g.NewBTreeFrom[string, string](3, comparators.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
 		t.Assert(m2.Map(), map[string]string{"1": "1", "key1": "val1"})
 	})
 }
@@ -55,7 +55,7 @@ func Test_BTree_Basic(t *testing.T) {
 func Test_BTree_Set_Fun(t *testing.T) {
 	//GetOrPutFunc lock or unlock
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewBTree[string, int](3, comparator.ComparatorString)
+		m := g.NewBTree[string, int](3, comparators.ComparatorString)
 		t.Assert(m.GetOrPutFunc("fun", getValue), 3)
 		t.Assert(m.GetOrPutFunc("fun", getValue), 3)
 		t.Assert(m.GetOrPutFunc("funlock", getValue), 3)
@@ -65,7 +65,7 @@ func Test_BTree_Set_Fun(t *testing.T) {
 	})
 	//PutIfAbsentFunc lock or unlock
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewBTree[string, int](3, comparator.ComparatorString)
+		m := g.NewBTree[string, int](3, comparators.ComparatorString)
 		t.Assert(m.PutIfAbsentFunc("fun", getValue), true)
 		t.Assert(m.PutIfAbsentFunc("fun", getValue), false)
 		t.Assert(m.PutIfAbsentFunc("funlock", getValue), true)
@@ -78,7 +78,7 @@ func Test_BTree_Set_Fun(t *testing.T) {
 
 func Test_BTree_Batch(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewBTree[string, string](3, comparator.ComparatorString)
+		m := g.NewBTree[string, string](3, comparators.ComparatorString)
 		m.Puts(map[string]string{"1": "1", "key1": "val1", "key2": "val2", "key3": "val3"})
 		t.Assert(m.Map(), map[string]string{"1": "1", "key1": "val1", "key2": "val2", "key3": "val3"})
 		m.Removes([]string{"key1", "1"})
@@ -93,7 +93,7 @@ func Test_BTree_Iterator(t *testing.T) {
 
 	expect := map[string]string{"key4": "val4", "1": "1", "key1": "val1", "key2": "val2", "key3": "val3"}
 
-	m := g.NewBTreeFrom[string, string](3, comparator.ComparatorString, expect)
+	m := g.NewBTreeFrom[string, string](3, comparators.ComparatorString, expect)
 
 	gtest.C(t, func(t *gtest.T) {
 		m.Iterator(func(k string, v string) bool {
@@ -149,7 +149,7 @@ func Test_BTree_IteratorFrom(t *testing.T) {
 	for i := 1; i <= 10; i++ {
 		m[i] = i * 10
 	}
-	tree := g.NewBTreeFrom[int, int](3, comparator.ComparatorInt, m)
+	tree := g.NewBTreeFrom[int, int](3, comparators.ComparatorInt, m)
 
 	gtest.C(t, func(t *gtest.T) {
 		n := 5
@@ -181,7 +181,7 @@ func Test_BTree_IteratorFrom(t *testing.T) {
 func Test_BTree_Clone(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		//clone 方法是深克隆
-		m := g.NewBTreeFrom[string, string](3, comparator.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
+		m := g.NewBTreeFrom[string, string](3, comparators.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
 		m_clone := m.Clone()
 		m.Remove("1")
 		//修改原 map,clone 后的 map 不影响
@@ -197,20 +197,20 @@ func Test_BTree_LRNode(t *testing.T) {
 	expect := map[string]string{"key4": "val4", "key1": "val1", "key2": "val2", "key3": "val3"}
 	//safe
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewBTreeFrom[string, string](3, comparator.ComparatorString, expect)
+		m := g.NewBTreeFrom[string, string](3, comparators.ComparatorString, expect)
 		t.Assert(m.Left().Key(), "key1")
 		t.Assert(m.Right().Key(), "key4")
 	})
 	//unsafe
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewBTreeFrom(3, comparator.ComparatorString, expect, true)
+		m := g.NewBTreeFrom(3, comparators.ComparatorString, expect, true)
 		t.Assert(m.Left().Key(), "key1")
 		t.Assert(m.Right().Key(), "key4")
 	})
 }
 
 func Test_BTree_Remove(t *testing.T) {
-	m := g.NewBTree[int, string](3, comparator.ComparatorInt)
+	m := g.NewBTree[int, string](3, comparators.ComparatorInt)
 	for i := 1; i <= 100; i++ {
 		m.Put(i, fmt.Sprintf("val%d", i))
 	}

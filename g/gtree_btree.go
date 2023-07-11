@@ -39,7 +39,7 @@ type BTreeEntry[K comparable, V comparable] struct {
 	value V
 }
 
-// NewBTree instantiates a B-tree with `m` (maximum number of children) and a custom key comparator.
+// NewBTree instantiates a B-tree with `m` (maximum number of children) and a custom key comparators.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
 // Note that the `m` must be greater or equal than 3, or else it panics.
@@ -54,7 +54,7 @@ func NewBTree[K comparable, V comparable](m int, comparator func(v1, v2 K) int, 
 	}
 }
 
-// NewBTreeFrom instantiates a B-tree with `m` (maximum number of children), a custom key comparator and data map.
+// NewBTreeFrom instantiates a B-tree with `m` (maximum number of children), a custom key comparators and data map.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
 func NewBTreeFrom[K comparable, V comparable](m int, comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *BTree[K, V] {
@@ -948,7 +948,7 @@ func (tree BTree[K, V]) MarshalJSON() (jsonBytes []byte, err error) {
 // or else it panics.
 func (tree *BTree[K, V]) getComparator() func(a, b K) int {
 	if tree.comparator == nil {
-		panic("comparator is missing for tree")
+		panic("comparators is missing for tree")
 	}
 	return tree.comparator
 }

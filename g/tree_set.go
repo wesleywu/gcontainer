@@ -6,14 +6,14 @@ import (
 	"github.com/wesleywu/gcontainer/internal/deepcopy"
 	"github.com/wesleywu/gcontainer/internal/json"
 	"github.com/wesleywu/gcontainer/internal/rwmutex"
-	"github.com/wesleywu/gcontainer/utils/comparator"
+	"github.com/wesleywu/gcontainer/utils/comparators"
 	"github.com/wesleywu/gcontainer/utils/gconv"
 	"github.com/wesleywu/gcontainer/utils/gstr"
 )
 
 // TreeSet is a golang sorted set with rich features.
 // It is using increasing order in default, which can be changed by
-// setting it a custom comparator.
+// setting it a custom comparators.
 // It contains a concurrent-safe/unsafe switch, which should be set
 // when its initialization and cannot be changed then.
 type TreeSet[T comparable] struct {
@@ -23,18 +23,18 @@ type TreeSet[T comparable] struct {
 
 // NewTreeSet creates and returns an empty sorted set.
 // The parameter `safe` is used to specify whether using array in concurrent-safety, which is false in default.
-// The parameter `comparator` used to compare values to sort in array,
+// The parameter `comparators` used to compare values to sort in array,
 // if it returns value < 0, means `a` < `b`; the `a` will be inserted before `b`;
 // if it returns value = 0, means `a` = `b`; the `a` will be replaced by     `b`;
 // if it returns value > 0, means `a` > `b`; the `a` will be inserted after  `b`;
-func NewTreeSet[T comparable](comparator comparator.Comparator[T], safe ...bool) *TreeSet[T] {
+func NewTreeSet[T comparable](comparator comparators.Comparator[T], safe ...bool) *TreeSet[T] {
 	return &TreeSet[T]{
 		mu:   rwmutex.Create(safe...),
 		tree: NewRedBlackTree[T, struct{}](comparator, false),
 	}
 }
 
-// NewTreeSetDefault creates and returns an empty sorted set using default comparator.
+// NewTreeSetDefault creates and returns an empty sorted set using default comparators.
 // The parameter `safe` is used to specify whether using array in concurrent-safety, which is false in default.
 // if it returns value < 0, means `a` < `b`; the `a` will be inserted before `b`;
 // if it returns value = 0, means `a` = `b`; the `a` will be replaced by     `b`;
@@ -42,14 +42,14 @@ func NewTreeSet[T comparable](comparator comparator.Comparator[T], safe ...bool)
 func NewTreeSetDefault[T comparable](safe ...bool) *TreeSet[T] {
 	return &TreeSet[T]{
 		mu:   rwmutex.Create(safe...),
-		tree: NewRedBlackTree[T, struct{}](comparator.ComparatorAny[T], false),
+		tree: NewRedBlackTree[T, struct{}](comparators.ComparatorAny[T], false),
 	}
 }
 
 // NewTreeSetFrom creates and returns an sorted array with given slice `array`.
 // The parameter `safe` is used to specify whether using array in concurrent-safety,
 // which is false in default.
-func NewTreeSetFrom[T comparable](elements []T, comparator comparator.Comparator[T], safe ...bool) *TreeSet[T] {
+func NewTreeSetFrom[T comparable](elements []T, comparator comparators.Comparator[T], safe ...bool) *TreeSet[T] {
 	a := &TreeSet[T]{
 		mu:   rwmutex.Create(safe...),
 		tree: NewRedBlackTree[T, struct{}](comparator, false),
@@ -62,7 +62,7 @@ func NewTreeSetFrom[T comparable](elements []T, comparator comparator.Comparator
 
 func (t *TreeSet[T]) lazyInit() {
 	if t.tree == nil {
-		t.tree = NewRedBlackTree[T, struct{}](comparator.ComparatorAny[T], false)
+		t.tree = NewRedBlackTree[T, struct{}](comparators.ComparatorAny[T], false)
 	}
 }
 
@@ -122,7 +122,7 @@ func (t *TreeSet[T]) Clone() Collection[T] {
 	}
 }
 
-func (t *TreeSet[T]) Comparator() comparator.Comparator[T] {
+func (t *TreeSet[T]) Comparator() comparators.Comparator[T] {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	t.lazyInit()

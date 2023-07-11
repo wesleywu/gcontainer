@@ -1,4 +1,4 @@
-package comparator
+package comparators
 
 import (
 	"sort"
