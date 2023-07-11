@@ -601,7 +601,6 @@ func (a *ArrayList[T]) Unique() Array[T] {
 func (a *ArrayList[T]) LockFunc(f func(array []T)) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	// todo fix this
 	f(a.array)
 }
 
@@ -609,7 +608,6 @@ func (a *ArrayList[T]) LockFunc(f func(array []T)) {
 func (a *ArrayList[T]) RLockFunc(f func(array []T)) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
-	// todo fix this
 	f(a.array)
 }
 
