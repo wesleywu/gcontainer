@@ -121,11 +121,11 @@ func TestStrSet_Equal(t *testing.T) {
 		s2.Add("1", "2", "3")
 		s3.Add("1", "2", "3", "4")
 		s4.Add("4", "5", "6")
-		t.Assert(s1.Equal(s2), true)
-		t.Assert(s1.Equal(s3), false)
-		t.Assert(s1.Equal(s4), false)
+		t.Assert(s1.Equals(s2), true)
+		t.Assert(s1.Equals(s3), false)
+		t.Assert(s1.Equals(s4), false)
 		s5 := s1
-		t.Assert(s1.Equal(s5), true)
+		t.Assert(s1.Equals(s5), true)
 	})
 }
 

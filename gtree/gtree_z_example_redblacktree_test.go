@@ -15,7 +15,7 @@ import (
 	"github.com/wesleywu/gcontainer/utils/gconv"
 )
 
-func ExampleRedBlackTree_PutComparator() {
+func ExampleRedBlackTree_SetComparator() {
 	var tree gtree.RedBlackTree[string, string]
 	tree.SetComparator(comparator.ComparatorString)
 	for i := 0; i < 6; i++ {
@@ -312,7 +312,7 @@ func ExampleRedBlackTree_Right() {
 	// <nil>
 }
 
-func ExampleRedBlackTree_Floor() {
+func ExampleRedBlackTree_FloorEntry() {
 	tree := gtree.NewRedBlackTree[int, int](comparator.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		if i != 50 {
@@ -320,33 +320,33 @@ func ExampleRedBlackTree_Floor() {
 		}
 	}
 
-	node, found := tree.Floor(95)
-	if found {
-		fmt.Println("Floor 95:", node.Key)
+	node := tree.FloorEntry(95)
+	if node != nil {
+		fmt.Println("FloorEntry 95:", node.Key)
 	}
 
-	node, found = tree.Floor(50)
-	if found {
-		fmt.Println("Floor 50:", node.Key)
+	node = tree.FloorEntry(50)
+	if node != nil {
+		fmt.Println("FloorEntry 50:", node.Key)
 	}
 
-	node, found = tree.Floor(100)
-	if found {
-		fmt.Println("Floor 100:", node.Key)
+	node = tree.FloorEntry(100)
+	if node != nil {
+		fmt.Println("FloorEntry 100:", node.Key)
 	}
 
-	node, found = tree.Floor(0)
-	if found {
-		fmt.Println("Floor 0:", node.Key)
+	node = tree.FloorEntry(0)
+	if node != nil {
+		fmt.Println("FloorEntry 0:", node.Key)
 	}
 
 	// Output:
-	// Floor 95: 95
-	// Floor 50: 49
-	// Floor 100: 99
+	// FloorEntry 95: 95
+	// FloorEntry 50: 49
+	// FloorEntry 100: 99
 }
 
-func ExampleRedBlackTree_Ceiling() {
+func ExampleRedBlackTree_CeilingEntry() {
 	tree := gtree.NewRedBlackTree[int, int](comparator.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		if i != 50 {
@@ -354,33 +354,33 @@ func ExampleRedBlackTree_Ceiling() {
 		}
 	}
 
-	node, found := tree.Ceiling(1)
-	if found {
-		fmt.Println("Ceiling 1:", node.Key)
+	node := tree.CeilingEntry(1)
+	if node != nil {
+		fmt.Println("CeilingEntry 1:", node.Key)
 	}
 
-	node, found = tree.Ceiling(50)
-	if found {
-		fmt.Println("Ceiling 50:", node.Key)
+	node = tree.CeilingEntry(50)
+	if node != nil {
+		fmt.Println("CeilingEntry 50:", node.Key)
 	}
 
-	node, found = tree.Ceiling(100)
-	if found {
-		fmt.Println("Ceiling 100:", node.Key)
+	node = tree.CeilingEntry(100)
+	if node != nil {
+		fmt.Println("CeilingEntry 100:", node.Key)
 	}
 
-	node, found = tree.Ceiling(-1)
-	if found {
-		fmt.Println("Ceiling -1:", node.Key)
+	node = tree.CeilingEntry(-1)
+	if node != nil {
+		fmt.Println("CeilingEntry -1:", node.Key)
 	}
 
 	// Output:
-	// Ceiling 1: 1
-	// Ceiling 50: 51
-	// Ceiling -1: 1
+	// CeilingEntry 1: 1
+	// CeilingEntry 50: 51
+	// CeilingEntry -1: 1
 }
 
-func ExampleRedBlackTree_Lower() {
+func ExampleRedBlackTree_LowerEntry() {
 	tree := gtree.NewRedBlackTree[int, int](comparator.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		if i != 50 {
@@ -388,33 +388,33 @@ func ExampleRedBlackTree_Lower() {
 		}
 	}
 
-	node, found := tree.Lower(95)
-	if found {
-		fmt.Println("Lower 95:", node.Key)
+	node := tree.LowerEntry(95)
+	if node != nil {
+		fmt.Println("LowerEntry 95:", node.Key)
 	}
 
-	node, found = tree.Lower(50)
-	if found {
-		fmt.Println("Lower 50:", node.Key)
+	node = tree.LowerEntry(50)
+	if node != nil {
+		fmt.Println("LowerEntry 50:", node.Key)
 	}
 
-	node, found = tree.Lower(100)
-	if found {
-		fmt.Println("Lower 100:", node.Key)
+	node = tree.LowerEntry(100)
+	if node != nil {
+		fmt.Println("LowerEntry 100:", node.Key)
 	}
 
-	node, found = tree.Lower(0)
-	if found {
-		fmt.Println("Lower 0:", node.Key)
+	node = tree.LowerEntry(0)
+	if node != nil {
+		fmt.Println("LowerEntry 0:", node.Key)
 	}
 
 	// Output:
-	// Lower 95: 94
-	// Lower 50: 49
-	// Lower 100: 99
+	// LowerEntry 95: 94
+	// LowerEntry 50: 49
+	// LowerEntry 100: 99
 }
 
-func ExampleRedBlackTree_Higher() {
+func ExampleRedBlackTree_HigherEntry() {
 	tree := gtree.NewRedBlackTree[int, int](comparator.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		if i != 50 {
@@ -422,36 +422,36 @@ func ExampleRedBlackTree_Higher() {
 		}
 	}
 
-	node, found := tree.Higher(1)
-	if found {
-		fmt.Println("Higher 1:", node.Key)
+	node := tree.HigherEntry(1)
+	if node != nil {
+		fmt.Println("HigherEntry 1:", node.Key)
 	}
 
-	node, found = tree.Higher(95)
-	if found {
-		fmt.Println("Higher 95:", node.Key)
+	node = tree.HigherEntry(95)
+	if node != nil {
+		fmt.Println("HigherEntry 95:", node.Key)
 	}
 
-	node, found = tree.Higher(50)
-	if found {
-		fmt.Println("Higher 50:", node.Key)
+	node = tree.HigherEntry(50)
+	if node != nil {
+		fmt.Println("HigherEntry 50:", node.Key)
 	}
 
-	node, found = tree.Higher(100)
-	if found {
-		fmt.Println("Higher 100:", node.Key)
+	node = tree.HigherEntry(100)
+	if node != nil {
+		fmt.Println("HigherEntry 100:", node.Key)
 	}
 
-	node, found = tree.Higher(-1)
-	if found {
-		fmt.Println("Higher -1:", node.Key)
+	node = tree.HigherEntry(-1)
+	if node != nil {
+		fmt.Println("HigherEntry -1:", node.Key)
 	}
 
 	// Output:
-	// Higher 1: 2
-	// Higher 95: 96
-	// Higher 50: 51
-	// Higher -1: 1
+	// HigherEntry 1: 2
+	// HigherEntry 95: 96
+	// HigherEntry 50: 51
+	// HigherEntry -1: 1
 }
 
 func ExampleRedBlackTree_Iterator() {

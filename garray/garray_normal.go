@@ -490,7 +490,7 @@ func (a *StdArray[T]) Interfaces() []T {
 }
 
 // Clone returns a new array, which is a copy of current array.
-func (a *StdArray[T]) Clone() (newArray Array[T]) {
+func (a *StdArray[T]) Clone() (newArray Collection[T]) {
 	a.mu.RLock()
 	array := make([]T, len(a.array))
 	copy(array, a.array)
@@ -521,6 +521,32 @@ func (a *StdArray[T]) ContainsAll(values Collection[T]) bool {
 		}
 		return true
 	})
+	return true
+}
+
+func (a *StdArray[T]) Equals(another Collection[T]) bool {
+	if a == another {
+		return true
+	}
+	var (
+		ano *StdArray[T]
+		ok  bool
+	)
+	if ano, ok = another.(*StdArray[T]); !ok {
+		return false
+	}
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	ano.mu.RLock()
+	defer ano.mu.RUnlock()
+	if len(a.array) != len(ano.array) {
+		return false
+	}
+	for index, value := range a.array {
+		if value != ano.array[index] {
+			return false
+		}
+	}
 	return true
 }
 
@@ -592,19 +618,19 @@ func (a *StdArray[T]) Unique() Array[T] {
 }
 
 // LockFunc locks writing by callback function `f`.
-func (a *StdArray[T]) LockFunc(f func(array Array[T])) {
+func (a *StdArray[T]) LockFunc(f func(array []T)) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	// todo fix this
-	f(a)
+	f(a.array)
 }
 
 // RLockFunc locks reading by callback function `f`.
-func (a *StdArray[T]) RLockFunc(f func(array Array[T])) {
+func (a *StdArray[T]) RLockFunc(f func(array []T)) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	// todo fix this
-	f(a)
+	f(a.array)
 }
 
 // Fill fills an array with num entries of the value `value`,

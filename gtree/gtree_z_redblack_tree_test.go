@@ -348,31 +348,29 @@ func Test_RedBlackTree_CeilingFloor(t *testing.T) {
 	//found and eq
 	gtest.C(t, func(t *gtest.T) {
 		m := gtree.NewRedBlackTreeFrom[int, string](comparator.ComparatorInt, expect)
-		c, cf := m.Ceiling(8)
-		t.Assert(cf, true)
+		c := m.CeilingEntry(8)
+		t.Assert(c != nil, true)
 		t.Assert(c.Value, "val8")
-		f, ff := m.Floor(20)
-		t.Assert(ff, true)
+		f := m.FloorEntry(20)
+		t.Assert(f != nil, true)
 		t.Assert(f.Value, "val20")
 	})
 	//found and neq
 	gtest.C(t, func(t *gtest.T) {
 		m := gtree.NewRedBlackTreeFrom[int, string](comparator.ComparatorInt, expect)
-		c, cf := m.Ceiling(9)
-		t.Assert(cf, true)
+		c := m.CeilingEntry(9)
+		t.Assert(c != nil, true)
 		t.Assert(c.Value, "val10")
-		f, ff := m.Floor(5)
-		t.Assert(ff, true)
+		f := m.FloorEntry(5)
+		t.Assert(f != nil, true)
 		t.Assert(f.Value, "val4")
 	})
 	//nofound
 	gtest.C(t, func(t *gtest.T) {
 		m := gtree.NewRedBlackTreeFrom[int, string](comparator.ComparatorInt, expect)
-		c, cf := m.Ceiling(21)
-		t.Assert(cf, false)
+		c := m.CeilingEntry(21)
 		t.Assert(c, nil)
-		f, ff := m.Floor(-1)
-		t.Assert(ff, false)
+		f := m.FloorEntry(-1)
 		t.Assert(f, nil)
 	})
 }

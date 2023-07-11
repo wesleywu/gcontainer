@@ -84,6 +84,36 @@ func TestHashSet_Basic(t *testing.T) {
 	})
 }
 
+func TestHashSet_Clone(t *testing.T) {
+	gtest.C(t, func(t *gtest.T) {
+		a1 := []int{0, 1, 2, 3}
+		array1 := gset.NewFrom(a1)
+		array2 := array1.Clone().(*gset.HashSet[int])
+
+		t.Assert(array2.Size(), 4)
+		t.Assert(array2.Sum(), 6)
+		t.AssertEQ(array1, array2)
+	})
+}
+
+func TestHashSet_Equals(t *testing.T) {
+	gtest.C(t, func(t *gtest.T) {
+		s1 := gset.NewSet[int]()
+		s2 := gset.NewSet[int]()
+		s3 := gset.NewSet[int]()
+		s4 := gset.NewSet[int]()
+		s1.Add(1, 2, 3)
+		s2.Add(1, 2, 3)
+		s3.Add(1, 2, 3, 4)
+		s4.Add(4, 5, 6)
+		t.Assert(s1.Equals(s2), true)
+		t.Assert(s1.Equals(s3), false)
+		t.Assert(s1.Equals(s4), false)
+		s5 := s1
+		t.Assert(s1.Equals(s5), true)
+	})
+}
+
 func TestHashSet_ForEach(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		s := gset.NewSet[int]()
@@ -120,24 +150,6 @@ func TestHashSet_LockFunc(t *testing.T) {
 				2: {},
 			})
 		})
-	})
-}
-
-func TestHashSet_Equal(t *testing.T) {
-	gtest.C(t, func(t *gtest.T) {
-		s1 := gset.NewSet[int]()
-		s2 := gset.NewSet[int]()
-		s3 := gset.NewSet[int]()
-		s4 := gset.NewSet[int]()
-		s1.Add(1, 2, 3)
-		s2.Add(1, 2, 3)
-		s3.Add(1, 2, 3, 4)
-		s4.Add(4, 5, 6)
-		t.Assert(s1.Equal(s2), true)
-		t.Assert(s1.Equal(s3), false)
-		t.Assert(s1.Equal(s4), false)
-		s5 := s1
-		t.Assert(s1.Equal(s5), true)
 	})
 }
 

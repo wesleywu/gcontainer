@@ -362,28 +362,28 @@ func ExampleAVLTree_Floor() {
 
 	node, found := tree.Floor(95)
 	if found {
-		fmt.Println("Floor 95:", node.Key)
+		fmt.Println("FloorEntry 95:", node.Key)
 	}
 
 	node, found = tree.Floor(50)
 	if found {
-		fmt.Println("Floor 50:", node.Key)
+		fmt.Println("FloorEntry 50:", node.Key)
 	}
 
 	node, found = tree.Floor(100)
 	if found {
-		fmt.Println("Floor 100:", node.Key)
+		fmt.Println("FloorEntry 100:", node.Key)
 	}
 
 	node, found = tree.Floor(0)
 	if found {
-		fmt.Println("Floor 0:", node.Key)
+		fmt.Println("FloorEntry 0:", node.Key)
 	}
 
 	// Output:
-	// Floor 95: 95
-	// Floor 50: 49
-	// Floor 100: 99
+	// FloorEntry 95: 95
+	// FloorEntry 50: 49
+	// FloorEntry 100: 99
 }
 
 func ExampleAVLTree_Ceiling() {
@@ -396,28 +396,28 @@ func ExampleAVLTree_Ceiling() {
 
 	node, found := tree.Ceiling(1)
 	if found {
-		fmt.Println("Ceiling 1:", node.Key)
+		fmt.Println("CeilingEntry 1:", node.Key)
 	}
 
 	node, found = tree.Ceiling(50)
 	if found {
-		fmt.Println("Ceiling 50:", node.Key)
+		fmt.Println("CeilingEntry 50:", node.Key)
 	}
 
 	node, found = tree.Ceiling(100)
 	if found {
-		fmt.Println("Ceiling 100:", node.Key)
+		fmt.Println("CeilingEntry 100:", node.Key)
 	}
 
 	node, found = tree.Ceiling(-1)
 	if found {
-		fmt.Println("Ceiling -1:", node.Key)
+		fmt.Println("CeilingEntry -1:", node.Key)
 	}
 
 	// Output:
-	// Ceiling 1: 1
-	// Ceiling 50: 51
-	// Ceiling -1: 1
+	// CeilingEntry 1: 1
+	// CeilingEntry 50: 51
+	// CeilingEntry -1: 1
 }
 
 func ExampleAVLTree_String() {
@@ -534,7 +534,7 @@ func ExampleAVLTree_IteratorAsc() {
 	// key: 9 , value: 1
 }
 
-func ExampleAVLTree_IteratorAscFrom_Normal() {
+func ExampleAVLTree_IteratorAscFrom_normal() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
@@ -554,7 +554,7 @@ func ExampleAVLTree_IteratorAscFrom_Normal() {
 	// key: 5 , value: 50
 }
 
-func ExampleAVLTree_IteratorAscFrom_NoExistKey() {
+func ExampleAVLTree_IteratorAscFrom_noExistKey() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
@@ -569,7 +569,7 @@ func ExampleAVLTree_IteratorAscFrom_NoExistKey() {
 	// Output:
 }
 
-func ExampleAVLTree_IteratorAscFrom_NoExistKeyAndMatchFalse() {
+func ExampleAVLTree_IteratorAscFrom_noExistKeyAndMatchFalse() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10

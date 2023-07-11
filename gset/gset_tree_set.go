@@ -6,6 +6,7 @@ import (
 	"github.com/wesleywu/gcontainer/garray"
 	"github.com/wesleywu/gcontainer/gtree"
 	"github.com/wesleywu/gcontainer/internal/deepcopy"
+	"github.com/wesleywu/gcontainer/internal/json"
 	"github.com/wesleywu/gcontainer/internal/rwmutex"
 	"github.com/wesleywu/gcontainer/utils/comparator"
 	"github.com/wesleywu/gcontainer/utils/gconv"
@@ -96,11 +97,38 @@ func (t *TreeSet[T]) AddAll(elements garray.Collection[T]) bool {
 	return changed
 }
 
+func (t *TreeSet[T]) Ceiling(element T) (ceiling T, found bool) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	t.lazyInit()
+	if ceilingNode := t.tree.CeilingEntry(element); ceilingNode != nil {
+		return ceilingNode.Key, true
+	}
+	return ceiling, false
+}
+
 func (t *TreeSet[T]) Clear() {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.lazyInit()
 	t.tree.Clear()
+}
+
+func (t *TreeSet[T]) Clone() garray.Collection[T] {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	newTree := t.tree.Clone(false)
+	return &TreeSet[T]{
+		mu:   rwmutex.Create(t.mu.IsSafe()),
+		tree: newTree.(*gtree.RedBlackTree[T, struct{}]),
+	}
+}
+
+func (t *TreeSet[T]) Comparator() comparator.Comparator[T] {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	t.lazyInit()
+	return t.tree.Comparator()
 }
 
 func (t *TreeSet[T]) Contains(element T) bool {
@@ -139,6 +167,61 @@ func (t *TreeSet[T]) DeepCopy() garray.Collection[T] {
 	return NewTreeSetFrom[T](data, t.Comparator(), t.mu.IsSafe())
 }
 
+// Equals checks whether the two sets equal.
+func (t *TreeSet[T]) Equals(another garray.Collection[T]) bool {
+	if t == another {
+		return true
+	}
+	var (
+		ano *TreeSet[T]
+		ok  bool
+	)
+	if ano, ok = another.(*TreeSet[T]); !ok {
+		return false
+	}
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	ano.mu.RLock()
+	defer ano.mu.RUnlock()
+	if t.tree.Size() != ano.tree.Size() {
+		return false
+	}
+	values := t.tree.Map()
+	valuesAno := ano.tree.Map()
+	for k, v := range values {
+		vAno, vOk := valuesAno[k]
+		if !vOk {
+			return false
+		}
+		if v != vAno {
+			return false
+		}
+	}
+	return true
+}
+
+func (t *TreeSet[T]) First() (element T, found bool) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	t.lazyInit()
+	first := t.tree.Left()
+	if first == nil {
+		found = false
+		return
+	}
+	return first.Key, true
+}
+
+func (t *TreeSet[T]) Floor(element T) (floor T, found bool) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	t.lazyInit()
+	if floorNode := t.tree.FloorEntry(element); floorNode != nil {
+		return floorNode.Key, true
+	}
+	return floor, false
+}
+
 func (t *TreeSet[T]) ForEach(f func(T) bool) {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -155,6 +238,29 @@ func (t *TreeSet[T]) ForEachDescending(f func(T) bool) {
 	t.tree.IteratorDesc(func(key T, _ struct{}) bool {
 		return f(key)
 	})
+}
+
+func (t *TreeSet[T]) HeadSet(toElement T, inclusive bool) SortedSet[T] {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	t.lazyInit()
+	result := NewTreeSet[T](t.tree.Comparator(), t.mu.IsSafe())
+
+	t.tree.IteratorDescFrom(toElement, inclusive, func(key T, _ struct{}) bool {
+		result.Add(key)
+		return true
+	})
+	return result
+}
+
+func (t *TreeSet[T]) Higher(element T) (higher T, found bool) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	t.lazyInit()
+	if higherNode := t.tree.HigherEntry(element); higherNode != nil {
+		return higherNode.Key, true
+	}
+	return higher, false
 }
 
 func (t *TreeSet[T]) IsEmpty() bool {
@@ -188,6 +294,50 @@ func (t *TreeSet[T]) Join(glue string) string {
 		return true
 	})
 	return buffer.String()
+}
+
+func (t *TreeSet[T]) Last() (element T, found bool) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	t.lazyInit()
+	last := t.tree.Right()
+	if last == nil {
+		found = false
+		return
+	}
+	return last.Key, true
+}
+
+func (t *TreeSet[T]) Lower(element T) (lower T, found bool) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	t.lazyInit()
+	if lowerNode := t.tree.LowerEntry(element); lowerNode != nil {
+		return lowerNode.Key, true
+	}
+	return lower, false
+}
+
+func (t *TreeSet[T]) PollFirst() (first T, found bool) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.lazyInit()
+	firstNode := t.tree.PollFirstEntry()
+	if firstNode != nil {
+		return firstNode.Key, true
+	}
+	return first, false
+}
+
+func (t *TreeSet[T]) PollLast() (last T, found bool) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.lazyInit()
+	lastNode := t.tree.PollLastEntry()
+	if lastNode != nil {
+		return lastNode.Key, true
+	}
+	return last, false
 }
 
 func (t *TreeSet[T]) Remove(elements ...T) bool {
@@ -265,50 +415,6 @@ func (t *TreeSet[T]) String() string {
 	return buffer.String()
 }
 
-func (t *TreeSet[T]) Comparator() comparator.Comparator[T] {
-	t.mu.RLock()
-	defer t.mu.RUnlock()
-	t.lazyInit()
-	return t.tree.Comparator()
-}
-
-func (t *TreeSet[T]) First() (element T, found bool) {
-	t.mu.RLock()
-	defer t.mu.RUnlock()
-	t.lazyInit()
-	first := t.tree.Left()
-	if first == nil {
-		found = false
-		return
-	}
-	return first.Key, true
-}
-
-func (t *TreeSet[T]) HeadSet(toElement T, inclusive bool) SortedSet[T] {
-	t.mu.RLock()
-	defer t.mu.RUnlock()
-	t.lazyInit()
-	result := NewTreeSet[T](t.tree.Comparator(), t.mu.IsSafe())
-
-	t.tree.IteratorDescFrom(toElement, inclusive, func(key T, _ struct{}) bool {
-		result.Add(key)
-		return true
-	})
-	return result
-}
-
-func (t *TreeSet[T]) Last() (element T, found bool) {
-	t.mu.RLock()
-	defer t.mu.RUnlock()
-	t.lazyInit()
-	last := t.tree.Right()
-	if last == nil {
-		found = false
-		return
-	}
-	return last.Key, true
-}
-
 func (t *TreeSet[T]) SubSet(fromElement T, fromInclusive bool, toElement T, toInclusive bool) SortedSet[T] {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -328,4 +434,42 @@ func (t *TreeSet[T]) TailSet(fromElement T, inclusive bool) SortedSet[T] {
 		return true
 	})
 	return result
+}
+
+// MarshalJSON implements the interface MarshalJSON for json.Marshal.
+func (t TreeSet[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(t.Slice())
+}
+
+// UnmarshalJSON implements the interface UnmarshalJSON for json.Unmarshal.
+func (t *TreeSet[T]) UnmarshalJSON(b []byte) error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.lazyInit()
+	var array []T
+	if err := json.UnmarshalUseNumber(b, &array); err != nil {
+		return err
+	}
+	for _, v := range array {
+		t.tree.Put(v, struct{}{})
+	}
+	return nil
+}
+
+// UnmarshalValue is an interface implement which sets any type of value for set.
+func (t *TreeSet[T]) UnmarshalValue(value interface{}) (err error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.lazyInit()
+	var array []T
+	switch value.(type) {
+	case string, []byte:
+		err = json.UnmarshalUseNumber(gconv.Bytes(value), &array)
+	default:
+		array = gconv.SliceAny[T](value)
+	}
+	for _, v := range array {
+		t.tree.Put(v, struct{}{})
+	}
+	return
 }

@@ -421,6 +421,36 @@ func TestList_Clear(t *testing.T) {
 	})
 }
 
+func TestList_Clone(t *testing.T) {
+	gtest.C(t, func(t *gtest.T) {
+		a1 := []int{0, 1, 2, 3}
+		array1 := glist.NewFrom(a1)
+		array2 := array1.Clone().(*glist.List[int])
+
+		t.Assert(array2.Len(), 4)
+		t.Assert(array2.Sum(), 6)
+		t.AssertEQ(array1, array2)
+	})
+}
+
+func TestList_Equals(t *testing.T) {
+	gtest.C(t, func(t *gtest.T) {
+		s1 := glist.New[int]()
+		s2 := glist.New[int]()
+		s3 := glist.New[int]()
+		s4 := glist.New[int]()
+		s1.Add(1, 2, 3)
+		s2.Add(1, 2, 3)
+		s3.Add(1, 2, 3, 4)
+		s4.Add(4, 5, 6)
+		t.Assert(s1.Equals(s2), true)
+		t.Assert(s1.Equals(s3), false)
+		t.Assert(s1.Equals(s4), false)
+		s5 := s1
+		t.Assert(s1.Equals(s5), true)
+	})
+}
+
 func TestList_PushFronts(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := glist.New[int]()

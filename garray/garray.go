@@ -19,6 +19,9 @@ type Collection[T comparable] interface {
 	// Clear removes all the elements from this collection.
 	Clear()
 
+	// Clone returns a new collection, which is a copy of current collection.
+	Clone() Collection[T]
+
 	// Contains returns true if this collection contains the specified element.
 	Contains(T) bool
 
@@ -27,6 +30,9 @@ type Collection[T comparable] interface {
 
 	// DeepCopy implements interface for deep copy of current type.
 	DeepCopy() Collection[T]
+
+	// Equals compares the specified object with this collection for equality.
+	Equals(another Collection[T]) bool
 
 	// ForEach iterates all elements in this collection readonly with custom callback function `f`.
 	// If `f` returns true, then it continues iterating; or false to stop.
@@ -65,9 +71,6 @@ type Array[T comparable] interface {
 	// The last chunk may contain less than size elements.
 	Chunk(size int) [][]T
 
-	// Clone returns a new array, which is a copy of current array.
-	Clone() (newArray Array[T])
-
 	// ContainsI checks whether a value exists in the array with case-insensitively, only applying to element type string
 	// For element type other than string, ContainsI returns the same result as Contains
 	// Note that it internally iterates the whole array to do the comparison with case-insensitively.
@@ -99,9 +102,6 @@ type Array[T comparable] interface {
 	// Get returns the element at the specified position in this list.
 	// If given `index` is out of range, returns empty `value` for type T and bool value false as `found`.
 	Get(index int) (value T, found bool)
-
-	// LockFunc locks writing by callback function `f`.
-	LockFunc(f func(array Array[T]))
 
 	// MustGet returns the element at the specified position in this list.
 	// If given `index` is out of range, returns empty `value` for type T.
@@ -146,9 +146,6 @@ type Array[T comparable] interface {
 	// RemoveAt removes an item by index.
 	// If the given `index` is out of range of the array, the `found` is false.
 	RemoveAt(index int) (value T, found bool)
-
-	// RLockFunc locks reading by callback function `f`.
-	RLockFunc(f func(array Array[T]))
 
 	// Search searches array by `value`, returns the index of `value`,
 	// or returns -1 if not exists.

@@ -604,6 +604,51 @@ func (l *List[T]) Clear() {
 	l.Init()
 }
 
+func (l *List[T]) Clone() garray.Collection[T] {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	l.lazyInit()
+	values := make([]T, l.len)
+	for i, e := 0, l.root.next; i < l.len; i, e = i+1, e.Next() {
+		values[i] = e.Value
+	}
+	return NewFrom(values, l.mu.IsSafe())
+}
+
+func (l *List[T]) Equals(another garray.Collection[T]) bool {
+	if l == another {
+		return true
+	}
+	var (
+		ano *List[T]
+		ok  bool
+	)
+	if ano, ok = another.(*List[T]); !ok {
+		return false
+	}
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	ano.mu.RLock()
+	defer ano.mu.RUnlock()
+	if l.len != ano.len {
+		return false
+	}
+	values := make([]T, l.len)
+	for i, e := 0, l.root.next; i < l.len; i, e = i+1, e.Next() {
+		values[i] = e.Value
+	}
+	valuesAno := make([]T, l.len)
+	for i, e := 0, ano.root.next; i < ano.len; i, e = i+1, e.Next() {
+		valuesAno[i] = e.Value
+	}
+	for i := 0; i < l.len; i++ {
+		if values[i] != valuesAno[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // Iterator is alias of IteratorAsc.
 func (l *List[T]) Iterator(f func(e *Element[T]) bool) {
 	l.IteratorAsc(f)
@@ -647,13 +692,10 @@ func (l *List[T]) Join(glue string) string {
 	defer l.mu.RUnlock()
 	l.lazyInit()
 	buffer := bytes.NewBuffer(nil)
-	length := l.Len()
-	if length > 0 {
-		for i, e := 0, l.root.next; i < length; i, e = i+1, e.Next() {
-			buffer.WriteString(gconv.String(e.Value))
-			if i != length-1 {
-				buffer.WriteString(glue)
-			}
+	for i, e := 0, l.root.next; i < l.len; i, e = i+1, e.Next() {
+		buffer.WriteString(gconv.String(e.Value))
+		if i != l.len-1 {
+			buffer.WriteString(glue)
 		}
 	}
 	return buffer.String()
@@ -663,6 +705,16 @@ func (l *List[T]) Join(glue string) string {
 func (l *List[T]) String() string {
 	l.lazyInit()
 	return "[" + l.Join(",") + "]"
+}
+
+// Sum returns the sum of values in an array.
+func (l *List[T]) Sum() (sum int) {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	for i, e := 0, l.root.next; i < l.len; i, e = i+1, e.Next() {
+		sum += gconv.Int(e.Value)
+	}
+	return
 }
 
 // MarshalJSON implements the interface MarshalJSON for json.Marshal.

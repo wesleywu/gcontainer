@@ -210,6 +210,19 @@ func (set *HashSet[T]) Clear() {
 	set.mu.Unlock()
 }
 
+func (set *HashSet[T]) Clone() garray.Collection[T] {
+	set.mu.RLock()
+	defer set.mu.RUnlock()
+	m := make(map[T]struct{})
+	for k := range set.data {
+		m[k] = struct{}{}
+	}
+	return &HashSet[T]{
+		data: m,
+		mu:   rwmutex.Create(set.mu.IsSafe()),
+	}
+}
+
 // Slice returns the an of items of the set as slice.
 func (set *HashSet[T]) Slice() []T {
 	set.mu.RLock()
@@ -291,20 +304,27 @@ func (set *HashSet[T]) RLockFunc(f func(m map[T]struct{})) {
 	f(set.data)
 }
 
-// Equal checks whether the two sets equal.
-func (set *HashSet[T]) Equal(other *HashSet[T]) bool {
-	if set == other {
+// Equals checks whether the two sets equal.
+func (set *HashSet[T]) Equals(another garray.Collection[T]) bool {
+	if set == another {
 		return true
+	}
+	var (
+		ano *HashSet[T]
+		ok  bool
+	)
+	if ano, ok = another.(*HashSet[T]); !ok {
+		return false
 	}
 	set.mu.RLock()
 	defer set.mu.RUnlock()
-	other.mu.RLock()
-	defer other.mu.RUnlock()
-	if len(set.data) != len(other.data) {
+	ano.mu.RLock()
+	defer ano.mu.RUnlock()
+	if len(set.data) != len(ano.data) {
 		return false
 	}
 	for key := range set.data {
-		if _, ok := other.data[key]; !ok {
+		if _, ok = ano.data[key]; !ok {
 			return false
 		}
 	}
@@ -545,7 +565,7 @@ func (set *HashSet[T]) DeepCopy() garray.Collection[T] {
 	set.mu.RLock()
 	defer set.mu.RUnlock()
 	data := make([]T, 0)
-	for k, _ := range set.data {
+	for k := range set.data {
 		data = append(data, deepcopy.Copy(k).(T))
 	}
 	return NewFrom[T](data, set.mu.IsSafe())
