@@ -20,6 +20,10 @@ import (
 	"github.com/wesleywu/gcontainer/utils/gstr"
 )
 
+// HashSet implements the Set interface, backed by a golang map instance.
+// It makes no guarantees as to the iteration order of the set; in particular,
+// it does not guarantee that the order will remain constant over time.
+// This struct permits the nil or empty element.
 type HashSet[T comparable] struct {
 	mu   rwmutex.RWMutex
 	data map[T]struct{}

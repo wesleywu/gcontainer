@@ -125,7 +125,7 @@ func (a *ArrayList[T]) Sum() (sum int) {
 }
 
 // SortFunc sorts the array by custom function `less`.
-func (a *ArrayList[T]) SortFunc(less func(v1, v2 T) bool) Array[T] {
+func (a *ArrayList[T]) SortFunc(less func(v1, v2 T) bool) List[T] {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	sort.Slice(a.array, func(i, j int) bool {
@@ -238,7 +238,7 @@ func (a *ArrayList[T]) RemoveAll(values Collection[T]) bool {
 }
 
 // PushLeft pushes one or multiple items to the beginning of array.
-func (a *ArrayList[T]) PushLeft(value ...T) Array[T] {
+func (a *ArrayList[T]) PushLeft(value ...T) List[T] {
 	a.mu.Lock()
 	a.array = append(value, a.array...)
 	a.mu.Unlock()
@@ -247,7 +247,7 @@ func (a *ArrayList[T]) PushLeft(value ...T) Array[T] {
 
 // PushRight pushes one or multiple items to the end of array.
 // It equals to Append.
-func (a *ArrayList[T]) PushRight(value ...T) Array[T] {
+func (a *ArrayList[T]) PushRight(value ...T) List[T] {
 	a.mu.Lock()
 	a.array = append(a.array, value...)
 	a.mu.Unlock()
@@ -573,7 +573,7 @@ func (a *ArrayList[T]) doSearchWithoutLock(value T) int {
 
 // Unique uniques the array, clear repeated items.
 // Example: [1,1,2,3,2] -> [1,2,3]
-func (a *ArrayList[T]) Unique() Array[T] {
+func (a *ArrayList[T]) Unique() List[T] {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	if len(a.array) == 0 {
@@ -656,7 +656,7 @@ func (a *ArrayList[T]) Chunk(size int) [][]T {
 // If size is positive then the array is padded on the right, or negative on the left.
 // If the absolute value of `size` is less than or equal to the length of the array
 // then no padding takes place.
-func (a *ArrayList[T]) Pad(size int, val T) Array[T] {
+func (a *ArrayList[T]) Pad(size int, val T) List[T] {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	if size == 0 || (size > 0 && size < len(a.array)) || (size < 0 && size > -len(a.array)) {
@@ -705,7 +705,7 @@ func (a *ArrayList[T]) Rands(size int) []T {
 }
 
 // Shuffle randomly shuffles the array.
-func (a *ArrayList[T]) Shuffle() Array[T] {
+func (a *ArrayList[T]) Shuffle() List[T] {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	for i, v := range grand.Perm(len(a.array)) {
@@ -715,7 +715,7 @@ func (a *ArrayList[T]) Shuffle() Array[T] {
 }
 
 // Reverse makes array with elements in reverse order.
-func (a *ArrayList[T]) Reverse() Array[T] {
+func (a *ArrayList[T]) Reverse() List[T] {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	for i, j := 0, len(a.array)-1; i < j; i, j = i+1, j-1 {
@@ -850,7 +850,7 @@ func (a *ArrayList[T]) UnmarshalValue(value interface{}) error {
 // Filter iterates array and filters elements using custom callback function.
 // It removes the element from array if callback function `filter` returns true,
 // it or else does nothing and continues iterating.
-func (a *ArrayList[T]) Filter(filter func(index int, value T) bool) Array[T] {
+func (a *ArrayList[T]) Filter(filter func(index int, value T) bool) List[T] {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	for i := 0; i < len(a.array); {
@@ -864,7 +864,7 @@ func (a *ArrayList[T]) Filter(filter func(index int, value T) bool) Array[T] {
 }
 
 // FilterNil removes all nil value of the array.
-func (a *ArrayList[T]) FilterNil() Array[T] {
+func (a *ArrayList[T]) FilterNil() List[T] {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	for i := 0; i < len(a.array); {
@@ -879,7 +879,7 @@ func (a *ArrayList[T]) FilterNil() Array[T] {
 
 // FilterEmpty removes all empty value of the array.
 // Values like: 0, nil, false, "", len(slice/map/chan) == 0 are considered empty.
-func (a *ArrayList[T]) FilterEmpty() Array[T] {
+func (a *ArrayList[T]) FilterEmpty() List[T] {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	for i := 0; i < len(a.array); {
@@ -893,7 +893,7 @@ func (a *ArrayList[T]) FilterEmpty() Array[T] {
 }
 
 // Walk applies a user supplied function `f` to every item of array.
-func (a *ArrayList[T]) Walk(f func(value T) T) Array[T] {
+func (a *ArrayList[T]) Walk(f func(value T) T) List[T] {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	for i, v := range a.array {

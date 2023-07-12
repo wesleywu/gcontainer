@@ -23,8 +23,8 @@ const (
 	black, red color = true, false
 )
 
-// RedBlackTree holds elements of the red-black tree.
-type RedBlackTree[K comparable, V comparable] struct {
+// TreeMap implements the red-black tree.
+type TreeMap[K comparable, V comparable] struct {
 	mu         rwmutex.RWMutex
 	root       *RedBlackTreeNode[K, V]
 	size       int
@@ -44,8 +44,8 @@ type RedBlackTreeNode[K comparable, V comparable] struct {
 // NewRedBlackTree instantiates a red-black tree with the custom key comparators.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewRedBlackTree[K comparable, V comparable](comparator comparators.Comparator[K], safe ...bool) *RedBlackTree[K, V] {
-	return &RedBlackTree[K, V]{
+func NewRedBlackTree[K comparable, V comparable](comparator comparators.Comparator[K], safe ...bool) *TreeMap[K, V] {
+	return &TreeMap[K, V]{
 		mu:         rwmutex.Create(safe...),
 		comparator: comparator,
 	}
@@ -54,8 +54,8 @@ func NewRedBlackTree[K comparable, V comparable](comparator comparators.Comparat
 // NewRedBlackTreeDefault instantiates a red-black tree with default key comparators.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewRedBlackTreeDefault[K comparable, V comparable](safe ...bool) *RedBlackTree[K, V] {
-	return &RedBlackTree[K, V]{
+func NewRedBlackTreeDefault[K comparable, V comparable](safe ...bool) *TreeMap[K, V] {
+	return &TreeMap[K, V]{
 		mu:         rwmutex.Create(safe...),
 		comparator: comparators.ComparatorAny[K],
 	}
@@ -64,7 +64,7 @@ func NewRedBlackTreeDefault[K comparable, V comparable](safe ...bool) *RedBlackT
 // NewRedBlackTreeFrom instantiates a red-black tree with the custom key comparators and `data` map.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewRedBlackTreeFrom[K comparable, V comparable](comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *RedBlackTree[K, V] {
+func NewRedBlackTreeFrom[K comparable, V comparable](comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *TreeMap[K, V] {
 	tree := NewRedBlackTree[K, V](comparator, safe...)
 	for k, v := range data {
 		tree.doSet(k, v)
@@ -81,7 +81,7 @@ func (n *RedBlackTreeNode[K, V]) Value() V {
 }
 
 // AscendingKeySet returns a ascending order view of the keys contained in this map.
-func (tree *RedBlackTree[K, V]) AscendingKeySet() SortedSet[K] {
+func (tree *TreeMap[K, V]) AscendingKeySet() SortedSet[K] {
 	var (
 		keySet = NewTreeSet[K](tree.Comparator(), tree.mu.IsSafe())
 		index  = 0
@@ -94,12 +94,12 @@ func (tree *RedBlackTree[K, V]) AscendingKeySet() SortedSet[K] {
 	return keySet
 }
 
-func (tree *RedBlackTree[K, V]) Comparator() comparators.Comparator[K] {
+func (tree *TreeMap[K, V]) Comparator() comparators.Comparator[K] {
 	return tree.comparator
 }
 
 // SetComparator sets/changes the comparators for sorting.
-func (tree *RedBlackTree[K, V]) SetComparator(comparator comparators.Comparator[K]) {
+func (tree *TreeMap[K, V]) SetComparator(comparator comparators.Comparator[K]) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	tree.comparator = comparator
@@ -119,14 +119,14 @@ func (tree *RedBlackTree[K, V]) SetComparator(comparator comparators.Comparator[
 }
 
 // Clone returns a new tree with a copy of current tree.
-func (tree *RedBlackTree[K, V]) Clone(safe ...bool) Map[K, V] {
+func (tree *TreeMap[K, V]) Clone(safe ...bool) Map[K, V] {
 	newTree := NewRedBlackTree[K, V](tree.comparator, safe...)
 	newTree.Puts(tree.Map())
 	return newTree
 }
 
 // DescendingKeySet returns a reversed order view of the keys contained in this map.
-func (tree *RedBlackTree[K, V]) DescendingKeySet() SortedSet[K] {
+func (tree *TreeMap[K, V]) DescendingKeySet() SortedSet[K] {
 	var (
 		keySet = NewTreeSet[K](comparators.Reverse(tree.Comparator()), tree.mu.IsSafe())
 		index  = 0
@@ -139,21 +139,21 @@ func (tree *RedBlackTree[K, V]) DescendingKeySet() SortedSet[K] {
 	return keySet
 }
 
-func (tree *RedBlackTree[K, V]) FirstEntry() MapEntry[K, V] {
+func (tree *TreeMap[K, V]) FirstEntry() MapEntry[K, V] {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	return tree.leftNode()
 }
 
 // Put inserts key-value item into the tree.
-func (tree *RedBlackTree[K, V]) Put(key K, value V) {
+func (tree *TreeMap[K, V]) Put(key K, value V) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	tree.doSet(key, value)
 }
 
 // Puts batch sets key-values to the tree.
-func (tree *RedBlackTree[K, V]) Puts(data map[K]V) {
+func (tree *TreeMap[K, V]) Puts(data map[K]V) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	for k, v := range data {
@@ -162,7 +162,7 @@ func (tree *RedBlackTree[K, V]) Puts(data map[K]V) {
 }
 
 // doSet inserts key-value item into the tree without mutex.
-func (tree *RedBlackTree[K, V]) doSet(key K, value V) {
+func (tree *TreeMap[K, V]) doSet(key K, value V) {
 	insertedNode := (*RedBlackTreeNode[K, V])(nil)
 	if tree.root == nil {
 		// Assert key is of comparators's type for initial tree
@@ -204,7 +204,7 @@ func (tree *RedBlackTree[K, V]) doSet(key K, value V) {
 }
 
 // Get returns the value by given `key`, or empty value of type K if the key is not found in the map.
-func (tree *RedBlackTree[K, V]) Get(key K) (value V) {
+func (tree *TreeMap[K, V]) Get(key K) (value V) {
 	value, _ = tree.Search(key)
 	return
 }
@@ -218,7 +218,7 @@ func (tree *RedBlackTree[K, V]) Get(key K) (value V) {
 // and its return value will be set to the map with `key`.
 //
 // It returns value with given `key`.
-func (tree *RedBlackTree[K, V]) doSetWithLockCheck(key K, value V) V {
+func (tree *TreeMap[K, V]) doSetWithLockCheck(key K, value V) V {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	if node, found := tree.doSearch(key); found {
@@ -239,7 +239,7 @@ func (tree *RedBlackTree[K, V]) doSetWithLockCheck(key K, value V) V {
 // and its return value will be set to the map with `key`.
 //
 // It returns value with given `key`.
-func (tree *RedBlackTree[K, V]) doSetWithLockCheckFunc(key K, f func() V) V {
+func (tree *TreeMap[K, V]) doSetWithLockCheckFunc(key K, f func() V) V {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	if node, found := tree.doSearch(key); found {
@@ -254,7 +254,7 @@ func (tree *RedBlackTree[K, V]) doSetWithLockCheckFunc(key K, f func() V) V {
 
 // GetOrPut returns the value by key,
 // or sets value with given `value` if it does not exist and then returns this value.
-func (tree *RedBlackTree[K, V]) GetOrPut(key K, value V) V {
+func (tree *TreeMap[K, V]) GetOrPut(key K, value V) V {
 	if v, ok := tree.Search(key); !ok {
 		return tree.doSetWithLockCheck(key, value)
 	} else {
@@ -268,7 +268,7 @@ func (tree *RedBlackTree[K, V]) GetOrPut(key K, value V) V {
 //
 // GetOrSetFuncLock differs with GetOrSetFunc function is that it executes function `f`
 // with mutex.Lock of the hash map.
-func (tree *RedBlackTree[K, V]) GetOrPutFunc(key K, f func() V) V {
+func (tree *TreeMap[K, V]) GetOrPutFunc(key K, f func() V) V {
 	if v, ok := tree.Search(key); !ok {
 		return tree.doSetWithLockCheckFunc(key, f)
 	} else {
@@ -278,7 +278,7 @@ func (tree *RedBlackTree[K, V]) GetOrPutFunc(key K, f func() V) V {
 
 // PutIfAbsent sets `value` to the map if the `key` does not exist, and then returns true.
 // It returns false if `key` exists, and `value` would be ignored.
-func (tree *RedBlackTree[K, V]) PutIfAbsent(key K, value V) bool {
+func (tree *TreeMap[K, V]) PutIfAbsent(key K, value V) bool {
 	if !tree.ContainsKey(key) {
 		tree.doSetWithLockCheck(key, value)
 		return true
@@ -288,7 +288,7 @@ func (tree *RedBlackTree[K, V]) PutIfAbsent(key K, value V) bool {
 
 // PutIfAbsentFunc sets value with return value of callback function `f`, and then returns true.
 // It returns false if `key` exists, and `value` would be ignored.
-func (tree *RedBlackTree[K, V]) PutIfAbsentFunc(key K, f func() V) bool {
+func (tree *TreeMap[K, V]) PutIfAbsentFunc(key K, f func() V) bool {
 	if !tree.ContainsKey(key) {
 		tree.doSetWithLockCheckFunc(key, f)
 		return true
@@ -297,13 +297,13 @@ func (tree *RedBlackTree[K, V]) PutIfAbsentFunc(key K, f func() V) bool {
 }
 
 // ContainsKey checks whether `key` exists in the tree.
-func (tree *RedBlackTree[K, V]) ContainsKey(key K) bool {
+func (tree *TreeMap[K, V]) ContainsKey(key K) bool {
 	_, ok := tree.Search(key)
 	return ok
 }
 
 // doRemove removes the node from the tree by `key` without mutex.
-func (tree *RedBlackTree[K, V]) doRemove(node *RedBlackTreeNode[K, V]) (value V, removed bool) {
+func (tree *TreeMap[K, V]) doRemove(node *RedBlackTreeNode[K, V]) (value V, removed bool) {
 	if node == nil {
 		return
 	}
@@ -335,7 +335,7 @@ func (tree *RedBlackTree[K, V]) doRemove(node *RedBlackTreeNode[K, V]) (value V,
 	return
 }
 
-func (tree *RedBlackTree[K, V]) PollFirstEntry() MapEntry[K, V] {
+func (tree *TreeMap[K, V]) PollFirstEntry() MapEntry[K, V] {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	node := tree.leftNode()
@@ -352,7 +352,7 @@ func (tree *RedBlackTree[K, V]) PollFirstEntry() MapEntry[K, V] {
 	return node
 }
 
-func (tree *RedBlackTree[K, V]) PollLastEntry() MapEntry[K, V] {
+func (tree *TreeMap[K, V]) PollLastEntry() MapEntry[K, V] {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	node := tree.rightNode()
@@ -370,7 +370,7 @@ func (tree *RedBlackTree[K, V]) PollLastEntry() MapEntry[K, V] {
 }
 
 // Remove removes the node from the tree by `key`.
-func (tree *RedBlackTree[K, V]) Remove(key K) (value V, removed bool) {
+func (tree *TreeMap[K, V]) Remove(key K) (value V, removed bool) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	node, found := tree.doSearch(key)
@@ -381,7 +381,7 @@ func (tree *RedBlackTree[K, V]) Remove(key K) (value V, removed bool) {
 }
 
 // Removes batch deletes values of the tree by `keys`.
-func (tree *RedBlackTree[K, V]) Removes(keys []K) {
+func (tree *TreeMap[K, V]) Removes(keys []K) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	for _, key := range keys {
@@ -394,26 +394,26 @@ func (tree *RedBlackTree[K, V]) Removes(keys []K) {
 }
 
 // Reverse returns a reverse order view of the mappings contained in this map.
-func (tree *RedBlackTree[K, V]) Reverse() SortedMap[K, V] {
+func (tree *TreeMap[K, V]) Reverse() SortedMap[K, V] {
 	newTree := NewRedBlackTree[K, V](comparators.Reverse(tree.comparator), tree.mu.IsSafe())
 	newTree.Puts(tree.Map())
 	return newTree
 }
 
 // IsEmpty returns true if tree does not contain any nodes.
-func (tree *RedBlackTree[K, V]) IsEmpty() bool {
+func (tree *TreeMap[K, V]) IsEmpty() bool {
 	return tree.Size() == 0
 }
 
 // Size returns number of nodes in the tree.
-func (tree *RedBlackTree[K, V]) Size() int {
+func (tree *TreeMap[K, V]) Size() int {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	return tree.size
 }
 
 // Keys returns all keys in asc order.
-func (tree *RedBlackTree[K, V]) Keys() []K {
+func (tree *TreeMap[K, V]) Keys() []K {
 	var (
 		keys  = make([]K, tree.Size())
 		index = 0
@@ -427,7 +427,7 @@ func (tree *RedBlackTree[K, V]) Keys() []K {
 }
 
 // Values returns all values in asc order based on the key.
-func (tree *RedBlackTree[K, V]) Values() []V {
+func (tree *TreeMap[K, V]) Values() []V {
 	var (
 		values = make([]V, tree.Size())
 		index  = 0
@@ -441,7 +441,7 @@ func (tree *RedBlackTree[K, V]) Values() []V {
 }
 
 // Map returns all key-value items as map.
-func (tree *RedBlackTree[K, V]) Map() map[K]V {
+func (tree *TreeMap[K, V]) Map() map[K]V {
 	m := make(map[K]V, tree.Size())
 	tree.IteratorAsc(func(key K, value V) bool {
 		m[key] = value
@@ -451,7 +451,7 @@ func (tree *RedBlackTree[K, V]) Map() map[K]V {
 }
 
 // MapStrAny returns all key-value items as map[string]V.
-func (tree *RedBlackTree[K, V]) MapStrAny() map[string]V {
+func (tree *TreeMap[K, V]) MapStrAny() map[string]V {
 	m := make(map[string]V, tree.Size())
 	tree.IteratorAsc(func(key K, value V) bool {
 		m[gconv.String(key)] = value
@@ -461,7 +461,7 @@ func (tree *RedBlackTree[K, V]) MapStrAny() map[string]V {
 }
 
 // Left returns the left-most (min) node or nil if tree is empty.
-func (tree *RedBlackTree[K, V]) Left() *RedBlackTreeNode[K, V] {
+func (tree *TreeMap[K, V]) Left() *RedBlackTreeNode[K, V] {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	node := tree.leftNode()
@@ -475,7 +475,7 @@ func (tree *RedBlackTree[K, V]) Left() *RedBlackTreeNode[K, V] {
 }
 
 // Right returns the right-most (max) node or nil if tree is empty.
-func (tree *RedBlackTree[K, V]) Right() *RedBlackTreeNode[K, V] {
+func (tree *TreeMap[K, V]) Right() *RedBlackTreeNode[K, V] {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	node := tree.rightNode()
@@ -489,7 +489,7 @@ func (tree *RedBlackTree[K, V]) Right() *RedBlackTreeNode[K, V] {
 }
 
 // leftNode returns the left-most (min) node or nil if tree is empty.
-func (tree *RedBlackTree[K, V]) leftNode() *RedBlackTreeNode[K, V] {
+func (tree *TreeMap[K, V]) leftNode() *RedBlackTreeNode[K, V] {
 	p := (*RedBlackTreeNode[K, V])(nil)
 	n := tree.root
 	for n != nil {
@@ -500,7 +500,7 @@ func (tree *RedBlackTree[K, V]) leftNode() *RedBlackTreeNode[K, V] {
 }
 
 // rightNode returns the right-most (max) node or nil if tree is empty.
-func (tree *RedBlackTree[K, V]) rightNode() *RedBlackTreeNode[K, V] {
+func (tree *TreeMap[K, V]) rightNode() *RedBlackTreeNode[K, V] {
 	p := (*RedBlackTreeNode[K, V])(nil)
 	n := tree.root
 	for n != nil {
@@ -515,7 +515,7 @@ func (tree *RedBlackTree[K, V]) rightNode() *RedBlackTreeNode[K, V] {
 //
 // A FloorEntry node may not be found, either because the tree is empty, or because
 // all nodes in the tree are larger than the given node.
-func (tree *RedBlackTree[K, V]) FloorEntry(key K) MapEntry[K, V] {
+func (tree *TreeMap[K, V]) FloorEntry(key K) MapEntry[K, V] {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	p := tree.root
@@ -551,7 +551,7 @@ func (tree *RedBlackTree[K, V]) FloorEntry(key K) MapEntry[K, V] {
 
 // FloorKey returns the greatest key less than or equal to the given key, or empty of type K if there is no such key.
 // The parameter `ok` indicates whether a non-empty `floorKey` is returned.
-func (tree *RedBlackTree[K, V]) FloorKey(key K) (floorKey K, ok bool) {
+func (tree *TreeMap[K, V]) FloorKey(key K) (floorKey K, ok bool) {
 	if entry := tree.FloorEntry(key); entry != nil {
 		return entry.Key(), true
 	}
@@ -564,7 +564,7 @@ func (tree *RedBlackTree[K, V]) FloorKey(key K) (floorKey K, ok bool) {
 // CeilingEntry node is defined as the smallest node that its key is larger than or equal to the given `key`.
 // A ceiling node may not be found, either because the tree is empty, or because
 // all nodes in the tree are smaller than the given node.
-func (tree *RedBlackTree[K, V]) CeilingEntry(key K) MapEntry[K, V] {
+func (tree *TreeMap[K, V]) CeilingEntry(key K) MapEntry[K, V] {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	p := tree.root
@@ -600,7 +600,7 @@ func (tree *RedBlackTree[K, V]) CeilingEntry(key K) MapEntry[K, V] {
 
 // CeilingKey returns the least key greater than or equal to the given key, or empty of type K if there is no such key.
 // The parameter `ok` indicates whether a non-empty `ceilingKey` is returned.
-func (tree *RedBlackTree[K, V]) CeilingKey(key K) (ceilingKey K, ok bool) {
+func (tree *TreeMap[K, V]) CeilingKey(key K) (ceilingKey K, ok bool) {
 	if entry := tree.CeilingEntry(key); entry != nil {
 		return entry.Key(), true
 	}
@@ -608,7 +608,7 @@ func (tree *RedBlackTree[K, V]) CeilingKey(key K) (ceilingKey K, ok bool) {
 }
 
 // HeadMap returns a view of the portion of this map whose keys are less than (or equal to, if inclusive is true) toKey.
-func (tree *RedBlackTree[K, V]) HeadMap(toKey K, inclusive bool) SortedMap[K, V] {
+func (tree *TreeMap[K, V]) HeadMap(toKey K, inclusive bool) SortedMap[K, V] {
 	result := NewRedBlackTree[K, V](tree.Comparator(), tree.mu.IsSafe())
 	tree.IteratorDescFrom(toKey, inclusive, func(key K, value V) bool {
 		result.Put(key, value)
@@ -621,7 +621,7 @@ func (tree *RedBlackTree[K, V]) HeadMap(toKey K, inclusive bool) SortedMap[K, V]
 //
 // A LowerEntry node may not be found, either because the tree is empty, or because
 // all nodes in the tree are larger than or equal to the given node.
-func (tree *RedBlackTree[K, V]) LowerEntry(key K) MapEntry[K, V] {
+func (tree *TreeMap[K, V]) LowerEntry(key K) MapEntry[K, V] {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	p := tree.root
@@ -655,7 +655,7 @@ func (tree *RedBlackTree[K, V]) LowerEntry(key K) MapEntry[K, V] {
 
 // LowerKey returns the greatest key strictly less than the given key, or empty of type K if there is no such key.
 // The parameter `ok` indicates whether a non-empty `lowerKey` is returned.
-func (tree *RedBlackTree[K, V]) LowerKey(key K) (lowerKey K, ok bool) {
+func (tree *TreeMap[K, V]) LowerKey(key K) (lowerKey K, ok bool) {
 	if entry := tree.LowerEntry(key); entry != nil {
 		return entry.Key(), true
 	}
@@ -667,7 +667,7 @@ func (tree *RedBlackTree[K, V]) LowerKey(key K) (lowerKey K, ok bool) {
 //
 // A HigherEntry node may not be found, either because the tree is empty, or because
 // all nodes in the tree are smaller than or equal to the given node.
-func (tree *RedBlackTree[K, V]) HigherEntry(key K) MapEntry[K, V] {
+func (tree *TreeMap[K, V]) HigherEntry(key K) MapEntry[K, V] {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	p := tree.root
@@ -701,7 +701,7 @@ func (tree *RedBlackTree[K, V]) HigherEntry(key K) MapEntry[K, V] {
 
 // HigherKey returns the least key strictly greater than the given key, or empty of type K if there is no such key.
 // The parameter `ok` indicates whether a non-empty `higherKey` is returned.
-func (tree *RedBlackTree[K, V]) HigherKey(key K) (higherKey K, ok bool) {
+func (tree *TreeMap[K, V]) HigherKey(key K) (higherKey K, ok bool) {
 	if entry := tree.HigherEntry(key); entry != nil {
 		return entry.Key(), true
 	}
@@ -709,18 +709,18 @@ func (tree *RedBlackTree[K, V]) HigherKey(key K) (higherKey K, ok bool) {
 }
 
 // Iterator is alias of IteratorAsc.
-func (tree *RedBlackTree[K, V]) Iterator(f func(key K, value V) bool) {
+func (tree *TreeMap[K, V]) Iterator(f func(key K, value V) bool) {
 	tree.IteratorAsc(f)
 }
 
 // IteratorFrom is alias of IteratorAscFrom.
-func (tree *RedBlackTree[K, V]) IteratorFrom(key K, inclusive bool, f func(key K, value V) bool) {
+func (tree *TreeMap[K, V]) IteratorFrom(key K, inclusive bool, f func(key K, value V) bool) {
 	tree.IteratorAscFrom(key, inclusive, f)
 }
 
 // IteratorAsc iterates the tree readonly in ascending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *RedBlackTree[K, V]) IteratorAsc(f func(key K, value V) bool) {
+func (tree *TreeMap[K, V]) IteratorAsc(f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	tree.doIteratorAsc(tree.leftNode(), f)
@@ -730,7 +730,7 @@ func (tree *RedBlackTree[K, V]) IteratorAsc(f func(key K, value V) bool) {
 // The parameter `key` specifies the start entry for iterating. The `match` specifies whether
 // starting iterating if the `key` is fully matched, or else using index searching iterating.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *RedBlackTree[K, V]) IteratorAscFrom(key K, inclusive bool, f func(key K, value V) bool) {
+func (tree *TreeMap[K, V]) IteratorAscFrom(key K, inclusive bool, f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	var entry MapEntry[K, V]
@@ -745,7 +745,7 @@ func (tree *RedBlackTree[K, V]) IteratorAscFrom(key K, inclusive bool, f func(ke
 	tree.doIteratorAsc(entry.(*RedBlackTreeNode[K, V]), f)
 }
 
-func (tree *RedBlackTree[K, V]) doIteratorAsc(node *RedBlackTreeNode[K, V], f func(key K, value V) bool) {
+func (tree *TreeMap[K, V]) doIteratorAsc(node *RedBlackTreeNode[K, V], f func(key K, value V) bool) {
 loop:
 	if node == nil {
 		return
@@ -773,7 +773,7 @@ loop:
 
 // IteratorDesc iterates the tree readonly in descending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *RedBlackTree[K, V]) IteratorDesc(f func(key K, value V) bool) {
+func (tree *TreeMap[K, V]) IteratorDesc(f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	tree.doIteratorDesc(tree.rightNode(), f)
@@ -783,7 +783,7 @@ func (tree *RedBlackTree[K, V]) IteratorDesc(f func(key K, value V) bool) {
 // The parameter `key` specifies the start entry for iterating. The `match` specifies whether
 // starting iterating if the `key` is fully matched, or else using index searching iterating.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *RedBlackTree[K, V]) IteratorDescFrom(key K, inclusive bool, f func(key K, value V) bool) {
+func (tree *TreeMap[K, V]) IteratorDescFrom(key K, inclusive bool, f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	var entry MapEntry[K, V]
@@ -798,7 +798,7 @@ func (tree *RedBlackTree[K, V]) IteratorDescFrom(key K, inclusive bool, f func(k
 	tree.doIteratorDesc(entry.(*RedBlackTreeNode[K, V]), f)
 }
 
-func (tree *RedBlackTree[K, V]) doIteratorDesc(node *RedBlackTreeNode[K, V], f func(key K, value V) bool) {
+func (tree *TreeMap[K, V]) doIteratorDesc(node *RedBlackTreeNode[K, V], f func(key K, value V) bool) {
 loop:
 	if node == nil {
 		return
@@ -824,14 +824,14 @@ loop:
 	}
 }
 
-func (tree *RedBlackTree[K, V]) LastEntry() MapEntry[K, V] {
+func (tree *TreeMap[K, V]) LastEntry() MapEntry[K, V] {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	return tree.rightNode()
 }
 
 // SubMap returns a view of the portion of this map whose keys range from fromKey to toKey.
-func (tree *RedBlackTree[K, V]) SubMap(fromKey K, fromInclusive bool, toKey K, toInclusive bool) SortedMap[K, V] {
+func (tree *TreeMap[K, V]) SubMap(fromKey K, fromInclusive bool, toKey K, toInclusive bool) SortedMap[K, V] {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	var (
@@ -887,7 +887,7 @@ func (tree *RedBlackTree[K, V]) SubMap(fromKey K, fromInclusive bool, toKey K, t
 }
 
 // Clear removes all nodes from the tree.
-func (tree *RedBlackTree[K, V]) Clear() {
+func (tree *TreeMap[K, V]) Clear() {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	tree.root = nil
@@ -895,7 +895,7 @@ func (tree *RedBlackTree[K, V]) Clear() {
 }
 
 // Replace the data of the tree with given `data`.
-func (tree *RedBlackTree[K, V]) Replace(data map[K]V) {
+func (tree *TreeMap[K, V]) Replace(data map[K]V) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	tree.root = nil
@@ -906,7 +906,7 @@ func (tree *RedBlackTree[K, V]) Replace(data map[K]V) {
 }
 
 // String returns a string representation of container.
-func (tree *RedBlackTree[K, V]) String() string {
+func (tree *TreeMap[K, V]) String() string {
 	if tree == nil {
 		return ""
 	}
@@ -920,13 +920,13 @@ func (tree *RedBlackTree[K, V]) String() string {
 }
 
 // Print prints the tree to stdout.
-func (tree *RedBlackTree[K, V]) Print() {
+func (tree *TreeMap[K, V]) Print() {
 	fmt.Println(tree.String())
 }
 
 // Search searches the tree with given `key`.
 // Second return parameter `found` is true if key was found, otherwise false.
-func (tree *RedBlackTree[K, V]) Search(key K) (value V, found bool) {
+func (tree *TreeMap[K, V]) Search(key K) (value V, found bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	node, found := tree.doSearch(key)
@@ -937,7 +937,7 @@ func (tree *RedBlackTree[K, V]) Search(key K) (value V, found bool) {
 }
 
 // TailMap returns a view of the portion of this map whose keys are greater than (or equal to, if inclusive is true) fromKey.
-func (tree *RedBlackTree[K, V]) TailMap(fromKey K, inclusive bool) SortedMap[K, V] {
+func (tree *TreeMap[K, V]) TailMap(fromKey K, inclusive bool) SortedMap[K, V] {
 	result := NewRedBlackTree[K, V](tree.Comparator(), tree.mu.IsSafe())
 	tree.IteratorAscFrom(fromKey, inclusive, func(key K, value V) bool {
 		result.Put(key, value)
@@ -951,8 +951,8 @@ func (tree *RedBlackTree[K, V]) TailMap(fromKey K, inclusive bool) SortedMap[K, 
 // or else the comparators would panic.
 //
 // If the type of value is different with key, you pass the new `comparators`.
-func (tree *RedBlackTree[K, V]) Flip(comparator func(v1, v2 V) int) *RedBlackTree[V, K] {
-	t := (*RedBlackTree[V, K])(nil)
+func (tree *TreeMap[K, V]) Flip(comparator func(v1, v2 V) int) *TreeMap[V, K] {
+	t := (*TreeMap[V, K])(nil)
 	t = NewRedBlackTree[V, K](comparator, tree.mu.IsSafe())
 	tree.IteratorAsc(func(key K, value V) bool {
 		t.doSet(value, key)
@@ -961,7 +961,7 @@ func (tree *RedBlackTree[K, V]) Flip(comparator func(v1, v2 V) int) *RedBlackTre
 	return t
 }
 
-func (tree *RedBlackTree[K, V]) output(node *RedBlackTreeNode[K, V], prefix string, isTail bool, str *string) {
+func (tree *TreeMap[K, V]) output(node *RedBlackTreeNode[K, V], prefix string, isTail bool, str *string) {
 	if node.right != nil {
 		newPrefix := prefix
 		if isTail {
@@ -991,7 +991,7 @@ func (tree *RedBlackTree[K, V]) output(node *RedBlackTreeNode[K, V], prefix stri
 
 // doSearch searches the tree with given `key` without mutex.
 // It returns the node if found or otherwise nil.
-func (tree *RedBlackTree[K, V]) doSearch(key K) (node *RedBlackTreeNode[K, V], found bool) {
+func (tree *TreeMap[K, V]) doSearch(key K) (node *RedBlackTreeNode[K, V], found bool) {
 	node = tree.root
 	for node != nil {
 		compare := tree.getComparator()(key, node.key)
@@ -1031,7 +1031,7 @@ func (node *RedBlackTreeNode[K, V]) sibling() *RedBlackTreeNode[K, V] {
 	return node.parent.left
 }
 
-func (tree *RedBlackTree[K, V]) rotateLeft(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) rotateLeft(node *RedBlackTreeNode[K, V]) {
 	right := node.right
 	tree.replaceNode(node, right)
 	node.right = right.left
@@ -1042,7 +1042,7 @@ func (tree *RedBlackTree[K, V]) rotateLeft(node *RedBlackTreeNode[K, V]) {
 	node.parent = right
 }
 
-func (tree *RedBlackTree[K, V]) rotateRight(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) rotateRight(node *RedBlackTreeNode[K, V]) {
 	left := node.left
 	tree.replaceNode(node, left)
 	node.left = left.right
@@ -1053,7 +1053,7 @@ func (tree *RedBlackTree[K, V]) rotateRight(node *RedBlackTreeNode[K, V]) {
 	node.parent = left
 }
 
-func (tree *RedBlackTree[K, V]) replaceNode(old *RedBlackTreeNode[K, V], new *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) replaceNode(old *RedBlackTreeNode[K, V], new *RedBlackTreeNode[K, V]) {
 	if old.parent == nil {
 		tree.root = new
 	} else {
@@ -1068,7 +1068,7 @@ func (tree *RedBlackTree[K, V]) replaceNode(old *RedBlackTreeNode[K, V], new *Re
 	}
 }
 
-func (tree *RedBlackTree[K, V]) insertCase1(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) insertCase1(node *RedBlackTreeNode[K, V]) {
 	if node.parent == nil {
 		node.color = black
 	} else {
@@ -1076,14 +1076,14 @@ func (tree *RedBlackTree[K, V]) insertCase1(node *RedBlackTreeNode[K, V]) {
 	}
 }
 
-func (tree *RedBlackTree[K, V]) insertCase2(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) insertCase2(node *RedBlackTreeNode[K, V]) {
 	if tree.nodeColor(node.parent) == black {
 		return
 	}
 	tree.insertCase3(node)
 }
 
-func (tree *RedBlackTree[K, V]) insertCase3(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) insertCase3(node *RedBlackTreeNode[K, V]) {
 	uncle := node.uncle()
 	if tree.nodeColor(uncle) == red {
 		node.parent.color = black
@@ -1095,7 +1095,7 @@ func (tree *RedBlackTree[K, V]) insertCase3(node *RedBlackTreeNode[K, V]) {
 	}
 }
 
-func (tree *RedBlackTree[K, V]) insertCase4(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) insertCase4(node *RedBlackTreeNode[K, V]) {
 	grandparent := node.grandparent()
 	if node == node.parent.right && node.parent == grandparent.left {
 		tree.rotateLeft(node.parent)
@@ -1107,7 +1107,7 @@ func (tree *RedBlackTree[K, V]) insertCase4(node *RedBlackTreeNode[K, V]) {
 	tree.insertCase5(node)
 }
 
-func (tree *RedBlackTree[K, V]) insertCase5(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) insertCase5(node *RedBlackTreeNode[K, V]) {
 	node.parent.color = black
 	grandparent := node.grandparent()
 	grandparent.color = red
@@ -1128,14 +1128,14 @@ func (node *RedBlackTreeNode[K, V]) maximumNode() *RedBlackTreeNode[K, V] {
 	return node
 }
 
-func (tree *RedBlackTree[K, V]) deleteCase1(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) deleteCase1(node *RedBlackTreeNode[K, V]) {
 	if node.parent == nil {
 		return
 	}
 	tree.deleteCase2(node)
 }
 
-func (tree *RedBlackTree[K, V]) deleteCase2(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) deleteCase2(node *RedBlackTreeNode[K, V]) {
 	sibling := node.sibling()
 	if tree.nodeColor(sibling) == red {
 		node.parent.color = red
@@ -1149,7 +1149,7 @@ func (tree *RedBlackTree[K, V]) deleteCase2(node *RedBlackTreeNode[K, V]) {
 	tree.deleteCase3(node)
 }
 
-func (tree *RedBlackTree[K, V]) deleteCase3(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) deleteCase3(node *RedBlackTreeNode[K, V]) {
 	sibling := node.sibling()
 	if tree.nodeColor(node.parent) == black &&
 		tree.nodeColor(sibling) == black &&
@@ -1162,7 +1162,7 @@ func (tree *RedBlackTree[K, V]) deleteCase3(node *RedBlackTreeNode[K, V]) {
 	}
 }
 
-func (tree *RedBlackTree[K, V]) deleteCase4(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) deleteCase4(node *RedBlackTreeNode[K, V]) {
 	sibling := node.sibling()
 	if tree.nodeColor(node.parent) == red &&
 		tree.nodeColor(sibling) == black &&
@@ -1175,7 +1175,7 @@ func (tree *RedBlackTree[K, V]) deleteCase4(node *RedBlackTreeNode[K, V]) {
 	}
 }
 
-func (tree *RedBlackTree[K, V]) deleteCase5(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) deleteCase5(node *RedBlackTreeNode[K, V]) {
 	sibling := node.sibling()
 	if node == node.parent.left &&
 		tree.nodeColor(sibling) == black &&
@@ -1195,7 +1195,7 @@ func (tree *RedBlackTree[K, V]) deleteCase5(node *RedBlackTreeNode[K, V]) {
 	tree.deleteCase6(node)
 }
 
-func (tree *RedBlackTree[K, V]) deleteCase6(node *RedBlackTreeNode[K, V]) {
+func (tree *TreeMap[K, V]) deleteCase6(node *RedBlackTreeNode[K, V]) {
 	sibling := node.sibling()
 	sibling.color = tree.nodeColor(node.parent)
 	node.parent.color = black
@@ -1208,7 +1208,7 @@ func (tree *RedBlackTree[K, V]) deleteCase6(node *RedBlackTreeNode[K, V]) {
 	}
 }
 
-func (tree *RedBlackTree[K, V]) nodeColor(node *RedBlackTreeNode[K, V]) color {
+func (tree *TreeMap[K, V]) nodeColor(node *RedBlackTreeNode[K, V]) color {
 	if node == nil {
 		return black
 	}
@@ -1216,7 +1216,7 @@ func (tree *RedBlackTree[K, V]) nodeColor(node *RedBlackTreeNode[K, V]) color {
 }
 
 // MarshalJSON implements the interface MarshalJSON for json.Marshal.
-func (tree RedBlackTree[K, V]) MarshalJSON() (jsonBytes []byte, err error) {
+func (tree TreeMap[K, V]) MarshalJSON() (jsonBytes []byte, err error) {
 	if tree.root == nil {
 		return []byte("null"), nil
 	}
@@ -1239,7 +1239,7 @@ func (tree RedBlackTree[K, V]) MarshalJSON() (jsonBytes []byte, err error) {
 }
 
 // UnmarshalJSON implements the interface UnmarshalJSON for json.Unmarshal.
-func (tree *RedBlackTree[K, V]) UnmarshalJSON(b []byte) error {
+func (tree *TreeMap[K, V]) UnmarshalJSON(b []byte) error {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	if tree.comparator == nil {
@@ -1256,7 +1256,7 @@ func (tree *RedBlackTree[K, V]) UnmarshalJSON(b []byte) error {
 }
 
 // UnmarshalValue is an interface implement which sets any type of value for map.
-func (tree *RedBlackTree[K, V]) UnmarshalValue(value interface{}) (err error) {
+func (tree *TreeMap[K, V]) UnmarshalValue(value interface{}) (err error) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	if tree.comparator == nil {
@@ -1283,7 +1283,7 @@ func (tree *RedBlackTree[K, V]) UnmarshalValue(value interface{}) (err error) {
 
 // getComparator returns the comparator if it's previously set,
 // or else it panics.
-func (tree *RedBlackTree[K, V]) getComparator() func(a, b K) int {
+func (tree *TreeMap[K, V]) getComparator() func(a, b K) int {
 	if tree.comparator == nil {
 		return comparators.ComparatorAny[K]
 	}

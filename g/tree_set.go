@@ -18,7 +18,7 @@ import (
 // when its initialization and cannot be changed then.
 type TreeSet[T comparable] struct {
 	mu   rwmutex.RWMutex
-	tree *RedBlackTree[T, struct{}]
+	tree *TreeMap[T, struct{}]
 }
 
 // NewTreeSet creates and returns an empty sorted set.
@@ -118,7 +118,7 @@ func (t *TreeSet[T]) Clone() Collection[T] {
 	newTree := t.tree.Clone(false)
 	return &TreeSet[T]{
 		mu:   rwmutex.Create(t.mu.IsSafe()),
-		tree: newTree.(*RedBlackTree[T, struct{}]),
+		tree: newTree.(*TreeMap[T, struct{}]),
 	}
 }
 

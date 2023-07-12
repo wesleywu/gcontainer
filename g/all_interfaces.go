@@ -8,6 +8,10 @@ package g
 
 import "github.com/wesleywu/gcontainer/utils/comparators"
 
+// Collection is the root interface in the collection hierarchy.
+// A collection represents a group of objects, known as its elements.
+// Some collections allow duplicate elements and others do not.
+// Some are ordered and others unordered.
 type Collection[T comparable] interface {
 	// Add adds all the elements in the specified slice to this collection.
 	// Returns true if this collection changed as a result of the call
@@ -64,10 +68,23 @@ type Collection[T comparable] interface {
 	String() string
 }
 
+// Set is a collection that contains no duplicate elements. More formally,
+// sets contain no pair of elements e1 and e2 such that e1.equals(e2), and at most one null element.
+// As implied by its name, this interface models the mathematical set abstraction.
 type Set[T comparable] interface {
 	Collection[T]
 }
 
+// SortedSet is a Set that further provides a total ordering on its elements.
+// The elements are ordered using their natural ordering, or by a Comparator typically provided
+// at sorted set creation time.
+// The set's iterator will traverse the set in ascending element order.
+// Several additional operations are provided to take advantage of the ordering.
+// (This interface is the set analogue of SortedMap.)
+//
+// SortedSet also provides navigation methods lower, floor, ceiling, and higher return elements
+// respectively less than, less than or equal, greater than or equal, and greater than a given element,
+// returning empty if there is no such element.
 type SortedSet[T comparable] interface {
 	Set[T]
 
@@ -119,7 +136,10 @@ type SortedSet[T comparable] interface {
 	TailSet(fromElement T, inclusive bool) SortedSet[T]
 }
 
-type Array[T comparable] interface {
+// List is nn ordered collection (also known as a sequence). The user of this interface has precise control over
+// where in the list each element is inserted. The user can access elements by their integer index (position in the list),
+// and search for elements in the list.
+type List[T comparable] interface {
 	Collection[T]
 
 	// Chunk splits an array into multiple arrays,
@@ -146,14 +166,14 @@ type Array[T comparable] interface {
 	// Filter iterates array and filters elements using custom callback function.
 	// It removes the element from array if callback function `filter` returns true,
 	// it or else does nothing and continues iterating.
-	Filter(filter func(index int, value T) bool) Array[T]
+	Filter(filter func(index int, value T) bool) List[T]
 
 	// FilterNil removes all nil value of the array.
-	FilterNil() Array[T]
+	FilterNil() List[T]
 
 	// FilterEmpty removes all empty value of the array.
 	// Values like: 0, nil, false, "", len(slice/map/chan) == 0 are considered empty.
-	FilterEmpty() Array[T]
+	FilterEmpty() List[T]
 
 	// Get returns the element at the specified position in this list.
 	// If given `index` is out of range, returns empty `value` for type T and bool value false as `found`.
@@ -231,13 +251,18 @@ type Array[T comparable] interface {
 
 	// Unique uniques the array, clear repeated items.
 	// Example: [1,1,2,3,2] -> [1,2,3]
-	Unique() Array[T]
+	Unique() List[T]
 
 	// Walk applies a user supplied function `f` to every item of array.
-	Walk(f func(value T) T) Array[T]
+	Walk(f func(value T) T) List[T]
 }
 
 // Map defines common functions of a `map` and provides more map features.
+// The Map interface provides three collection views, which allow a map's contents to be viewed as a set of keys,
+// collection of values, or set of key-value mappings.
+// The order of a map is defined as the order in which the iterators on the map's collection views return their elements.
+// Some map implementations, like the TreeMap struct, make specific guarantees as to their order;
+// others, like the HashMap struct, do not.
 type Map[K comparable, V comparable] interface {
 	// Put sets key-value to the map.
 	Put(key K, value V)
@@ -322,6 +347,22 @@ type Map[K comparable, V comparable] interface {
 	String() string
 }
 
+// SortedMap is a Map that further provides a total ordering on its keys. The map is ordered according to
+// the natural ordering of its keys, or by a Comparator typically provided at sorted map creation time.
+// This order is reflected when iterating over the sorted map's collection views (returned by the entrySet,
+// keySet and values methods). Several additional operations are provided to take advantage of the ordering.
+//
+// (This interface is the map analogue of SortedSet.)
+//
+// All keys inserted into a sorted map must implement the Comparable interface (or be accepted by
+// the specified comparator).
+//
+// SortedMap also provides navigation methods returning the closest matches for given search targets.
+// Methods LowerEntry, FloorEntry, CeilingEntry, and HigherEntry return MapEntry associated with keys
+// respectively less than, less than or equal, greater than or equal, and greater than a given key,
+// returning empty if there is no such key.
+// Similarly, methods LowerKey, FloorKey, CeilingKey, and HigherKey return only the associated keys.
+// All of these methods are designed for locating, not traversing entries.
 type SortedMap[K comparable, V comparable] interface {
 	Map[K, V]
 
@@ -384,7 +425,11 @@ type SortedMap[K comparable, V comparable] interface {
 	TailMap(fromKey K, inclusive bool) SortedMap[K, V]
 }
 
+// MapEntry is a key-value pair, usually representing the element entries in a Map
 type MapEntry[K comparable, V comparable] interface {
+	// Key returns the key corresponding to this entry.
 	Key() K
+
+	// Value returns the value corresponding to this entry.
 	Value() V
 }

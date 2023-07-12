@@ -16,7 +16,7 @@ import (
 )
 
 func ExampleRedBlackTree_SetComparator() {
-	var tree g.RedBlackTree[string, string]
+	var tree g.TreeMap[string, string]
 	tree.SetComparator(comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
