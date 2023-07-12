@@ -69,7 +69,7 @@ type Collection[T comparable] interface {
 }
 
 // Set is a collection that contains no duplicate elements. More formally,
-// sets contain no pair of elements e1 and e2 such that e1.equals(e2), and at most one null element.
+// sets contain no pair of elements e1 and e2 such that e1.equals(e2), and at most one nil element.
 // As implied by its name, this interface models the mathematical set abstraction.
 type Set[T comparable] interface {
 	Collection[T]
@@ -335,10 +335,10 @@ type Map[K comparable, V comparable] interface {
 	Clone(safe ...bool) Map[K, V]
 
 	// Compute attempts to compute a mapping for the specified `key` and its current mapped value
-	// (or null if there is no current mapping).
+	// (or empty if there is no current mapping).
 	// For example, to either create or append a String msg to a value mapping:
 	//
-	// If the function `f` returns null, the mapping is removed (or remains absent if initially absent).
+	// If the function `f` returns nil, the mapping is removed (or remains absent if initially absent).
 	// If the function itself returns an error, the error is rethrown, and the current mapping is left unchanged.
 	// todo implements me
 	//Compute(key K, f func(key K, value V) (V, error)) error
@@ -412,7 +412,7 @@ type SortedMap[K comparable, V comparable] interface {
 	// PollFirstEntry removes and returns a key-value mapping associated with the least key in this map, or nil if the map is empty.
 	PollFirstEntry() MapEntry[K, V]
 
-	// PollLastEntry removes and returns a key-value mapping associated with the greatest key in this map, or null if the map is empty.
+	// PollLastEntry removes and returns a key-value mapping associated with the greatest key in this map, or nil if the map is empty.
 	PollLastEntry() MapEntry[K, V]
 
 	// Reverse returns a reverse order view of the mappings contained in this map.
