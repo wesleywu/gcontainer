@@ -67,6 +67,22 @@ func NewLinkedListFrom[T comparable](array []T, safe ...bool) *LinkedList[T] {
 	return l
 }
 
+// Next returns the next list element or nil.
+func (e *Element[T]) Next() *Element[T] {
+	if p := e.next; e.list != nil && p != &e.list.root {
+		return p
+	}
+	return nil
+}
+
+// Prev returns the previous list element or nil.
+func (e *Element[T]) Prev() *Element[T] {
+	if p := e.prev; e.list != nil && p != &e.list.root {
+		return p
+	}
+	return nil
+}
+
 // Add append a new element e with value v at the back of list l and returns true.
 func (l *LinkedList[T]) Add(values ...T) bool {
 	l.mu.RLock()
@@ -170,22 +186,6 @@ func (l *LinkedList[T]) search(value T) *Element[T] {
 				return e
 			}
 		}
-	}
-	return nil
-}
-
-// Next returns the next list element or nil.
-func (e *Element[T]) Next() *Element[T] {
-	if p := e.next; e.list != nil && p != &e.list.root {
-		return p
-	}
-	return nil
-}
-
-// Prev returns the previous list element or nil.
-func (e *Element[T]) Prev() *Element[T] {
-	if p := e.prev; e.list != nil && p != &e.list.root {
-		return p
 	}
 	return nil
 }
@@ -644,19 +644,14 @@ func (l *LinkedList[T]) Equals(another Collection[T]) bool {
 	return true
 }
 
-// Iterator is alias of ForEachAsc.
-func (l *LinkedList[T]) Iterator(f func(e *Element[T]) bool) {
-	l.ForEachAsc(f)
-}
-
 // ForEachAsc iterates the list readonly in ascending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (l *LinkedList[T]) ForEachAsc(f func(e *Element[T]) bool) {
+func (l *LinkedList[T]) ForEachAsc(f func(e T) bool) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 	l.lazyInit()
 	for i, e := 0, l.root.next; i < l.len; i, e = i+1, e.Next() {
-		if !f(e) {
+		if !f(e.Value) {
 			break
 		}
 	}
@@ -664,12 +659,12 @@ func (l *LinkedList[T]) ForEachAsc(f func(e *Element[T]) bool) {
 
 // ForEachDesc iterates the list readonly in descending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (l *LinkedList[T]) ForEachDesc(f func(e *Element[T]) bool) {
+func (l *LinkedList[T]) ForEachDesc(f func(e T) bool) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 	l.lazyInit()
 	for i, e := 0, l.root.prev; i < l.len; i, e = i+1, e.Prev() {
-		if !f(e) {
+		if !f(e.Value) {
 			break
 		}
 	}

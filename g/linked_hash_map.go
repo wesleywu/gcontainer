@@ -68,9 +68,7 @@ func (m *LinkedHashMap[K, V]) ForEachAsc(f func(key K, value V) bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	if m.list != nil {
-		var node *gListMapNode[K, V]
-		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
-			node = e.Value
+		m.list.ForEachAsc(func(node *gListMapNode[K, V]) bool {
 			return f(node.key, node.value)
 		})
 	}
@@ -82,9 +80,7 @@ func (m *LinkedHashMap[K, V]) ForEachDesc(f func(key K, value interface{}) bool)
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	if m.list != nil {
-		var node *gListMapNode[K, V]
-		m.list.ForEachDesc(func(e *Element[*gListMapNode[K, V]]) bool {
-			node = e.Value
+		m.list.ForEachDesc(func(node *gListMapNode[K, V]) bool {
 			return f(node.key, node.value)
 		})
 	}
@@ -121,12 +117,10 @@ func (m *LinkedHashMap[K, V]) Replace(data map[K]V) {
 // Map returns a copy of the underlying data of the map.
 func (m *LinkedHashMap[K, V]) Map() map[K]V {
 	m.mu.RLock()
-	var node *gListMapNode[K, V]
 	var data map[K]V
 	if m.list != nil {
 		data = make(map[K]V, len(m.data))
-		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
-			node = e.Value
+		m.list.ForEachAsc(func(node *gListMapNode[K, V]) bool {
 			data[node.key] = node.value
 			return true
 		})
@@ -138,12 +132,10 @@ func (m *LinkedHashMap[K, V]) Map() map[K]V {
 // MapStrAny returns a copy of the underlying data of the map as map[string]V.
 func (m *LinkedHashMap[K, V]) MapStrAny() map[string]V {
 	m.mu.RLock()
-	var node *gListMapNode[K, V]
 	var data map[string]V
 	if m.list != nil {
 		data = make(map[string]V, len(m.data))
-		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
-			node = e.Value
+		m.list.ForEachAsc(func(node *gListMapNode[K, V]) bool {
 			data[gconv.String(node.key)] = node.value
 			return true
 		})
@@ -158,10 +150,8 @@ func (m *LinkedHashMap[K, V]) FilterEmpty() {
 	if m.list != nil {
 		var (
 			keys = make([]K, 0)
-			node *gListMapNode[K, V]
 		)
-		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
-			node = e.Value
+		m.list.ForEachAsc(func(node *gListMapNode[K, V]) bool {
 			if empty.IsEmpty(node.value) {
 				keys = append(keys, node.key)
 			}
@@ -412,8 +402,8 @@ func (m *LinkedHashMap[K, V]) Keys() []K {
 		index = 0
 	)
 	if m.list != nil {
-		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
-			keys[index] = e.Value.key
+		m.list.ForEachAsc(func(node *gListMapNode[K, V]) bool {
+			keys[index] = node.key
 			index++
 			return true
 		})
@@ -430,8 +420,8 @@ func (m *LinkedHashMap[K, V]) Values() []V {
 		index  = 0
 	)
 	if m.list != nil {
-		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
-			values[index] = e.Value.value
+		m.list.ForEachAsc(func(node *gListMapNode[K, V]) bool {
+			values[index] = node.value
 			index++
 			return true
 		})
@@ -488,9 +478,7 @@ func (m *LinkedHashMap[K, V]) Merge(other *LinkedHashMap[K, V]) {
 		other.mu.RLock()
 		defer other.mu.RUnlock()
 	}
-	var node *gListMapNode[K, V]
-	other.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
-		node = e.Value
+	other.list.ForEachAsc(func(node *gListMapNode[K, V]) bool {
 		if e, ok := m.data[node.key]; !ok {
 			m.data[node.key] = m.list.PushBack(&gListMapNode[K, V]{node.key, node.value})
 		} else {
@@ -594,10 +582,8 @@ func (m *LinkedHashMap[K, V]) DeepCopy() interface{} {
 	defer m.mu.RUnlock()
 	data := make(map[K]V, len(m.data))
 	if m.list != nil {
-		var node *gListMapNode[K, V]
-		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
-			node = e.Value
-			data[node.key] = deepcopy.Copy(node.value).(V)
+		m.list.ForEachAsc(func(e *gListMapNode[K, V]) bool {
+			data[e.key] = deepcopy.Copy(e.value).(V)
 			return true
 		})
 	}

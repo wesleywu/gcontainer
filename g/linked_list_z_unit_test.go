@@ -410,7 +410,7 @@ func TestMoveUnknownMark(t *testing.T) {
 	})
 }
 
-func TestList_Clear(t *testing.T) {
+func TestLinkedList_Clear(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		l.PushBack(1)
@@ -421,7 +421,7 @@ func TestList_Clear(t *testing.T) {
 	})
 }
 
-func TestList_Clone(t *testing.T) {
+func TestLinkedList_Clone(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		a1 := []int{0, 1, 2, 3}
 		array1 := g.NewLinkedListFrom(a1)
@@ -433,7 +433,7 @@ func TestList_Clone(t *testing.T) {
 	})
 }
 
-func TestList_Equals(t *testing.T) {
+func TestLinkedList_Equals(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		s1 := g.NewLinkedList[int]()
 		s2 := g.NewLinkedList[int]()
@@ -451,7 +451,7 @@ func TestList_Equals(t *testing.T) {
 	})
 }
 
-func TestList_PushFronts(t *testing.T) {
+func TestLinkedList_PushFronts(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2}
@@ -463,7 +463,7 @@ func TestList_PushFronts(t *testing.T) {
 	})
 }
 
-func TestList_PushBacks(t *testing.T) {
+func TestLinkedList_PushBacks(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2}
@@ -475,7 +475,7 @@ func TestList_PushBacks(t *testing.T) {
 	})
 }
 
-func TestList_PopBacks(t *testing.T) {
+func TestLinkedList_PopBacks(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2, 3, 4}
@@ -490,7 +490,7 @@ func TestList_PopBacks(t *testing.T) {
 	})
 }
 
-func TestList_PopFronts(t *testing.T) {
+func TestLinkedList_PopFronts(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2, 3, 4}
@@ -501,7 +501,7 @@ func TestList_PopFronts(t *testing.T) {
 	})
 }
 
-func TestList_PopBackAll(t *testing.T) {
+func TestLinkedList_PopBackAll(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2, 3, 4}
@@ -512,7 +512,7 @@ func TestList_PopBackAll(t *testing.T) {
 	})
 }
 
-func TestList_PopFrontAll(t *testing.T) {
+func TestLinkedList_PopFrontAll(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2, 3, 4}
@@ -523,7 +523,7 @@ func TestList_PopFrontAll(t *testing.T) {
 	})
 }
 
-func TestList_FrontAll(t *testing.T) {
+func TestLinkedList_FrontAll(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2, 3, 4}
@@ -534,7 +534,7 @@ func TestList_FrontAll(t *testing.T) {
 	})
 }
 
-func TestList_BackAll(t *testing.T) {
+func TestLinkedList_BackAll(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2, 3, 4}
@@ -545,7 +545,7 @@ func TestList_BackAll(t *testing.T) {
 	})
 }
 
-func TestList_FrontValue(t *testing.T) {
+func TestLinkedList_FrontValue(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		l2 := g.NewLinkedList[int]()
@@ -560,7 +560,7 @@ func TestList_FrontValue(t *testing.T) {
 	})
 }
 
-func TestList_BackValue(t *testing.T) {
+func TestLinkedList_BackValue(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		l2 := g.NewLinkedList[int]()
@@ -575,7 +575,7 @@ func TestList_BackValue(t *testing.T) {
 	})
 }
 
-func TestList_Back(t *testing.T) {
+func TestLinkedList_Back(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2, 3, 4}
@@ -586,7 +586,7 @@ func TestList_Back(t *testing.T) {
 	})
 }
 
-func TestList_Size(t *testing.T) {
+func TestLinkedList_Size(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2, 3, 4}
@@ -597,7 +597,7 @@ func TestList_Size(t *testing.T) {
 	})
 }
 
-func TestList_Removes(t *testing.T) {
+func TestLinkedList_Removes(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2, 3, 4}
@@ -613,7 +613,7 @@ func TestList_Removes(t *testing.T) {
 	})
 }
 
-func TestList_Pop(t *testing.T) {
+func TestLinkedList_Pop(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
@@ -624,13 +624,13 @@ func TestList_Pop(t *testing.T) {
 	})
 }
 
-func TestList_IteratorAsc(t *testing.T) {
+func TestLinkedList_ForEachAsc(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2, 5, 6, 3, 4}
 		l.PushFronts(a1)
 		e1 := l.Back()
-		fun1 := func(e *g.Element[int]) bool {
+		fun1 := func(e int) bool {
 			return gconv.Int(e1.Value) > 2
 		}
 		checkList(t, l, []int{4, 3, 6, 5, 2, 1})
@@ -639,13 +639,13 @@ func TestList_IteratorAsc(t *testing.T) {
 	})
 }
 
-func TestList_IteratorDesc(t *testing.T) {
+func TestLinkedList_ForEachDesc(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[int]()
 		a1 := []int{1, 2, 3, 4}
 		l.PushFronts(a1)
 		e1 := l.Back()
-		fun1 := func(e *g.Element[int]) bool {
+		fun1 := func(e int) bool {
 			return gconv.Int(e1.Value) > 6
 		}
 		l.ForEachDesc(fun1)
@@ -654,22 +654,22 @@ func TestList_IteratorDesc(t *testing.T) {
 	})
 }
 
-func TestList_Iterator(t *testing.T) {
+func TestLinkedList_ForEach(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedList[string]()
 		a1 := []string{"a", "b", "c", "d", "e"}
 		l.PushFronts(a1)
 		e1 := l.Back()
-		fun1 := func(e *g.Element[string]) bool {
+		fun1 := func(e string) bool {
 			return gconv.String(e1.Value) > "c"
 		}
 		checkList(t, l, []string{"e", "d", "c", "b", "a"})
-		l.Iterator(fun1)
+		l.ForEach(fun1)
 		checkList(t, l, []string{"e", "d", "c", "b", "a"})
 	})
 }
 
-func TestList_Join(t *testing.T) {
+func TestLinkedList_Join(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedListFrom([]interface{}{1, 2, "a", `"b"`, `\c`})
 		t.Assert(l.Join(","), `1,2,a,"b",\c`)
@@ -677,14 +677,14 @@ func TestList_Join(t *testing.T) {
 	})
 }
 
-func TestList_String(t *testing.T) {
+func TestLinkedList_String(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedListFrom([]interface{}{1, 2, "a", `"b"`, `\c`})
 		t.Assert(l.String(), `[1,2,a,"b",\c]`)
 	})
 }
 
-func TestList_Json(t *testing.T) {
+func TestLinkedList_Json(t *testing.T) {
 	// Marshal
 	gtest.C(t, func(t *gtest.T) {
 		a := []string{"a", "b", "c"}
@@ -718,7 +718,7 @@ func TestList_Json(t *testing.T) {
 	})
 }
 
-func TestList_UnmarshalValue(t *testing.T) {
+func TestLinkedList_UnmarshalValue(t *testing.T) {
 	type TList struct {
 		Name string
 		List *g.LinkedList[byte]
@@ -751,7 +751,7 @@ func TestList_UnmarshalValue(t *testing.T) {
 	})
 }
 
-func TestList_DeepCopy(t *testing.T) {
+func TestLinkedList_DeepCopy(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedListFrom([]int{1, 2, 3, 4, 5})
 		copyList := l.DeepCopy().(*g.LinkedList[int])

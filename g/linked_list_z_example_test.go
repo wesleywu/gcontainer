@@ -69,7 +69,7 @@ func ExampleNewArrayListFrom() {
 	// 0
 }
 
-func ExampleList_PushFront() {
+func ExampleLinkedList_PushFront() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -87,7 +87,7 @@ func ExampleList_PushFront() {
 	// [0,1,2,3,4,5]
 }
 
-func ExampleList_PushBack() {
+func ExampleLinkedList_PushBack() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -105,7 +105,7 @@ func ExampleList_PushBack() {
 	// [1,2,3,4,5,6]
 }
 
-func ExampleList_PushFronts() {
+func ExampleLinkedList_PushFronts() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -123,7 +123,7 @@ func ExampleList_PushFronts() {
 	// [-4,-3,-2,-1,0,1,2,3,4,5]
 }
 
-func ExampleList_PushBacks() {
+func ExampleLinkedList_PushBacks() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -141,7 +141,7 @@ func ExampleList_PushBacks() {
 	// [1,2,3,4,5,6,7,8,9,10]
 }
 
-func ExampleList_PopBack() {
+func ExampleLinkedList_PopBack() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -158,7 +158,7 @@ func ExampleList_PopBack() {
 	// [1,2,3,4]
 }
 
-func ExampleList_PopFront() {
+func ExampleLinkedList_PopFront() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -175,7 +175,7 @@ func ExampleList_PopFront() {
 	// [2,3,4,5]
 }
 
-func ExampleList_PopBacks() {
+func ExampleLinkedList_PopBacks() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -192,7 +192,7 @@ func ExampleList_PopBacks() {
 	// [1,2,3]
 }
 
-func ExampleList_PopFronts() {
+func ExampleLinkedList_PopFronts() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -209,7 +209,7 @@ func ExampleList_PopFronts() {
 	// [3,4,5]
 }
 
-func ExampleList_PopBackAll() {
+func ExampleLinkedList_PopBackAll() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -224,7 +224,7 @@ func ExampleList_PopBackAll() {
 	// 0
 }
 
-func ExampleList_PopFrontAll() {
+func ExampleLinkedList_PopFrontAll() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -239,7 +239,7 @@ func ExampleList_PopFrontAll() {
 	// 0
 }
 
-func ExampleList_FrontAll() {
+func ExampleLinkedList_FrontAll() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l)
@@ -250,7 +250,7 @@ func ExampleList_FrontAll() {
 	// [1 2 3 4 5]
 }
 
-func ExampleList_BackAll() {
+func ExampleLinkedList_BackAll() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l)
@@ -261,7 +261,7 @@ func ExampleList_BackAll() {
 	// [5 4 3 2 1]
 }
 
-func ExampleList_FrontValue() {
+func ExampleLinkedList_FrontValue() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l)
@@ -272,7 +272,7 @@ func ExampleList_FrontValue() {
 	// 1
 }
 
-func ExampleList_BackValue() {
+func ExampleLinkedList_BackValue() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l)
@@ -283,7 +283,7 @@ func ExampleList_BackValue() {
 	// 5
 }
 
-func ExampleList_Front() {
+func ExampleLinkedList_Front() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Front().Value)
@@ -301,7 +301,7 @@ func ExampleList_Front() {
 	// [0,1,9,2,3,4,5]
 }
 
-func ExampleList_Back() {
+func ExampleLinkedList_Back() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Back().Value)
@@ -319,7 +319,7 @@ func ExampleList_Back() {
 	// [1,2,3,4,9,5,6]
 }
 
-func ExampleList_Len() {
+func ExampleLinkedList_Len() {
 	l := g.NewLinkedListFrom[int]([]int{1, 2, 3, 4, 5})
 
 	fmt.Println(l.Len())
@@ -328,7 +328,7 @@ func ExampleList_Len() {
 	// 5
 }
 
-func ExampleList_Size() {
+func ExampleLinkedList_Size() {
 	l := g.NewLinkedListFrom[int]([]int{1, 2, 3, 4, 5})
 
 	fmt.Println(l.Size())
@@ -337,7 +337,7 @@ func ExampleList_Size() {
 	// 5
 }
 
-func ExampleList_MoveBefore() {
+func ExampleLinkedList_MoveBefore() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Size())
@@ -371,7 +371,7 @@ func ExampleList_MoveBefore() {
 	// [6,1,2,3,4,5]
 }
 
-func ExampleList_MoveAfter() {
+func ExampleLinkedList_MoveAfter() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Size())
@@ -405,7 +405,7 @@ func ExampleList_MoveAfter() {
 	// [1,2,3,4,5,0]
 }
 
-func ExampleList_MoveToFront() {
+func ExampleLinkedList_MoveToFront() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Size())
@@ -433,7 +433,7 @@ func ExampleList_MoveToFront() {
 	// [5,1,2,3,4]
 }
 
-func ExampleList_MoveToBack() {
+func ExampleLinkedList_MoveToBack() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Size())
@@ -461,7 +461,7 @@ func ExampleList_MoveToBack() {
 	// [2,3,4,5,1]
 }
 
-func ExampleList_PushBackList() {
+func ExampleLinkedList_PushBackList() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Size())
@@ -486,7 +486,7 @@ func ExampleList_PushBackList() {
 	// [1,2,3,4,5,6,7,8,9,10]
 }
 
-func ExampleList_PushFrontList() {
+func ExampleLinkedList_PushFrontList() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Size())
@@ -511,7 +511,7 @@ func ExampleList_PushFrontList() {
 	// [-4,-3,-2,-1,0,1,2,3,4,5]
 }
 
-func ExampleList_InsertAfter() {
+func ExampleLinkedList_InsertAfter() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -530,7 +530,7 @@ func ExampleList_InsertAfter() {
 	// [1,8,2,3,4,5,9]
 }
 
-func ExampleList_InsertBefore() {
+func ExampleLinkedList_InsertBefore() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -549,7 +549,7 @@ func ExampleList_InsertBefore() {
 	// [8,1,2,3,4,9,5]
 }
 
-func ExampleList_Remove() {
+func ExampleLinkedList_Remove() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -561,22 +561,7 @@ func ExampleList_Remove() {
 	fmt.Println(l.Len())
 	fmt.Println(l)
 
-	// Output:
-	// 5
-	// [1,2,3,4,5]
-	// true
-	// true
-	// 3
-	// [2,3,4]
-}
-
-func ExampleList_Removes() {
-	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
-
-	fmt.Println(l.Len())
-	fmt.Println(l)
-
-	l.Remove(l.Front().Value, l.Back().Value)
+	fmt.Println(l.Remove(l.Front().Value, l.Back().Value))
 
 	fmt.Println(l.Len())
 	fmt.Println(l)
@@ -584,11 +569,16 @@ func ExampleList_Removes() {
 	// Output:
 	// 5
 	// [1,2,3,4,5]
+	// true
+	// true
 	// 3
 	// [2,3,4]
+	// true
+	// 1
+	// [3]
 }
 
-func ExampleList_RemoveAll() {
+func ExampleLinkedList_RemoveAll() {
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 5, 1).Slice())
 
 	fmt.Println(l.Len())
@@ -604,12 +594,12 @@ func ExampleList_RemoveAll() {
 	// 0
 }
 
-func ExampleList_IteratorAsc() {
+func ExampleLinkedList_ForEachAsc() {
 	// concurrent-safe list.
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 10, 1).Slice(), true)
 	// iterate reading from head using ForEachAsc.
-	l.ForEachAsc(func(e *g.Element[int]) bool {
-		fmt.Print(e.Value)
+	l.ForEachAsc(func(e int) bool {
+		fmt.Print(e)
 		return true
 	})
 
@@ -617,19 +607,19 @@ func ExampleList_IteratorAsc() {
 	// 12345678910
 }
 
-func ExampleList_IteratorDesc() {
+func ExampleLinkedList_ForEachDesc() {
 	// concurrent-safe list.
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 10, 1).Slice(), true)
 	// iterate reading from tail using ForEachDesc.
-	l.ForEachDesc(func(e *g.Element[int]) bool {
-		fmt.Print(e.Value)
+	l.ForEachDesc(func(e int) bool {
+		fmt.Print(e)
 		return true
 	})
 	// Output:
 	// 10987654321
 }
 
-func ExampleList_Join() {
+func ExampleLinkedList_Join() {
 	var l g.LinkedList[string]
 	l.PushBacks([]string{"a", "b", "c", "d"})
 
