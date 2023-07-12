@@ -242,7 +242,7 @@ func (tree *AVLTree[K, V]) Size() int {
 func (tree *AVLTree[K, V]) Keys() []K {
 	keys := make([]K, tree.Size())
 	index := 0
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		keys[index] = key
 		index++
 		return true
@@ -254,7 +254,7 @@ func (tree *AVLTree[K, V]) Keys() []K {
 func (tree *AVLTree[K, V]) Values() []V {
 	values := make([]V, tree.Size())
 	index := 0
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		values[index] = value
 		index++
 		return true
@@ -393,7 +393,7 @@ func (tree *AVLTree[K, V]) Print() {
 // Map returns all key-value items as map.
 func (tree *AVLTree[K, V]) Map() map[K]V {
 	m := make(map[K]V, tree.Size())
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		m[key] = value
 		return true
 	})
@@ -403,7 +403,7 @@ func (tree *AVLTree[K, V]) Map() map[K]V {
 // MapStrAny returns all key-value items as map[string]V.
 func (tree *AVLTree[K, V]) MapStrAny() map[string]V {
 	m := make(map[string]V, tree.Size())
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		m[gconv.String(key)] = value
 		return true
 	})
@@ -418,16 +418,16 @@ func (tree *AVLTree[K, V]) MapStrAny() map[string]V {
 func (tree *AVLTree[K, V]) Flip(comparator func(v1, v2 V) int) *AVLTree[V, K] {
 	t := (*AVLTree[V, K])(nil)
 	t = NewAVLTree[V, K](comparator, tree.mu.IsSafe())
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		t.put(value, key, nil, &t.root)
 		return true
 	})
 	return t
 }
 
-// Iterator is alias of IteratorAsc.
-func (tree *AVLTree[K, V]) Iterator(f func(key K, value V) bool) {
-	tree.IteratorAsc(f)
+// ForEach is alias of ForEachAsc.
+func (tree *AVLTree[K, V]) ForEach(f func(key K, value V) bool) {
+	tree.ForEachAsc(f)
 }
 
 // IteratorFrom is alias of IteratorAscFrom.
@@ -435,9 +435,9 @@ func (tree *AVLTree[K, V]) IteratorFrom(key K, match bool, f func(key K, value V
 	tree.IteratorAscFrom(key, match, f)
 }
 
-// IteratorAsc iterates the tree readonly in ascending order with given callback function `f`.
+// ForEachAsc iterates the tree readonly in ascending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *AVLTree[K, V]) IteratorAsc(f func(key K, value V) bool) {
+func (tree *AVLTree[K, V]) ForEachAsc(f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	tree.doIteratorAsc(tree.bottom(0), f)
@@ -469,9 +469,9 @@ func (tree *AVLTree[K, V]) doIteratorAsc(node *AVLTreeNode[K, V], f func(key K, 
 	}
 }
 
-// IteratorDesc iterates the tree readonly in descending order with given callback function `f`.
+// ForEachDesc iterates the tree readonly in descending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *AVLTree[K, V]) IteratorDesc(f func(key K, value V) bool) {
+func (tree *AVLTree[K, V]) ForEachDesc(f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	tree.doIteratorDesc(tree.bottom(1), f)
@@ -759,7 +759,7 @@ func (tree AVLTree[K, V]) MarshalJSON() (jsonBytes []byte, err error) {
 	}
 	buffer := bytes.NewBuffer(nil)
 	buffer.WriteByte('{')
-	tree.Iterator(func(key K, value V) bool {
+	tree.ForEach(func(key K, value V) bool {
 		valueBytes, valueJsonErr := json.Marshal(value)
 		if valueJsonErr != nil {
 			err = valueJsonErr

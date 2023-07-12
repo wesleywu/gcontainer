@@ -401,7 +401,7 @@ func ExampleBTree_Iterator() {
 	}
 
 	var totalKey, totalValue int
-	tree.Iterator(func(key, value int) bool {
+	tree.ForEach(func(key, value int) bool {
 		totalKey += key
 		totalValue += value
 
@@ -442,7 +442,7 @@ func ExampleBTree_IteratorAsc() {
 		tree.Put(i, 10-i)
 	}
 
-	tree.IteratorAsc(func(key, value int) bool {
+	tree.ForEachAsc(func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
 		return true
 	})
@@ -521,7 +521,7 @@ func ExampleBTree_IteratorDesc() {
 		tree.Put(i, 10-i)
 	}
 
-	tree.IteratorDesc(func(key, value int) bool {
+	tree.ForEachDesc(func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
 		return true
 	})

@@ -634,7 +634,7 @@ func TestList_IteratorAsc(t *testing.T) {
 			return gconv.Int(e1.Value) > 2
 		}
 		checkList(t, l, []int{4, 3, 6, 5, 2, 1})
-		l.IteratorAsc(fun1)
+		l.ForEachAsc(fun1)
 		checkList(t, l, []int{4, 3, 6, 5, 2, 1})
 	})
 }
@@ -648,7 +648,7 @@ func TestList_IteratorDesc(t *testing.T) {
 		fun1 := func(e *g.Element[int]) bool {
 			return gconv.Int(e1.Value) > 6
 		}
-		l.IteratorDesc(fun1)
+		l.ForEachDesc(fun1)
 		t.Assert(l.Len(), 4)
 		checkList(t, l, []int{4, 3, 2, 1})
 	})

@@ -252,7 +252,7 @@ func (tree *BTree[K, V]) Size() int {
 func (tree *BTree[K, V]) Keys() []K {
 	keys := make([]K, tree.Size())
 	index := 0
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		keys[index] = key
 		index++
 		return true
@@ -264,7 +264,7 @@ func (tree *BTree[K, V]) Keys() []K {
 func (tree *BTree[K, V]) Values() []V {
 	values := make([]V, tree.Size())
 	index := 0
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		values[index] = value
 		index++
 		return true
@@ -275,7 +275,7 @@ func (tree *BTree[K, V]) Values() []V {
 // Map returns all key-value items as map.
 func (tree *BTree[K, V]) Map() map[K]V {
 	m := make(map[K]V, tree.Size())
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		m[key] = value
 		return true
 	})
@@ -285,7 +285,7 @@ func (tree *BTree[K, V]) Map() map[K]V {
 // MapStrAny returns all key-value items as map[string]V.
 func (tree *BTree[K, V]) MapStrAny() map[string]V {
 	m := make(map[string]V, tree.Size())
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		m[gconv.String(key)] = value
 		return true
 	})
@@ -381,9 +381,9 @@ func (tree *BTree[K, V]) Print() {
 	fmt.Println(tree.String())
 }
 
-// Iterator is alias of IteratorAsc.
-func (tree *BTree[K, V]) Iterator(f func(key K, value V) bool) {
-	tree.IteratorAsc(f)
+// ForEach is alias of ForEachAsc.
+func (tree *BTree[K, V]) ForEach(f func(key K, value V) bool) {
+	tree.ForEachAsc(f)
 }
 
 // IteratorFrom is alias of IteratorAscFrom.
@@ -391,9 +391,9 @@ func (tree *BTree[K, V]) IteratorFrom(key K, match bool, f func(key K, value V) 
 	tree.IteratorAscFrom(key, match, f)
 }
 
-// IteratorAsc iterates the tree readonly in ascending order with given callback function `f`.
+// ForEachAsc iterates the tree readonly in ascending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *BTree[K, V]) IteratorAsc(f func(key K, value V) bool) {
+func (tree *BTree[K, V]) ForEachAsc(f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	node := tree.left(tree.root)
@@ -466,9 +466,9 @@ loop:
 	}
 }
 
-// IteratorDesc iterates the tree readonly in descending order with given callback function `f`.
+// ForEachDesc iterates the tree readonly in descending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *BTree[K, V]) IteratorDesc(f func(key K, value V) bool) {
+func (tree *BTree[K, V]) ForEachDesc(f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	node := tree.right(tree.root)
@@ -499,7 +499,7 @@ func (tree *BTree[K, V]) IteratorDescFrom(key K, match bool, f func(key K, value
 	}
 }
 
-// IteratorDesc iterates the tree readonly in descending order with given callback function `f`.
+// ForEachDesc iterates the tree readonly in descending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
 func (tree *BTree[K, V]) doIteratorDesc(node *BTreeNode[K, V], entry *BTreeEntry[K, V], index int, f func(key K, value V) bool) {
 	first := true
@@ -928,7 +928,7 @@ func (tree BTree[K, V]) MarshalJSON() (jsonBytes []byte, err error) {
 	}
 	buffer := bytes.NewBuffer(nil)
 	buffer.WriteByte('{')
-	tree.Iterator(func(key K, value V) bool {
+	tree.ForEach(func(key K, value V) bool {
 		valueBytes, valueJsonErr := json.Marshal(value)
 		if valueJsonErr != nil {
 			err = valueJsonErr

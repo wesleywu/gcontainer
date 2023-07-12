@@ -44,9 +44,9 @@ func NewHashMapFrom[K comparable, V comparable](data map[K]V, safe ...bool) *Has
 	}
 }
 
-// Iterator iterates the hash map readonly with custom callback function `f`.
+// ForEach iterates the hash map readonly with custom callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (m *HashMap[K, V]) Iterator(f func(k K, v V) bool) {
+func (m *HashMap[K, V]) ForEach(f func(k K, v V) bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	for k, v := range m.data {

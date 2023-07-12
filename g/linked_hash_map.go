@@ -57,33 +57,33 @@ func NewListMapFrom[K comparable, V comparable](data map[K]V, safe ...bool) *Lin
 	return m
 }
 
-// Iterator is alias of IteratorAsc.
-func (m *LinkedHashMap[K, V]) Iterator(f func(key K, value V) bool) {
-	m.IteratorAsc(f)
+// ForEach is alias of ForEachAsc.
+func (m *LinkedHashMap[K, V]) ForEach(f func(key K, value V) bool) {
+	m.ForEachAsc(f)
 }
 
-// IteratorAsc iterates the map readonly in ascending order with given callback function `f`.
+// ForEachAsc iterates the map readonly in ascending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (m *LinkedHashMap[K, V]) IteratorAsc(f func(key K, value V) bool) {
+func (m *LinkedHashMap[K, V]) ForEachAsc(f func(key K, value V) bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	if m.list != nil {
 		var node *gListMapNode[K, V]
-		m.list.IteratorAsc(func(e *Element[*gListMapNode[K, V]]) bool {
+		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
 			node = e.Value
 			return f(node.key, node.value)
 		})
 	}
 }
 
-// IteratorDesc iterates the map readonly in descending order with given callback function `f`.
+// ForEachDesc iterates the map readonly in descending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (m *LinkedHashMap[K, V]) IteratorDesc(f func(key K, value interface{}) bool) {
+func (m *LinkedHashMap[K, V]) ForEachDesc(f func(key K, value interface{}) bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	if m.list != nil {
 		var node *gListMapNode[K, V]
-		m.list.IteratorDesc(func(e *Element[*gListMapNode[K, V]]) bool {
+		m.list.ForEachDesc(func(e *Element[*gListMapNode[K, V]]) bool {
 			node = e.Value
 			return f(node.key, node.value)
 		})
@@ -125,7 +125,7 @@ func (m *LinkedHashMap[K, V]) Map() map[K]V {
 	var data map[K]V
 	if m.list != nil {
 		data = make(map[K]V, len(m.data))
-		m.list.IteratorAsc(func(e *Element[*gListMapNode[K, V]]) bool {
+		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
 			node = e.Value
 			data[node.key] = node.value
 			return true
@@ -142,7 +142,7 @@ func (m *LinkedHashMap[K, V]) MapStrAny() map[string]V {
 	var data map[string]V
 	if m.list != nil {
 		data = make(map[string]V, len(m.data))
-		m.list.IteratorAsc(func(e *Element[*gListMapNode[K, V]]) bool {
+		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
 			node = e.Value
 			data[gconv.String(node.key)] = node.value
 			return true
@@ -160,7 +160,7 @@ func (m *LinkedHashMap[K, V]) FilterEmpty() {
 			keys = make([]K, 0)
 			node *gListMapNode[K, V]
 		)
-		m.list.IteratorAsc(func(e *Element[*gListMapNode[K, V]]) bool {
+		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
 			node = e.Value
 			if empty.IsEmpty(node.value) {
 				keys = append(keys, node.key)
@@ -412,7 +412,7 @@ func (m *LinkedHashMap[K, V]) Keys() []K {
 		index = 0
 	)
 	if m.list != nil {
-		m.list.IteratorAsc(func(e *Element[*gListMapNode[K, V]]) bool {
+		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
 			keys[index] = e.Value.key
 			index++
 			return true
@@ -430,7 +430,7 @@ func (m *LinkedHashMap[K, V]) Values() []V {
 		index  = 0
 	)
 	if m.list != nil {
-		m.list.IteratorAsc(func(e *Element[*gListMapNode[K, V]]) bool {
+		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
 			values[index] = e.Value.value
 			index++
 			return true
@@ -489,7 +489,7 @@ func (m *LinkedHashMap[K, V]) Merge(other *LinkedHashMap[K, V]) {
 		defer other.mu.RUnlock()
 	}
 	var node *gListMapNode[K, V]
-	other.list.IteratorAsc(func(e *Element[*gListMapNode[K, V]]) bool {
+	other.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
 		node = e.Value
 		if e, ok := m.data[node.key]; !ok {
 			m.data[node.key] = m.list.PushBack(&gListMapNode[K, V]{node.key, node.value})
@@ -516,7 +516,7 @@ func (m LinkedHashMap[K, V]) MarshalJSON() (jsonBytes []byte, err error) {
 	}
 	buffer := bytes.NewBuffer(nil)
 	buffer.WriteByte('{')
-	m.Iterator(func(key K, value V) bool {
+	m.ForEach(func(key K, value V) bool {
 		valueBytes, valueJsonErr := json.Marshal(value)
 		if valueJsonErr != nil {
 			err = valueJsonErr
@@ -595,7 +595,7 @@ func (m *LinkedHashMap[K, V]) DeepCopy() interface{} {
 	data := make(map[K]V, len(m.data))
 	if m.list != nil {
 		var node *gListMapNode[K, V]
-		m.list.IteratorAsc(func(e *Element[*gListMapNode[K, V]]) bool {
+		m.list.ForEachAsc(func(e *Element[*gListMapNode[K, V]]) bool {
 			node = e.Value
 			data[node.key] = deepcopy.Copy(node.value).(V)
 			return true

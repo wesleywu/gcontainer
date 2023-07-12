@@ -172,18 +172,18 @@ func Test_AnyAnyMap_Iterator(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		expect := map[int]int{1: 1, 2: 2}
 		m := g.NewHashMapFrom[int, int](expect)
-		m.Iterator(func(k int, v int) bool {
+		m.ForEach(func(k int, v int) bool {
 			t.Assert(expect[k], v)
 			return true
 		})
 		// 断言返回值对遍历控制
 		i := 0
 		j := 0
-		m.Iterator(func(k int, v int) bool {
+		m.ForEach(func(k int, v int) bool {
 			i++
 			return true
 		})
-		m.Iterator(func(k int, v int) bool {
+		m.ForEach(func(k int, v int) bool {
 			j++
 			return false
 		})

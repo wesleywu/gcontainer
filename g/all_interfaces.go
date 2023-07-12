@@ -299,9 +299,9 @@ type Map[K comparable, V comparable] interface {
 	// Removes batch deletes values of the tree by `keys`.
 	Removes(keys []K)
 
-	// Iterator iterates all entries in the map readonly with custom callback function `f`.
+	// ForEach iterates all entries in the map readonly with custom callback function `f`.
 	// If `f` returns true, then it continues iterating; or false to stop.
-	Iterator(f func(key K, value V) bool)
+	ForEach(f func(key K, value V) bool)
 
 	// ContainsKey checks whether `key` exists in the map.
 	ContainsKey(key K) bool
@@ -340,7 +340,7 @@ type Map[K comparable, V comparable] interface {
 	//
 	// If the function `f` returns null, the mapping is removed (or remains absent if initially absent).
 	// If the function itself returns an error, the error is rethrown, and the current mapping is left unchanged.
-	// todo implement me
+	// todo implements me
 	//Compute(key K, f func(key K, value V) (V, error)) error
 
 	// String returns the map as a string.

@@ -142,12 +142,9 @@ func (l *LinkedList[T]) ForEach(f func(T) bool) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 	l.lazyInit()
-	length := l.len
-	if length > 0 {
-		for i, e := 0, l.root.next; i < length; i, e = i+1, e.Next() {
-			if !f(e.Value) {
-				break
-			}
+	for i, e := 0, l.root.next; i < l.len; i, e = i+1, e.Next() {
+		if !f(e.Value) {
+			break
 		}
 	}
 }
@@ -647,39 +644,33 @@ func (l *LinkedList[T]) Equals(another Collection[T]) bool {
 	return true
 }
 
-// Iterator is alias of IteratorAsc.
+// Iterator is alias of ForEachAsc.
 func (l *LinkedList[T]) Iterator(f func(e *Element[T]) bool) {
-	l.IteratorAsc(f)
+	l.ForEachAsc(f)
 }
 
-// IteratorAsc iterates the list readonly in ascending order with given callback function `f`.
+// ForEachAsc iterates the list readonly in ascending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (l *LinkedList[T]) IteratorAsc(f func(e *Element[T]) bool) {
+func (l *LinkedList[T]) ForEachAsc(f func(e *Element[T]) bool) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 	l.lazyInit()
-	length := l.Len()
-	if length > 0 {
-		for i, e := 0, l.root.next; i < length; i, e = i+1, e.Next() {
-			if !f(e) {
-				break
-			}
+	for i, e := 0, l.root.next; i < l.len; i, e = i+1, e.Next() {
+		if !f(e) {
+			break
 		}
 	}
 }
 
-// IteratorDesc iterates the list readonly in descending order with given callback function `f`.
+// ForEachDesc iterates the list readonly in descending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (l *LinkedList[T]) IteratorDesc(f func(e *Element[T]) bool) {
+func (l *LinkedList[T]) ForEachDesc(f func(e *Element[T]) bool) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 	l.lazyInit()
-	length := l.Len()
-	if length > 0 {
-		for i, e := 0, l.root.prev; i < length; i, e = i+1, e.Prev() {
-			if !f(e) {
-				break
-			}
+	for i, e := 0, l.root.prev; i < l.len; i, e = i+1, e.Prev() {
+		if !f(e) {
+			break
 		}
 	}
 }

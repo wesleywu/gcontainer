@@ -158,7 +158,7 @@ func (t *TreeSet[T]) DeepCopy() Collection[T] {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	data := make([]T, 0)
-	t.tree.Iterator(func(k T, _ struct{}) bool {
+	t.tree.ForEach(func(k T, _ struct{}) bool {
 		data = append(data, deepcopy.Copy(k).(T))
 		return true
 	})
@@ -224,7 +224,7 @@ func (t *TreeSet[T]) ForEach(f func(T) bool) {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	t.lazyInit()
-	t.tree.Iterator(func(key T, _ struct{}) bool {
+	t.tree.ForEach(func(key T, _ struct{}) bool {
 		return f(key)
 	})
 }
@@ -233,7 +233,7 @@ func (t *TreeSet[T]) ForEachDescending(f func(T) bool) {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	t.lazyInit()
-	t.tree.IteratorDesc(func(key T, _ struct{}) bool {
+	t.tree.ForEachDesc(func(key T, _ struct{}) bool {
 		return f(key)
 	})
 }
@@ -283,7 +283,7 @@ func (t *TreeSet[T]) Join(glue string) string {
 		i      = 0
 		buffer = bytes.NewBuffer(nil)
 	)
-	t.tree.Iterator(func(key T, value struct{}) bool {
+	t.tree.ForEach(func(key T, value struct{}) bool {
 		buffer.WriteString(gconv.String(key))
 		if i != size-1 {
 			buffer.WriteString(glue)
@@ -396,7 +396,7 @@ func (t *TreeSet[T]) String() string {
 	)
 	buffer.WriteByte('[')
 	s := ""
-	t.tree.Iterator(func(key T, _ struct{}) bool {
+	t.tree.ForEach(func(key T, _ struct{}) bool {
 		s = gconv.String(key)
 		if gstr.IsNumeric(s) {
 			buffer.WriteString(s)

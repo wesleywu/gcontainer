@@ -103,14 +103,14 @@ func Test_RedBlackTree_Iterator(t *testing.T) {
 
 	gtest.C(t, func(t *gtest.T) {
 
-		m.Iterator(func(k string, v string) bool {
+		m.ForEach(func(k string, v string) bool {
 			t.Assert(k, keys[index])
 			index++
 			t.Assert(expect[k], v)
 			return true
 		})
 
-		m.IteratorDesc(func(k string, v string) bool {
+		m.ForEachDesc(func(k string, v string) bool {
 			index--
 			t.Assert(k, keys[index])
 			t.Assert(expect[k], v)
@@ -122,11 +122,11 @@ func Test_RedBlackTree_Iterator(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		i := 0
 		j := 0
-		m.Iterator(func(k string, v string) bool {
+		m.ForEach(func(k string, v string) bool {
 			i++
 			return true
 		})
-		m.Iterator(func(k string, v string) bool {
+		m.ForEach(func(k string, v string) bool {
 			j++
 			return false
 		})
@@ -137,11 +137,11 @@ func Test_RedBlackTree_Iterator(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		i := 0
 		j := 0
-		m.IteratorDesc(func(k string, v string) bool {
+		m.ForEachDesc(func(k string, v string) bool {
 			i++
 			return true
 		})
-		m.IteratorDesc(func(k string, v string) bool {
+		m.ForEachDesc(func(k string, v string) bool {
 			j++
 			return false
 		})

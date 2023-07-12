@@ -90,18 +90,18 @@ func Test_Map_Iterator(t *testing.T) {
 		expect := map[string]string{"1": "1", "key1": "val1"}
 
 		m := g.NewHashMapFrom[string, string](expect)
-		m.Iterator(func(k string, v string) bool {
+		m.ForEach(func(k string, v string) bool {
 			t.Assert(expect[k], v)
 			return true
 		})
 		// 断言返回值对遍历控制
 		i := 0
 		j := 0
-		m.Iterator(func(k string, v string) bool {
+		m.ForEach(func(k string, v string) bool {
 			i++
 			return true
 		})
-		m.Iterator(func(k string, v string) bool {
+		m.ForEach(func(k string, v string) bool {
 			j++
 			return false
 		})

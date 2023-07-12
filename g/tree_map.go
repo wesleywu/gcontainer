@@ -86,7 +86,7 @@ func (tree *TreeMap[K, V]) AscendingKeySet() SortedSet[K] {
 		keySet = NewTreeSet[K](tree.Comparator(), tree.mu.IsSafe())
 		index  = 0
 	)
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		keySet.Add(key)
 		index++
 		return true
@@ -131,7 +131,7 @@ func (tree *TreeMap[K, V]) DescendingKeySet() SortedSet[K] {
 		keySet = NewTreeSet[K](comparators.Reverse(tree.Comparator()), tree.mu.IsSafe())
 		index  = 0
 	)
-	tree.IteratorDesc(func(key K, value V) bool {
+	tree.ForEachDesc(func(key K, value V) bool {
 		keySet.Add(key)
 		index++
 		return true
@@ -418,7 +418,7 @@ func (tree *TreeMap[K, V]) Keys() []K {
 		keys  = make([]K, tree.Size())
 		index = 0
 	)
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		keys[index] = key
 		index++
 		return true
@@ -432,7 +432,7 @@ func (tree *TreeMap[K, V]) Values() []V {
 		values = make([]V, tree.Size())
 		index  = 0
 	)
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		values[index] = value
 		index++
 		return true
@@ -443,7 +443,7 @@ func (tree *TreeMap[K, V]) Values() []V {
 // Map returns all key-value items as map.
 func (tree *TreeMap[K, V]) Map() map[K]V {
 	m := make(map[K]V, tree.Size())
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		m[key] = value
 		return true
 	})
@@ -453,7 +453,7 @@ func (tree *TreeMap[K, V]) Map() map[K]V {
 // MapStrAny returns all key-value items as map[string]V.
 func (tree *TreeMap[K, V]) MapStrAny() map[string]V {
 	m := make(map[string]V, tree.Size())
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		m[gconv.String(key)] = value
 		return true
 	})
@@ -708,9 +708,9 @@ func (tree *TreeMap[K, V]) HigherKey(key K) (higherKey K, ok bool) {
 	return
 }
 
-// Iterator is alias of IteratorAsc.
-func (tree *TreeMap[K, V]) Iterator(f func(key K, value V) bool) {
-	tree.IteratorAsc(f)
+// ForEach is alias of ForEachAsc.
+func (tree *TreeMap[K, V]) ForEach(f func(key K, value V) bool) {
+	tree.ForEachAsc(f)
 }
 
 // IteratorFrom is alias of IteratorAscFrom.
@@ -718,9 +718,9 @@ func (tree *TreeMap[K, V]) IteratorFrom(key K, inclusive bool, f func(key K, val
 	tree.IteratorAscFrom(key, inclusive, f)
 }
 
-// IteratorAsc iterates the tree readonly in ascending order with given callback function `f`.
+// ForEachAsc iterates the tree readonly in ascending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *TreeMap[K, V]) IteratorAsc(f func(key K, value V) bool) {
+func (tree *TreeMap[K, V]) ForEachAsc(f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	tree.doIteratorAsc(tree.leftNode(), f)
@@ -771,9 +771,9 @@ loop:
 	}
 }
 
-// IteratorDesc iterates the tree readonly in descending order with given callback function `f`.
+// ForEachDesc iterates the tree readonly in descending order with given callback function `f`.
 // If `f` returns true, then it continues iterating; or false to stop.
-func (tree *TreeMap[K, V]) IteratorDesc(f func(key K, value V) bool) {
+func (tree *TreeMap[K, V]) ForEachDesc(f func(key K, value V) bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
 	tree.doIteratorDesc(tree.rightNode(), f)
@@ -954,7 +954,7 @@ func (tree *TreeMap[K, V]) TailMap(fromKey K, inclusive bool) SortedMap[K, V] {
 func (tree *TreeMap[K, V]) Flip(comparator func(v1, v2 V) int) *TreeMap[V, K] {
 	t := (*TreeMap[V, K])(nil)
 	t = NewRedBlackTree[V, K](comparator, tree.mu.IsSafe())
-	tree.IteratorAsc(func(key K, value V) bool {
+	tree.ForEachAsc(func(key K, value V) bool {
 		t.doSet(value, key)
 		return true
 	})
@@ -1222,7 +1222,7 @@ func (tree TreeMap[K, V]) MarshalJSON() (jsonBytes []byte, err error) {
 	}
 	buffer := bytes.NewBuffer(nil)
 	buffer.WriteByte('{')
-	tree.Iterator(func(key K, value V) bool {
+	tree.ForEach(func(key K, value V) bool {
 		valueBytes, valueJsonErr := json.Marshal(value)
 		if valueJsonErr != nil {
 			err = valueJsonErr

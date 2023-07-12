@@ -608,7 +608,7 @@ func ExampleList_IteratorAsc() {
 	// concurrent-safe list.
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 10, 1).Slice(), true)
 	// iterate reading from head using ForEachAsc.
-	l.IteratorAsc(func(e *g.Element[int]) bool {
+	l.ForEachAsc(func(e *g.Element[int]) bool {
 		fmt.Print(e.Value)
 		return true
 	})
@@ -621,7 +621,7 @@ func ExampleList_IteratorDesc() {
 	// concurrent-safe list.
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 10, 1).Slice(), true)
 	// iterate reading from tail using ForEachDesc.
-	l.IteratorDesc(func(e *g.Element[int]) bool {
+	l.ForEachDesc(func(e *g.Element[int]) bool {
 		fmt.Print(e.Value)
 		return true
 	})
