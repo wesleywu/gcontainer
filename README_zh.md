@@ -4,7 +4,7 @@
 
 包含 Go 语言实现的各类数据结构(容器)，全面支持泛型，目标是复刻 Java 类库中的 java.util 和 java.util.concurrent 包里的数据结构实现。
 
-[![License MIT](https://img.shields.io/badge/License-MIT-red.svg)](COPYING)
+[![License MIT](https://img.shields.io/badge/License-MIT-red.svg)](LICENSE)
 [![Golang](https://img.shields.io/badge/Language-go1.20%2B-blue)](https://go.dev/)
 
 ```go
