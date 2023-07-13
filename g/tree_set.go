@@ -327,6 +327,19 @@ func (t *TreeSet[T]) PollFirst() (first T, found bool) {
 	return first, false
 }
 
+func (t *TreeSet[T]) PollHeadSet(toElement T, inclusive bool) SortedSet[T] {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.lazyInit()
+	result := NewTreeSet[T](t.Comparator(), t.mu.IsSafe())
+	headKeys := t.tree.HeadMap(toElement, inclusive).Keys()
+	for _, key := range headKeys {
+		t.tree.Remove(key)
+		result.Add(key)
+	}
+	return result
+}
+
 func (t *TreeSet[T]) PollLast() (last T, found bool) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -336,6 +349,19 @@ func (t *TreeSet[T]) PollLast() (last T, found bool) {
 		return lastNode.Key(), true
 	}
 	return last, false
+}
+
+func (t *TreeSet[T]) PollTailSet(fromElement T, inclusive bool) SortedSet[T] {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.lazyInit()
+	result := NewTreeSet[T](t.Comparator(), t.mu.IsSafe())
+	tailKeys := t.tree.TailMap(fromElement, inclusive).Keys()
+	for _, key := range tailKeys {
+		t.tree.Remove(key)
+		result.Add(key)
+	}
+	return result
 }
 
 func (t *TreeSet[T]) Remove(elements ...T) bool {

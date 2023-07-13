@@ -125,9 +125,17 @@ type SortedSet[T comparable] interface {
 	// or returns empty of type T and false as `found` if this set is empty.
 	PollFirst() (first T, found bool)
 
+	// PollHeadSet retrieves and removes portion of this set whose elements are less than
+	// (or equal to, if inclusive is true) toElement.
+	PollHeadSet(toElement T, inclusive bool) SortedSet[T]
+
 	// PollLast retrieves and removes the last (highest) element and true as `found`,
 	// or returns empty of type T and false as `found` if this set is empty.
 	PollLast() (last T, found bool)
+
+	// PollTailSet retrieves and removes portion of this set whose elements are greater than
+	// (or equal to, if inclusive is true) fromElement.
+	PollTailSet(fromElement T, inclusive bool) SortedSet[T]
 
 	// SubSet returns a view of the portion of this set whose elements range from fromElement to toElement.
 	SubSet(fromElement T, fromInclusive bool, toElement T, toInclusive bool) SortedSet[T]
