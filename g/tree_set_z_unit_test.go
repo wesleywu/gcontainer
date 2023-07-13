@@ -411,6 +411,43 @@ func TestTreeSet_PollFirst(t *testing.T) {
 	})
 }
 
+func TestTreeSet_PollHeadSet(t *testing.T) {
+	gtest.C(t, func(t *gtest.T) {
+		a1 := []string{"a", "d", "c", "b", "e"}
+		setOrigin := g.NewTreeSetFrom(a1, comparators.ComparatorString)
+
+		s1 := setOrigin.Clone().(*g.TreeSet[string])
+		r1 := s1.PollHeadSet("c", false)
+		t.Assert(r1.Slice(), []string{"a", "b"})
+		t.Assert(s1.Slice(), []string{"c", "d", "e"})
+
+		s2 := setOrigin.Clone().(*g.TreeSet[string])
+		r2 := s2.PollHeadSet("c", true)
+		t.Assert(r2.Slice(), []string{"a", "b", "c"})
+		t.Assert(s2.Slice(), []string{"d", "e"})
+
+		s3 := setOrigin.Clone().(*g.TreeSet[string])
+		r3 := s3.PollHeadSet("c1", true)
+		t.Assert(r3.Slice(), []string{"a", "b", "c"})
+		t.Assert(s3.Slice(), []string{"d", "e"})
+
+		s4 := setOrigin.Clone().(*g.TreeSet[string])
+		r4 := s4.PollHeadSet("c1", false)
+		t.Assert(r4.Slice(), []string{"a", "b", "c"})
+		t.Assert(s4.Slice(), []string{"d", "e"})
+
+		s5 := setOrigin.Clone().(*g.TreeSet[string])
+		r5 := s5.PollHeadSet("z", true)
+		t.Assert(r5.Slice(), []string{"a", "b", "c", "d", "e"})
+		t.Assert(s5.Slice(), []string{})
+
+		s6 := setOrigin.Clone().(*g.TreeSet[string])
+		r6 := s6.PollHeadSet("_", true)
+		t.Assert(r6.Slice(), []string{})
+		t.Assert(s6.Slice(), []string{"a", "b", "c", "d", "e"})
+	})
+}
+
 func TestTreeSet_PollLast(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array1 := g.NewTreeSetFrom(
@@ -439,6 +476,43 @@ func TestTreeSet_PollLast(t *testing.T) {
 		t.Assert(v, 1)
 		t.Assert(ok, true)
 		t.Assert(array.Size(), 0)
+	})
+}
+
+func TestTreeSet_PollTailSet(t *testing.T) {
+	gtest.C(t, func(t *gtest.T) {
+		a1 := []string{"a", "d", "c", "b", "e"}
+		setOrigin := g.NewTreeSetFrom(a1, comparators.ComparatorString)
+
+		s1 := setOrigin.Clone().(*g.TreeSet[string])
+		r1 := s1.PollTailSet("c", false)
+		t.Assert(r1.Slice(), []string{"d", "e"})
+		t.Assert(s1.Slice(), []string{"a", "b", "c"})
+
+		s2 := setOrigin.Clone().(*g.TreeSet[string])
+		r2 := s2.PollTailSet("c", true)
+		t.Assert(r2.Slice(), []string{"c", "d", "e"})
+		t.Assert(s2.Slice(), []string{"a", "b"})
+
+		s3 := setOrigin.Clone().(*g.TreeSet[string])
+		r3 := s3.PollTailSet("c1", true)
+		t.Assert(r3.Slice(), []string{"d", "e"})
+		t.Assert(s3.Slice(), []string{"a", "b", "c"})
+
+		s4 := setOrigin.Clone().(*g.TreeSet[string])
+		r4 := s4.PollTailSet("c1", false)
+		t.Assert(r4.Slice(), []string{"d", "e"})
+		t.Assert(s4.Slice(), []string{"a", "b", "c"})
+
+		s5 := setOrigin.Clone().(*g.TreeSet[string])
+		r5 := s5.PollTailSet("z", true)
+		t.Assert(r5.Slice(), []string{})
+		t.Assert(s5.Slice(), []string{"a", "b", "c", "d", "e"})
+
+		s6 := setOrigin.Clone().(*g.TreeSet[string])
+		r6 := s6.PollTailSet("_", true)
+		t.Assert(r6.Slice(), []string{"a", "b", "c", "d", "e"})
+		t.Assert(s6.Slice(), []string{})
 	})
 }
 

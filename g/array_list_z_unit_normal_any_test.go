@@ -107,11 +107,11 @@ func TestArray_Sort(t *testing.T) {
 		for i := 3; i >= 0; i-- {
 			array.Add(i)
 		}
-		array.SortFunc(func(v1, v2 int) bool {
+		array.Sort(func(v1, v2 int) bool {
 			return v1 < v2
 		})
 		t.Assert(array.Slice(), expect1)
-		array.SortFunc(func(v1, v2 int) bool {
+		array.Sort(func(v1, v2 int) bool {
 			return v1 > v2
 		})
 		t.Assert(array.Slice(), expect2)
