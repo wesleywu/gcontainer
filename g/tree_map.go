@@ -67,7 +67,7 @@ func NewRedBlackTreeDefault[K comparable, V comparable](safe ...bool) *TreeMap[K
 func NewRedBlackTreeFrom[K comparable, V comparable](comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *TreeMap[K, V] {
 	tree := NewRedBlackTree[K, V](comparator, safe...)
 	for k, v := range data {
-		tree.doSet(k, v)
+		tree.insertEntry(k, v)
 	}
 	return tree
 }
@@ -95,6 +95,9 @@ func (tree *TreeMap[K, V]) AscendingKeySet() SortedSet[K] {
 }
 
 func (tree *TreeMap[K, V]) Comparator() comparators.Comparator[K] {
+	if tree.comparator == nil {
+		tree.comparator = comparators.ComparatorAny[K]
+	}
 	return tree.comparator
 }
 
@@ -113,7 +116,7 @@ func (tree *TreeMap[K, V]) SetComparator(comparator comparators.Comparator[K]) {
 		tree.root = nil
 		tree.size = 0
 		for k, v := range data {
-			tree.doSet(k, v)
+			tree.insertEntry(k, v)
 		}
 	}
 }
@@ -149,7 +152,7 @@ func (tree *TreeMap[K, V]) FirstEntry() MapEntry[K, V] {
 func (tree *TreeMap[K, V]) Put(key K, value V) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
-	tree.doSet(key, value)
+	tree.insertEntry(key, value)
 }
 
 // Puts batch sets key-values to the tree.
@@ -157,50 +160,49 @@ func (tree *TreeMap[K, V]) Puts(data map[K]V) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	for k, v := range data {
-		tree.doSet(k, v)
+		tree.insertEntry(k, v)
 	}
 }
 
-// doSet inserts key-value item into the tree without mutex.
-func (tree *TreeMap[K, V]) doSet(key K, value V) {
-	insertedNode := (*RedBlackTreeNode[K, V])(nil)
-	if tree.root == nil {
-		// Assert key is of comparators's type for initial tree
-		tree.getComparator()(key, key)
-		tree.root = &RedBlackTreeNode[K, V]{key: key, value: value, color: red}
-		insertedNode = tree.root
-	} else {
-		node := tree.root
-		loop := true
-		for loop {
-			compare := tree.getComparator()(key, node.key)
-			switch {
-			case compare == 0:
-				// node.key   = key
-				node.value = value
-				return
-			case compare < 0:
-				if node.left == nil {
-					node.left = &RedBlackTreeNode[K, V]{key: key, value: value, color: red}
-					insertedNode = node.left
-					loop = false
-				} else {
-					node = node.left
-				}
-			case compare > 0:
-				if node.right == nil {
-					node.right = &RedBlackTreeNode[K, V]{key: key, value: value, color: red}
-					insertedNode = node.right
-					loop = false
-				} else {
-					node = node.right
-				}
-			}
-		}
-		insertedNode.parent = node
+func (tree *TreeMap[K, V]) insertEntry(key K, value V) (putValue V) {
+	t := tree.root
+	if t == nil {
+		tree.Comparator()(key, key) // type (and possibly nil) check
+
+		tree.root = &RedBlackTreeNode[K, V]{key: key, value: value, color: black}
+		tree.size = 1
+		//modCount++
+		return
 	}
-	tree.insertCase1(insertedNode)
+	var cmp int
+	var parent *RedBlackTreeNode[K, V]
+	// split comparator and comparable paths
+	var cpr = tree.Comparator()
+	for {
+		parent = t
+		cmp = cpr(key, t.key)
+		if cmp < 0 {
+			t = t.left
+		} else if cmp > 0 {
+			t = t.right
+		} else {
+			t.value = value
+			return value
+		}
+		if t == nil {
+			break
+		}
+	}
+	e := &RedBlackTreeNode[K, V]{key: key, value: value, parent: parent, color: black}
+	if cmp < 0 {
+		parent.left = e
+	} else {
+		parent.right = e
+	}
+	tree.fixAfterInsertion(e)
 	tree.size++
+	//modCount++
+	return
 }
 
 // Get returns the value by given `key`, or empty value of type K if the key is not found in the map.
@@ -221,11 +223,11 @@ func (tree *TreeMap[K, V]) Get(key K) (value V) {
 func (tree *TreeMap[K, V]) doSetWithLockCheck(key K, value V) V {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
-	if node, found := tree.doSearch(key); found {
+	if node := tree.getEntry(key); node != nil {
 		return node.value
 	}
 	if any(value) != nil {
-		tree.doSet(key, value)
+		tree.insertEntry(key, value)
 	}
 	return value
 }
@@ -242,12 +244,12 @@ func (tree *TreeMap[K, V]) doSetWithLockCheck(key K, value V) V {
 func (tree *TreeMap[K, V]) doSetWithLockCheckFunc(key K, f func() V) V {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
-	if node, found := tree.doSearch(key); found {
+	if node := tree.getEntry(key); node != nil {
 		return node.value
 	}
 	value := f()
 	if any(value) != nil {
-		tree.doSet(key, value)
+		tree.insertEntry(key, value)
 	}
 	return value
 }
@@ -302,37 +304,198 @@ func (tree *TreeMap[K, V]) ContainsKey(key K) bool {
 	return ok
 }
 
-// doRemove removes the node from the tree by `key` without mutex.
-func (tree *TreeMap[K, V]) doRemove(node *RedBlackTreeNode[K, V]) (value V, removed bool) {
-	if node == nil {
-		return
-	}
-	child := (*RedBlackTreeNode[K, V])(nil)
-	value = node.value
-	if node.left != nil && node.right != nil {
-		p := node.left.maximumNode()
-		node.key = p.key
-		node.value = p.value
-		node = p
-	}
-	if node.left == nil || node.right == nil {
-		if node.right == nil {
-			child = node.left
-		} else {
-			child = node.right
-		}
-		if node.color == black {
-			node.color = tree.nodeColor(child)
-			tree.deleteCase1(node)
-		}
-		tree.replaceNode(node, child)
-		if node.parent == nil && child != nil {
-			child.color = black
-		}
-	}
+func (tree *TreeMap[K, V]) deleteEntry(p *RedBlackTreeNode[K, V]) {
 	tree.size--
-	removed = true
-	return
+
+	// If strictly internal, copy successor's element to p and then make p
+	// point to successor.
+	if p.left != nil && p.right != nil {
+		s := successor(p)
+		p.key = s.key
+		p.value = s.value
+		p = s
+	} // p has 2 children
+
+	// Start fixup at replacement node, if it exists.
+	var replacement *RedBlackTreeNode[K, V]
+	if p.left != nil {
+		replacement = p.left
+	} else {
+		replacement = p.right
+	}
+
+	if replacement != nil {
+		// Link replacement to parent
+		replacement.parent = p.parent
+		if p.parent == nil {
+			tree.root = replacement
+		} else if p == p.parent.left {
+			p.parent.left = replacement
+		} else {
+			p.parent.right = replacement
+		}
+
+		// Nil out links so they are OK to use by fixAfterDeletion.
+		p.left = nil
+		p.right = nil
+		p.parent = nil
+
+		// Fix replacement
+		if p.color == black {
+			tree.fixAfterDeletion(replacement)
+		}
+	} else if p.parent == nil { // return if we are the only node.
+		tree.root = nil
+	} else { //  No children. Use self as phantom replacement and unlink.
+		if p.color == black {
+			tree.fixAfterDeletion(p)
+		}
+		if p.parent != nil {
+			if p == p.parent.left {
+				p.parent.left = nil
+			} else if p == p.parent.right {
+				p.parent.right = nil
+			}
+			p.parent = nil
+		}
+	}
+}
+
+func (tree *TreeMap[K, V]) fixAfterDeletion(x *RedBlackTreeNode[K, V]) {
+	for x != tree.root && x.color == black {
+		if x == leftOf(parentOf(x)) {
+			sib := rightOf(parentOf(x))
+
+			if colorOf(sib) == red {
+				setColor(sib, black)
+				setColor(parentOf(x), red)
+				tree.rotateLeft(parentOf(x))
+				sib = rightOf(parentOf(x))
+			}
+
+			if colorOf(leftOf(sib)) == black &&
+				colorOf(rightOf(sib)) == black {
+				setColor(sib, red)
+				x = parentOf(x)
+			} else {
+				if colorOf(rightOf(sib)) == black {
+					setColor(leftOf(sib), black)
+					setColor(sib, red)
+					tree.rotateRight(sib)
+					sib = rightOf(parentOf(x))
+				}
+				setColor(sib, colorOf(parentOf(x)))
+				setColor(parentOf(x), black)
+				setColor(rightOf(sib), black)
+				tree.rotateLeft(parentOf(x))
+				x = tree.root
+			}
+		} else { // symmetric
+			sib := leftOf(parentOf(x))
+
+			if colorOf(sib) == red {
+				setColor(sib, black)
+				setColor(parentOf(x), red)
+				tree.rotateRight(parentOf(x))
+				sib = leftOf(parentOf(x))
+			}
+
+			if colorOf(rightOf(sib)) == black &&
+				colorOf(leftOf(sib)) == black {
+				setColor(sib, red)
+				x = parentOf(x)
+			} else {
+				if colorOf(leftOf(sib)) == black {
+					setColor(rightOf(sib), black)
+					setColor(sib, red)
+					tree.rotateLeft(sib)
+					sib = leftOf(parentOf(x))
+				}
+				setColor(sib, colorOf(parentOf(x)))
+				setColor(parentOf(x), black)
+				setColor(leftOf(sib), black)
+				tree.rotateRight(parentOf(x))
+				x = tree.root
+			}
+		}
+	}
+	x.color = black
+}
+
+func leftOf[K comparable, V comparable](p *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
+	if p == nil {
+		return nil
+	}
+	return p.left
+}
+
+func rightOf[K comparable, V comparable](p *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
+	if p == nil {
+		return nil
+	}
+	return p.right
+}
+
+func parentOf[K comparable, V comparable](p *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
+	if p == nil {
+		return nil
+	}
+	return p.parent
+}
+
+func colorOf[K comparable, V comparable](p *RedBlackTreeNode[K, V]) color {
+	if p == nil {
+		return black
+	}
+	return p.color
+}
+
+func setColor[K comparable, V comparable](p *RedBlackTreeNode[K, V], c color) {
+	if p != nil {
+		p.color = c
+	}
+}
+
+// successor returns the successor of the specified Entry, or nil if no such.
+func successor[K comparable, V comparable](t *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
+	if t == nil {
+		return nil
+	} else if t.right != nil {
+		p := t.right
+		for p.left != nil {
+			p = p.left
+		}
+		return p
+	} else {
+		p := t.parent
+		ch := t
+		for p != nil && ch == p.right {
+			ch = p
+			p = p.parent
+		}
+		return p
+	}
+}
+
+// predecessor returns the predecessor of the specified Entry, or nil if no such.
+func predecessor[K comparable, V comparable](t *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
+	if t == nil {
+		return nil
+	} else if t.left != nil {
+		p := t.left
+		for p.right != nil {
+			p = p.right
+		}
+		return p
+	} else {
+		p := t.parent
+		ch := t
+		for p != nil && ch == p.left {
+			ch = p
+			p = p.parent
+		}
+		return p
+	}
 }
 
 func (tree *TreeMap[K, V]) PollFirstEntry() MapEntry[K, V] {
@@ -342,7 +505,7 @@ func (tree *TreeMap[K, V]) PollFirstEntry() MapEntry[K, V] {
 	if node == nil {
 		return nil
 	}
-	tree.doRemove(node)
+	tree.deleteEntry(node)
 	if tree.mu.IsSafe() {
 		return &RedBlackTreeNode[K, V]{
 			key:   node.key,
@@ -359,7 +522,7 @@ func (tree *TreeMap[K, V]) PollLastEntry() MapEntry[K, V] {
 	if node == nil {
 		return nil
 	}
-	tree.doRemove(node)
+	tree.deleteEntry(node)
 	if tree.mu.IsSafe() {
 		return &RedBlackTreeNode[K, V]{
 			key:   node.key,
@@ -373,11 +536,13 @@ func (tree *TreeMap[K, V]) PollLastEntry() MapEntry[K, V] {
 func (tree *TreeMap[K, V]) Remove(key K) (value V, removed bool) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
-	node, found := tree.doSearch(key)
-	if !found {
+	node := tree.getEntry(key)
+	if node == nil {
 		return
 	}
-	return tree.doRemove(node)
+	value = node.value
+	tree.deleteEntry(node)
+	return value, true
 }
 
 // Removes batch deletes values of the tree by `keys`.
@@ -385,11 +550,11 @@ func (tree *TreeMap[K, V]) Removes(keys []K) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	for _, key := range keys {
-		node, found := tree.doSearch(key)
-		if !found {
+		node := tree.getEntry(key)
+		if node == nil {
 			continue
 		}
-		tree.doRemove(node)
+		tree.deleteEntry(node)
 	}
 }
 
@@ -901,7 +1066,7 @@ func (tree *TreeMap[K, V]) Replace(data map[K]V) {
 	tree.root = nil
 	tree.size = 0
 	for k, v := range data {
-		tree.doSet(k, v)
+		tree.insertEntry(k, v)
 	}
 }
 
@@ -929,8 +1094,8 @@ func (tree *TreeMap[K, V]) Print() {
 func (tree *TreeMap[K, V]) Search(key K) (value V, found bool) {
 	tree.mu.RLock()
 	defer tree.mu.RUnlock()
-	node, found := tree.doSearch(key)
-	if found {
+	node := tree.getEntry(key)
+	if node != nil {
 		return node.value, true
 	}
 	return
@@ -955,7 +1120,7 @@ func (tree *TreeMap[K, V]) Flip(comparator func(v1, v2 V) int) *TreeMap[V, K] {
 	t := (*TreeMap[V, K])(nil)
 	t = NewRedBlackTree[V, K](comparator, tree.mu.IsSafe())
 	tree.ForEachAsc(func(key K, value V) bool {
-		t.doSet(value, key)
+		t.insertEntry(value, key)
 		return true
 	})
 	return t
@@ -989,230 +1154,103 @@ func (tree *TreeMap[K, V]) output(node *RedBlackTreeNode[K, V], prefix string, i
 	}
 }
 
-// doSearch searches the tree with given `key` without mutex.
-// It returns the node if found or otherwise nil.
-func (tree *TreeMap[K, V]) doSearch(key K) (node *RedBlackTreeNode[K, V], found bool) {
-	node = tree.root
-	for node != nil {
-		compare := tree.getComparator()(key, node.key)
+func (tree *TreeMap[K, V]) getEntry(key K) *RedBlackTreeNode[K, V] {
+	p := tree.root
+	for p != nil {
+		compare := tree.getComparator()(key, p.key)
 		switch {
 		case compare == 0:
-			return node, true
+			return p
 		case compare < 0:
-			node = node.left
+			p = p.left
 		case compare > 0:
-			node = node.right
+			p = p.right
 		}
 	}
-	return node, false
+	return p
 }
 
-func (node *RedBlackTreeNode[K, V]) grandparent() *RedBlackTreeNode[K, V] {
-	if node != nil && node.parent != nil {
-		return node.parent.parent
-	}
-	return nil
-}
-
-func (node *RedBlackTreeNode[K, V]) uncle() *RedBlackTreeNode[K, V] {
-	if node == nil || node.parent == nil || node.parent.parent == nil {
-		return nil
-	}
-	return node.parent.sibling()
-}
-
-func (node *RedBlackTreeNode[K, V]) sibling() *RedBlackTreeNode[K, V] {
-	if node == nil || node.parent == nil {
-		return nil
-	}
-	if node == node.parent.left {
-		return node.parent.right
-	}
-	return node.parent.left
-}
-
-func (tree *TreeMap[K, V]) rotateLeft(node *RedBlackTreeNode[K, V]) {
-	right := node.right
-	tree.replaceNode(node, right)
-	node.right = right.left
-	if right.left != nil {
-		right.left.parent = node
-	}
-	right.left = node
-	node.parent = right
-}
-
-func (tree *TreeMap[K, V]) rotateRight(node *RedBlackTreeNode[K, V]) {
-	left := node.left
-	tree.replaceNode(node, left)
-	node.left = left.right
-	if left.right != nil {
-		left.right.parent = node
-	}
-	left.right = node
-	node.parent = left
-}
-
-func (tree *TreeMap[K, V]) replaceNode(old *RedBlackTreeNode[K, V], new *RedBlackTreeNode[K, V]) {
-	if old.parent == nil {
-		tree.root = new
-	} else {
-		if old == old.parent.left {
-			old.parent.left = new
-		} else {
-			old.parent.right = new
-		}
-	}
-	if new != nil {
-		new.parent = old.parent
-	}
-}
-
-func (tree *TreeMap[K, V]) insertCase1(node *RedBlackTreeNode[K, V]) {
-	if node.parent == nil {
-		node.color = black
-	} else {
-		tree.insertCase2(node)
-	}
-}
-
-func (tree *TreeMap[K, V]) insertCase2(node *RedBlackTreeNode[K, V]) {
-	if tree.nodeColor(node.parent) == black {
+func (tree *TreeMap[K, V]) rotateLeft(p *RedBlackTreeNode[K, V]) {
+	if p == nil {
 		return
 	}
-	tree.insertCase3(node)
-}
-
-func (tree *TreeMap[K, V]) insertCase3(node *RedBlackTreeNode[K, V]) {
-	uncle := node.uncle()
-	if tree.nodeColor(uncle) == red {
-		node.parent.color = black
-		uncle.color = black
-		node.grandparent().color = red
-		tree.insertCase1(node.grandparent())
+	r := p.right
+	p.right = r.left
+	if r.left != nil {
+		r.left.parent = p
+	}
+	r.parent = p.parent
+	if p.parent == nil {
+		tree.root = r
+	} else if p.parent.left == p {
+		p.parent.left = r
 	} else {
-		tree.insertCase4(node)
+		p.parent.right = r
 	}
+	r.left = p
+	p.parent = r
 }
 
-func (tree *TreeMap[K, V]) insertCase4(node *RedBlackTreeNode[K, V]) {
-	grandparent := node.grandparent()
-	if node == node.parent.right && node.parent == grandparent.left {
-		tree.rotateLeft(node.parent)
-		node = node.left
-	} else if node == node.parent.left && node.parent == grandparent.right {
-		tree.rotateRight(node.parent)
-		node = node.right
-	}
-	tree.insertCase5(node)
-}
-
-func (tree *TreeMap[K, V]) insertCase5(node *RedBlackTreeNode[K, V]) {
-	node.parent.color = black
-	grandparent := node.grandparent()
-	grandparent.color = red
-	if node == node.parent.left && node.parent == grandparent.left {
-		tree.rotateRight(grandparent)
-	} else if node == node.parent.right && node.parent == grandparent.right {
-		tree.rotateLeft(grandparent)
-	}
-}
-
-func (node *RedBlackTreeNode[K, V]) maximumNode() *RedBlackTreeNode[K, V] {
-	if node == nil {
-		return nil
-	}
-	for node.right != nil {
-		return node.right
-	}
-	return node
-}
-
-func (tree *TreeMap[K, V]) deleteCase1(node *RedBlackTreeNode[K, V]) {
-	if node.parent == nil {
+func (tree *TreeMap[K, V]) rotateRight(p *RedBlackTreeNode[K, V]) {
+	if p == nil {
 		return
 	}
-	tree.deleteCase2(node)
+	l := p.left
+	p.left = l.right
+	if l.right != nil {
+		l.right.parent = p
+	}
+	l.parent = p.parent
+	if p.parent == nil {
+		tree.root = l
+	} else if p.parent.right == p {
+		p.parent.right = l
+	} else {
+		p.parent.left = l
+	}
+	l.right = p
+	p.parent = l
 }
 
-func (tree *TreeMap[K, V]) deleteCase2(node *RedBlackTreeNode[K, V]) {
-	sibling := node.sibling()
-	if tree.nodeColor(sibling) == red {
-		node.parent.color = red
-		sibling.color = black
-		if node == node.parent.left {
-			tree.rotateLeft(node.parent)
+func (tree *TreeMap[K, V]) fixAfterInsertion(x *RedBlackTreeNode[K, V]) {
+	x.color = red
+
+	for x != nil && x != tree.root && x.parent.color == red {
+		if parentOf(x) == leftOf(parentOf(parentOf(x))) {
+			y := rightOf(parentOf(parentOf(x)))
+			if colorOf(y) == red {
+				setColor(parentOf(x), black)
+				setColor(y, black)
+				setColor(parentOf(parentOf(x)), red)
+				x = parentOf(parentOf(x))
+			} else {
+				if x == rightOf(parentOf(x)) {
+					x = parentOf(x)
+					tree.rotateLeft(x)
+				}
+				setColor(parentOf(x), black)
+				setColor(parentOf(parentOf(x)), red)
+				tree.rotateRight(parentOf(parentOf(x)))
+			}
 		} else {
-			tree.rotateRight(node.parent)
+			y := leftOf(parentOf(parentOf(x)))
+			if colorOf(y) == red {
+				setColor(parentOf(x), black)
+				setColor(y, black)
+				setColor(parentOf(parentOf(x)), red)
+				x = parentOf(parentOf(x))
+			} else {
+				if x == leftOf(parentOf(x)) {
+					x = parentOf(x)
+					tree.rotateRight(x)
+				}
+				setColor(parentOf(x), black)
+				setColor(parentOf(parentOf(x)), red)
+				tree.rotateLeft(parentOf(parentOf(x)))
+			}
 		}
 	}
-	tree.deleteCase3(node)
-}
-
-func (tree *TreeMap[K, V]) deleteCase3(node *RedBlackTreeNode[K, V]) {
-	sibling := node.sibling()
-	if tree.nodeColor(node.parent) == black &&
-		tree.nodeColor(sibling) == black &&
-		tree.nodeColor(sibling.left) == black &&
-		tree.nodeColor(sibling.right) == black {
-		sibling.color = red
-		tree.deleteCase1(node.parent)
-	} else {
-		tree.deleteCase4(node)
-	}
-}
-
-func (tree *TreeMap[K, V]) deleteCase4(node *RedBlackTreeNode[K, V]) {
-	sibling := node.sibling()
-	if tree.nodeColor(node.parent) == red &&
-		tree.nodeColor(sibling) == black &&
-		tree.nodeColor(sibling.left) == black &&
-		tree.nodeColor(sibling.right) == black {
-		sibling.color = red
-		node.parent.color = black
-	} else {
-		tree.deleteCase5(node)
-	}
-}
-
-func (tree *TreeMap[K, V]) deleteCase5(node *RedBlackTreeNode[K, V]) {
-	sibling := node.sibling()
-	if node == node.parent.left &&
-		tree.nodeColor(sibling) == black &&
-		tree.nodeColor(sibling.left) == red &&
-		tree.nodeColor(sibling.right) == black {
-		sibling.color = red
-		sibling.left.color = black
-		tree.rotateRight(sibling)
-	} else if node == node.parent.right &&
-		tree.nodeColor(sibling) == black &&
-		tree.nodeColor(sibling.right) == red &&
-		tree.nodeColor(sibling.left) == black {
-		sibling.color = red
-		sibling.right.color = black
-		tree.rotateLeft(sibling)
-	}
-	tree.deleteCase6(node)
-}
-
-func (tree *TreeMap[K, V]) deleteCase6(node *RedBlackTreeNode[K, V]) {
-	sibling := node.sibling()
-	sibling.color = tree.nodeColor(node.parent)
-	node.parent.color = black
-	if node == node.parent.left && tree.nodeColor(sibling.right) == red {
-		sibling.right.color = black
-		tree.rotateLeft(node.parent)
-	} else if tree.nodeColor(sibling.left) == red {
-		sibling.left.color = black
-		tree.rotateRight(node.parent)
-	}
-}
-
-func (tree *TreeMap[K, V]) nodeColor(node *RedBlackTreeNode[K, V]) color {
-	if node == nil {
-		return black
-	}
-	return node.color
+	tree.root.color = black
 }
 
 // MarshalJSON implements the interface MarshalJSON for json.Marshal.
@@ -1250,7 +1288,7 @@ func (tree *TreeMap[K, V]) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	for k, v := range data {
-		tree.doSet(k, v)
+		tree.insertEntry(k, v)
 	}
 	return nil
 }
@@ -1276,7 +1314,7 @@ func (tree *TreeMap[K, V]) UnmarshalValue(value interface{}) (err error) {
 		default:
 			vt, _ = v.(V)
 		}
-		tree.doSet(kt, vt)
+		tree.insertEntry(kt, vt)
 	}
 	return
 }

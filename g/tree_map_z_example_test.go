@@ -15,7 +15,7 @@ import (
 	"github.com/wesleywu/gcontainer/utils/gconv"
 )
 
-func ExampleRedBlackTree_SetComparator() {
+func ExampleTreeMap_SetComparator() {
 	var tree g.TreeMap[string, string]
 	tree.SetComparator(comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
@@ -30,7 +30,7 @@ func ExampleRedBlackTree_SetComparator() {
 	// 6
 }
 
-func ExampleRedBlackTree_Clone() {
+func ExampleTreeMap_Clone() {
 	b := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		b.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -46,7 +46,7 @@ func ExampleRedBlackTree_Clone() {
 	// 6
 }
 
-func ExampleRedBlackTree_Put() {
+func ExampleTreeMap_Put() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -60,7 +60,7 @@ func ExampleRedBlackTree_Put() {
 	// 6
 }
 
-func ExampleRedBlackTree_Puts() {
+func ExampleTreeMap_Puts() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 
 	tree.Puts(map[string]string{
@@ -76,7 +76,7 @@ func ExampleRedBlackTree_Puts() {
 	// 2
 }
 
-func ExampleRedBlackTree_Get() {
+func ExampleTreeMap_Get() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -90,7 +90,7 @@ func ExampleRedBlackTree_Get() {
 	//
 }
 
-func ExampleRedBlackTree_GetOrPut() {
+func ExampleTreeMap_GetOrPut() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -104,7 +104,7 @@ func ExampleRedBlackTree_GetOrPut() {
 	// val6
 }
 
-func ExampleRedBlackTree_GetOrPutFunc() {
+func ExampleTreeMap_GetOrPutFunc() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -122,7 +122,7 @@ func ExampleRedBlackTree_GetOrPutFunc() {
 	// val6
 }
 
-func ExampleRedBlackTree_PutIfAbsent() {
+func ExampleTreeMap_PutIfAbsent() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -136,7 +136,7 @@ func ExampleRedBlackTree_PutIfAbsent() {
 	// true
 }
 
-func ExampleRedBlackTree_PutIfAbsentFunc() {
+func ExampleTreeMap_PutIfAbsentFunc() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -154,7 +154,7 @@ func ExampleRedBlackTree_PutIfAbsentFunc() {
 	// true
 }
 
-func ExampleRedBlackTree_ContainsKey() {
+func ExampleTreeMap_ContainsKey() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -168,7 +168,7 @@ func ExampleRedBlackTree_ContainsKey() {
 	// false
 }
 
-func ExampleRedBlackTree_Remove() {
+func ExampleTreeMap_Remove() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -184,7 +184,7 @@ func ExampleRedBlackTree_Remove() {
 	// map[key0:val0 key2:val2 key3:val3 key4:val4 key5:val5]
 }
 
-func ExampleRedBlackTree_Removes() {
+func ExampleTreeMap_Removes() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -202,7 +202,7 @@ func ExampleRedBlackTree_Removes() {
 	// map[key0:val0 key2:val2 key3:val3 key4:val4 key5:val5]
 }
 
-func ExampleRedBlackTree_IsEmpty() {
+func ExampleTreeMap_IsEmpty() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 
 	fmt.Println(tree.IsEmpty())
@@ -218,7 +218,7 @@ func ExampleRedBlackTree_IsEmpty() {
 	// false
 }
 
-func ExampleRedBlackTree_Size() {
+func ExampleTreeMap_Size() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 
 	fmt.Println(tree.Size())
@@ -234,7 +234,7 @@ func ExampleRedBlackTree_Size() {
 	// 6
 }
 
-func ExampleRedBlackTree_Keys() {
+func ExampleTreeMap_Keys() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 6; i > 0; i-- {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -246,7 +246,7 @@ func ExampleRedBlackTree_Keys() {
 	// [key1 key2 key3 key4 key5 key6]
 }
 
-func ExampleRedBlackTree_Values() {
+func ExampleTreeMap_Values() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 6; i > 0; i-- {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -258,7 +258,7 @@ func ExampleRedBlackTree_Values() {
 	// [val1 val2 val3 val4 val5 val6]
 }
 
-func ExampleRedBlackTree_Map() {
+func ExampleTreeMap_Map() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -270,7 +270,7 @@ func ExampleRedBlackTree_Map() {
 	// map[key0:val0 key1:val1 key2:val2 key3:val3 key4:val4 key5:val5]
 }
 
-func ExampleRedBlackTree_MapStrAny() {
+func ExampleTreeMap_MapStrAny() {
 	tree := g.NewRedBlackTree[int, string](comparators.ComparatorInt)
 	for i := 0; i < 6; i++ {
 		tree.Put(1000+i, "val"+gconv.String(i))
@@ -282,7 +282,7 @@ func ExampleRedBlackTree_MapStrAny() {
 	// map[1000:val0 1001:val1 1002:val2 1003:val3 1004:val4 1005:val5]
 }
 
-func ExampleRedBlackTree_Left() {
+func ExampleTreeMap_Left() {
 	tree := g.NewRedBlackTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		tree.Put(i, i)
@@ -297,7 +297,7 @@ func ExampleRedBlackTree_Left() {
 	// <nil>
 }
 
-func ExampleRedBlackTree_Right() {
+func ExampleTreeMap_Right() {
 	tree := g.NewRedBlackTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		tree.Put(i, i)
@@ -312,7 +312,7 @@ func ExampleRedBlackTree_Right() {
 	// <nil>
 }
 
-func ExampleRedBlackTree_FloorEntry() {
+func ExampleTreeMap_FloorEntry() {
 	tree := g.NewRedBlackTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		if i != 50 {
@@ -346,7 +346,7 @@ func ExampleRedBlackTree_FloorEntry() {
 	// FloorEntry 100: 99
 }
 
-func ExampleRedBlackTree_CeilingEntry() {
+func ExampleTreeMap_CeilingEntry() {
 	tree := g.NewRedBlackTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		if i != 50 {
@@ -380,7 +380,7 @@ func ExampleRedBlackTree_CeilingEntry() {
 	// CeilingEntry -1: 1
 }
 
-func ExampleRedBlackTree_LowerEntry() {
+func ExampleTreeMap_LowerEntry() {
 	tree := g.NewRedBlackTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		if i != 50 {
@@ -414,7 +414,7 @@ func ExampleRedBlackTree_LowerEntry() {
 	// LowerEntry 100: 99
 }
 
-func ExampleRedBlackTree_HigherEntry() {
+func ExampleTreeMap_HigherEntry() {
 	tree := g.NewRedBlackTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 100; i++ {
 		if i != 50 {
@@ -454,7 +454,7 @@ func ExampleRedBlackTree_HigherEntry() {
 	// HigherEntry -1: 1
 }
 
-func ExampleRedBlackTree_Iterator() {
+func ExampleTreeMap_ForEach() {
 	tree := g.NewRedBlackTree[int, int](comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
@@ -476,7 +476,7 @@ func ExampleRedBlackTree_Iterator() {
 	// totalValue: 27
 }
 
-func ExampleRedBlackTree_IteratorFrom() {
+func ExampleTreeMap_IteratorFrom() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
@@ -496,7 +496,7 @@ func ExampleRedBlackTree_IteratorFrom() {
 	// key: 5 , value: 50
 }
 
-func ExampleRedBlackTree_IteratorAsc() {
+func ExampleTreeMap_ForEachAsc() {
 	tree := g.NewRedBlackTree[int, int](comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
@@ -520,7 +520,7 @@ func ExampleRedBlackTree_IteratorAsc() {
 	// key: 9 , value: 1
 }
 
-func ExampleRedBlackTree_IteratorAscFrom_inclusive() {
+func ExampleTreeMap_IteratorAscFrom_inclusive() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
 		if i == 3 {
@@ -549,7 +549,7 @@ func ExampleRedBlackTree_IteratorAscFrom_inclusive() {
 	// key: 5 , value: 50
 }
 
-func ExampleRedBlackTree_IteratorAscFrom_nonInclusive() {
+func ExampleTreeMap_IteratorAscFrom_nonInclusive() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
 		if i == 3 {
@@ -576,7 +576,7 @@ func ExampleRedBlackTree_IteratorAscFrom_nonInclusive() {
 	// key: 5 , value: 50
 }
 
-func ExampleRedBlackTree_IteratorDesc() {
+func ExampleTreeMap_ForEachDesc() {
 	tree := g.NewRedBlackTree[int, int](comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
@@ -600,7 +600,7 @@ func ExampleRedBlackTree_IteratorDesc() {
 	// key: 0 , value: 10
 }
 
-func ExampleRedBlackTree_IteratorDescFrom_inclusive() {
+func ExampleTreeMap_IteratorDescFrom_inclusive() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
@@ -620,7 +620,7 @@ func ExampleRedBlackTree_IteratorDescFrom_inclusive() {
 	// key: 1 , value: 10
 }
 
-func ExampleRedBlackTree_IteratorDescFrom_nonInclusive() {
+func ExampleTreeMap_IteratorDescFrom_nonInclusive() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
@@ -639,7 +639,7 @@ func ExampleRedBlackTree_IteratorDescFrom_nonInclusive() {
 	// key: 1 , value: 10
 }
 
-func ExampleRedBlackTree_SubMap() {
+func ExampleTreeMap_SubMap() {
 	m := make(map[string]int)
 	for i := 0; i < 10; i++ {
 		m["key"+gconv.String(i)] = i * 10
@@ -690,7 +690,7 @@ func ExampleRedBlackTree_SubMap() {
 	// [90]
 }
 
-func ExampleRedBlackTree_Clear() {
+func ExampleTreeMap_Clear() {
 	tree := g.NewRedBlackTree[int, string](comparators.ComparatorInt)
 	for i := 0; i < 6; i++ {
 		tree.Put(1000+i, "val"+gconv.String(i))
@@ -705,7 +705,7 @@ func ExampleRedBlackTree_Clear() {
 	// 0
 }
 
-func ExampleRedBlackTree_Replace() {
+func ExampleTreeMap_Replace() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -728,7 +728,7 @@ func ExampleRedBlackTree_Replace() {
 	// map[newKey0:newVal0 newKey1:newVal1 newKey2:newVal2]
 }
 
-func ExampleRedBlackTree_String() {
+func ExampleTreeMap_String() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -745,7 +745,7 @@ func ExampleRedBlackTree_String() {
 	//     └── key0
 }
 
-func ExampleRedBlackTree_Print() {
+func ExampleTreeMap_Print() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -762,7 +762,7 @@ func ExampleRedBlackTree_Print() {
 	//     └── key0
 }
 
-func ExampleRedBlackTree_Search() {
+func ExampleTreeMap_Search() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -776,7 +776,7 @@ func ExampleRedBlackTree_Search() {
 	//  false
 }
 
-func ExampleRedBlackTree_Flip() {
+func ExampleTreeMap_Flip() {
 	tree := g.NewRedBlackTree[int, int](comparators.ComparatorInt)
 	for i := 1; i < 6; i++ {
 		tree.Put(i, i*10)
@@ -793,7 +793,7 @@ func ExampleRedBlackTree_Flip() {
 	// After Flip map[10:1 20:2 30:3 40:4 50:5]
 }
 
-func ExampleRedBlackTree_MarshalJSON() {
+func ExampleTreeMap_MarshalJSON() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -808,7 +808,7 @@ func ExampleRedBlackTree_MarshalJSON() {
 	// {"key0":"val0","key1":"val1","key2":"val2","key3":"val3","key4":"val4","key5":"val5"}
 }
 
-func ExampleRedBlackTree_UnmarshalJSON() {
+func ExampleTreeMap_UnmarshalJSON() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
 		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
@@ -825,7 +825,7 @@ func ExampleRedBlackTree_UnmarshalJSON() {
 	// map[key0:val0 key1:val1 key2:val2 key3:val3 key4:val4 key5:val5]
 }
 
-func ExampleRedBlackTree_UnmarshalValue() {
+func ExampleTreeMap_UnmarshalValue() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 
 	type User struct {
