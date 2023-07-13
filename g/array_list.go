@@ -124,14 +124,13 @@ func (a *ArrayList[T]) Sum() (sum int) {
 	return
 }
 
-// SortFunc sorts the array by custom function `less`.
-func (a *ArrayList[T]) SortFunc(less func(v1, v2 T) bool) List[T] {
+// Sort sorts the array by custom function `less`.
+func (a *ArrayList[T]) Sort(less func(v1, v2 T) bool) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	sort.Slice(a.array, func(i, j int) bool {
 		return less(a.array[i], a.array[j])
 	})
-	return a
 }
 
 // InsertBefore inserts the `values` to the front of `index`.

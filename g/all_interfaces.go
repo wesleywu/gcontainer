@@ -230,6 +230,9 @@ type List[T comparable] interface {
 	// Set replaces the element at the specified position in this list with the specified element.
 	Set(index int, value T) error
 
+	// Sort sorts the array by custom function `less`.
+	Sort(less func(v1, v2 T) bool)
+
 	// SubSlice returns a slice of elements from the array as specified
 	// by the `offset` and `size` parameters.
 	// If in concurrent safe usage, it returns a copy of the slice; else a pointer.
