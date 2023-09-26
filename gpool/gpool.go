@@ -93,7 +93,7 @@ func (p *Pool[T]) MustPut(value T) {
 func (p *Pool[T]) Clear() {
 	if p.ExpireFunc != nil {
 		for {
-			if r := p.list.PopFront(); r != nil {
+			if r, ok := p.list.PopFront(); ok {
 				p.ExpireFunc(r.value)
 			} else {
 				break
@@ -108,7 +108,7 @@ func (p *Pool[T]) Clear() {
 // it creates and returns one from NewFunc.
 func (p *Pool[T]) Get() (value T, err error) {
 	for !p.closed.Val() {
-		if r := p.list.PopFront(); r != nil {
+		if r, ok := p.list.PopFront(); ok {
 			f := r
 			if f.expireAt == 0 || f.expireAt > time.Now().UnixMilli() {
 				return f.value, nil
@@ -145,7 +145,7 @@ func (p *Pool[T]) checkExpireItems(ctx context.Context) {
 		// then it must close all items using this function.
 		if p.ExpireFunc != nil {
 			for {
-				if r := p.list.PopFront(); r != nil {
+				if r, ok := p.list.PopFront(); ok {
 					p.ExpireFunc(r.value)
 				} else {
 					break
@@ -168,7 +168,7 @@ func (p *Pool[T]) checkExpireItems(ctx context.Context) {
 		if latestExpire > timestampMilli {
 			break
 		}
-		if r := p.list.PopFront(); r != nil {
+		if r, ok := p.list.PopFront(); ok {
 			item := r
 			latestExpire = item.expireAt
 			// TODO improve the auto-expiration mechanism of the pool.

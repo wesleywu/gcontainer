@@ -17,13 +17,13 @@ import (
 
 var intIntMap = g.NewHashMap[int, int](true)
 
-var intAnyMap = g.NewHashMap[int, any](true)
+var intAnyMap = g.NewHashMap[int, int](true)
 
 var intStrMap = g.NewHashMap[int, string](true)
 
 var strIntMap = g.NewHashMap[string, int](true)
 
-var strAnyMap = g.NewHashMap[string, any](true)
+var strAnyMap = g.NewHashMap[string, int](true)
 
 var strStrMap = g.NewHashMap[string, string](true)
 

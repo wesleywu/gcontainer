@@ -41,34 +41,34 @@ func TestVar(t *testing.T) {
 	var l g.LinkedList[int]
 	l.PushFront(1)
 	l.PushFront(2)
-	if v := l.PopBack(); v != 1 {
+	if v, ok := l.PopBack(); v != 1 || !ok {
 		t.Errorf("EXPECT %v, GOT %v", 1, v)
 	} else {
 		// fmt.Println(v)
 	}
-	if v := l.PopBack(); v != 2 {
+	if v, ok := l.PopBack(); v != 2 || !ok {
 		t.Errorf("EXPECT %v, GOT %v", 2, v)
 	} else {
 		// fmt.Println(v)
 	}
-	if v := l.PopBack(); v != 0 {
+	if v, ok := l.PopBack(); ok {
 		t.Errorf("EXPECT %v, GOT %v", nil, v)
 	} else {
 		// fmt.Println(v)
 	}
 	l.PushBack(1)
 	l.PushBack(2)
-	if v := l.PopFront(); v != 1 {
+	if v, ok := l.PopFront(); v != 1 || !ok {
 		t.Errorf("EXPECT %v, GOT %v", 1, v)
 	} else {
 		// fmt.Println(v)
 	}
-	if v := l.PopFront(); v != 2 {
+	if v, ok := l.PopFront(); v != 2 || !ok {
 		t.Errorf("EXPECT %v, GOT %v", 2, v)
 	} else {
 		// fmt.Println(v)
 	}
-	if v := l.PopFront(); v != 0 {
+	if v, ok := l.PopFront(); ok {
 		t.Errorf("EXPECT %v, GOT %v", nil, v)
 	} else {
 		// fmt.Println(v)
@@ -79,34 +79,34 @@ func TestBasic(t *testing.T) {
 	l := g.NewLinkedList[int]()
 	l.PushFront(1)
 	l.PushFront(2)
-	if v := l.PopBack(); v != 1 {
+	if v, ok := l.PopBack(); v != 1 || !ok {
 		t.Errorf("EXPECT %v, GOT %v", 1, v)
 	} else {
 		// fmt.Println(v)
 	}
-	if v := l.PopBack(); v != 2 {
+	if v, ok := l.PopBack(); v != 2 || !ok {
 		t.Errorf("EXPECT %v, GOT %v", 2, v)
 	} else {
 		// fmt.Println(v)
 	}
-	if v := l.PopBack(); v != 0 {
+	if v, ok := l.PopBack(); ok {
 		t.Errorf("EXPECT %v, GOT %v", nil, v)
 	} else {
 		// fmt.Println(v)
 	}
 	l.PushBack(1)
 	l.PushBack(2)
-	if v := l.PopFront(); v != 1 {
+	if v, ok := l.PopFront(); v != 1 || !ok {
 		t.Errorf("EXPECT %v, GOT %v", 1, v)
 	} else {
 		// fmt.Println(v)
 	}
-	if v := l.PopFront(); v != 2 {
+	if v, ok := l.PopFront(); v != 2 || !ok {
 		t.Errorf("EXPECT %v, GOT %v", 2, v)
 	} else {
 		// fmt.Println(v)
 	}
-	if v := l.PopFront(); v != 0 {
+	if v, ok := l.PopFront(); ok {
 		t.Errorf("EXPECT %v, GOT %v", nil, v)
 	} else {
 		// fmt.Println(v)
@@ -617,9 +617,11 @@ func TestLinkedList_Pop(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		l := g.NewLinkedListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
-		t.Assert(l.PopBack(), 9)
+		back, _ := l.PopBack()
+		t.Assert(back, 9)
 		t.Assert(l.PopBacks(2), []int{8, 7})
-		t.Assert(l.PopFront(), 1)
+		front, _ := l.PopFront()
+		t.Assert(front, 1)
 		t.Assert(l.PopFronts(2), []int{2, 3})
 	})
 }
@@ -671,7 +673,7 @@ func TestLinkedList_ForEach(t *testing.T) {
 
 func TestLinkedList_Join(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		l := g.NewLinkedListFrom([]interface{}{1, 2, "a", `"b"`, `\c`})
+		l := g.NewLinkedListFrom[any]([]any{1, 2, "a", `"b"`, `\c`})
 		t.Assert(l.Join(","), `1,2,a,"b",\c`)
 		t.Assert(l.Join("."), `1.2.a."b".\c`)
 	})
@@ -679,7 +681,7 @@ func TestLinkedList_Join(t *testing.T) {
 
 func TestLinkedList_String(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		l := g.NewLinkedListFrom([]interface{}{1, 2, "a", `"b"`, `\c`})
+		l := g.NewLinkedListFrom[any]([]any{1, 2, "a", `"b"`, `\c`})
 		t.Assert(l.String(), `[1,2,a,"b",\c]`)
 	})
 }

@@ -133,7 +133,9 @@ func (q *Queue[T]) asyncLoopFromListToChannel() {
 				// When q.C is closed, it will panic here, especially q.C is being blocked for writing.
 				// If any error occurs here, it will be caught by recover and be ignored.
 				for i := 0; i < bufferLength; i++ {
-					q.C <- q.list.PopFront()
+					if front, ok := q.list.PopFront(); ok {
+						q.C <- front
+					}
 				}
 			} else {
 				break

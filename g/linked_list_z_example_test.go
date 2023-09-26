@@ -25,12 +25,14 @@ func ExampleNewArrayList() {
 	fmt.Println(l.BackAll())
 
 	for i := 0; i < n; i++ {
-		fmt.Print(l.PopFront())
+		v, _ := l.PopFront()
+		fmt.Print(v)
 	}
 
 	fmt.Println()
 	fmt.Println(l.Len())
-	fmt.Println(l.PopFront())
+	v, _ := l.PopFront()
+	fmt.Println(v)
 	fmt.Println(l.Len())
 
 	// Output:
@@ -54,7 +56,8 @@ func ExampleNewArrayListFrom() {
 	fmt.Println(l.BackAll())
 
 	for i := 0; i < n; i++ {
-		fmt.Print(l.PopFront())
+		v, _ := l.PopFront()
+		fmt.Print(v)
 	}
 
 	fmt.Println()
@@ -146,7 +149,8 @@ func ExampleLinkedList_PopBack() {
 
 	fmt.Println(l.Len())
 	fmt.Println(l)
-	fmt.Println(l.PopBack())
+	v, _ := l.PopBack()
+	fmt.Println(v)
 	fmt.Println(l.Len())
 	fmt.Println(l)
 
@@ -163,7 +167,8 @@ func ExampleLinkedList_PopFront() {
 
 	fmt.Println(l.Len())
 	fmt.Println(l)
-	fmt.Println(l.PopFront())
+	v, _ := l.PopFront()
+	fmt.Println(v)
 	fmt.Println(l.Len())
 	fmt.Println(l)
 

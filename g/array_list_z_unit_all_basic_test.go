@@ -48,8 +48,8 @@ func Test_IntArray_Unique(t *testing.T) {
 
 func TestNewFromCopy(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		a1 := []interface{}{"100", "200", "300", "400", "500", "600"}
-		array1 := g.NewArrayListFromCopy(a1)
+		a1 := []string{"100", "200", "300", "400", "500", "600"}
+		array1 := g.NewArrayListFromCopy[string](a1)
 		t.AssertIN(array1.PopRands(2), a1)
 		t.Assert(len(array1.PopRands(1)), 1)
 		t.Assert(len(array1.PopRands(9)), 3)

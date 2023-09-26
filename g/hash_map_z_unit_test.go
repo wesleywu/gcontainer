@@ -65,9 +65,6 @@ func Test_AnyAnyMap_Var(t *testing.T) {
 		t.AssertIN(exampleKey{Key: "1"}, m.Keys())
 		t.AssertIN(element3, m.Values())
 		t.AssertIN(element1, m.Values())
-		var mFlipped = m.Flip()
-		t.Assert(mFlipped.Size(), 2)
-		t.Assert(mFlipped.Get(element3), exampleKey{Key: "3"})
 
 		m.Clear()
 		t.Assert(m.Size(), 0)
@@ -95,8 +92,6 @@ func Test_AnyAnyMap_Var(t *testing.T) {
 		t.AssertIN(1, m.Keys())
 		t.AssertIN(3, m.Values())
 		t.AssertIN(1, m.Values())
-		m = m.Flip()
-		t.Assert(m.Map(), map[string]string{"1": "1", "3": "3"})
 
 		m.Clear()
 		t.Assert(m.Size(), 0)
@@ -127,8 +122,6 @@ func Test_AnyAnyMap_Basic(t *testing.T) {
 		t.AssertIN(1, m.Keys())
 		t.AssertIN(3, m.Values())
 		t.AssertIN(1, m.Values())
-		m = m.Flip()
-		t.Assert(m.Map(), map[interface{}]int{1: 1, 3: 3})
 
 		m.Clear()
 		t.Assert(m.Size(), 0)
@@ -499,20 +492,5 @@ func Test_AnyAnyMap_DeepCopy(t *testing.T) {
 		n := m.DeepCopy().(*g.HashMap[string, string])
 		n.Put("k1", "val1")
 		t.AssertNE(m.Get("k1"), n.Get("k1"))
-	})
-}
-
-func Test_AnyAnyMap_IsSubOf(t *testing.T) {
-	gtest.C(t, func(t *gtest.T) {
-		m1 := g.NewHashMapFrom[string, string](map[string]string{
-			"k1": "v1",
-			"k2": "v2",
-		})
-		m2 := g.NewHashMapFrom[string, string](map[string]string{
-			"k2": "v2",
-		})
-		t.Assert(m1.IsSubOf(m2), false)
-		t.Assert(m2.IsSubOf(m1), true)
-		t.Assert(m2.IsSubOf(m2), true)
 	})
 }

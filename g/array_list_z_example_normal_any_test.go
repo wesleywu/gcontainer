@@ -200,7 +200,7 @@ func ExampleArray_Chunk() {
 }
 
 func ExampleArray_PopLeft() {
-	array := g.NewArrayListFrom([]interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9})
+	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Any Pop* functions pick, delete and return the item from array.
 
@@ -217,7 +217,7 @@ func ExampleArray_PopLeft() {
 }
 
 func ExampleArray_PopLefts() {
-	array := g.NewArrayListFrom([]interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9})
+	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Any Pop* functions pick, delete and return the item from array.
 
@@ -234,7 +234,7 @@ func ExampleArray_PopLefts() {
 }
 
 func ExampleArray_PopRight() {
-	array := g.NewArrayListFrom([]interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9})
+	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Any Pop* functions pick, delete and return the item from array.
 
@@ -251,7 +251,7 @@ func ExampleArray_PopRight() {
 }
 
 func ExampleArray_PopRights() {
-	array := g.NewArrayListFrom([]interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9})
+	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Any Pop* functions pick, delete and return the item from array.
 

@@ -341,7 +341,7 @@ func (l *LinkedList[T]) PushFronts(values []T) {
 }
 
 // PopBack removes the element from back of `l` and returns the value of the element.
-func (l *LinkedList[T]) PopBack() (value T) {
+func (l *LinkedList[T]) PopBack() (value T, ok bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.lazyInit()
@@ -351,13 +351,14 @@ func (l *LinkedList[T]) PopBack() (value T) {
 			// if e.list == l, l must have been initialized when e was inserted
 			// in l or l == nil (e is a zero Element) and l.remove will crash
 			l.remove(e)
+			return value, true
 		}
 	}
-	return
+	return value, false
 }
 
 // PopFront removes the element from front of `l` and returns the value of the element.
-func (l *LinkedList[T]) PopFront() (value T) {
+func (l *LinkedList[T]) PopFront() (value T, ok bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.lazyInit()
@@ -367,9 +368,10 @@ func (l *LinkedList[T]) PopFront() (value T) {
 			// if e.list == l, l must have been initialized when e was inserted
 			// in l or l == nil (e is a zero Element) and l.remove will crash
 			l.remove(e)
+			return value, true
 		}
 	}
-	return
+	return value, false
 }
 
 // PopBacks removes `max` elements from back of `l`
