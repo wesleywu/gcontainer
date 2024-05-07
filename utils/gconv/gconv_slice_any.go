@@ -32,6 +32,14 @@ func SliceAny[T any](val interface{}) []T {
 		for k, v := range value {
 			array[k], _ = v.(T)
 		}
+	default:
+		if reflect.TypeOf(val).Kind() == reflect.Slice {
+			v := reflect.ValueOf(val)
+			array = make([]T, v.Len())
+			for i := 0; i < v.Len(); i++ {
+				array[i] = v.Index(i).Interface().(T)
+			}
+		}
 	}
 	return array
 }
