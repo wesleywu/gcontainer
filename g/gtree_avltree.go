@@ -16,7 +16,7 @@ import (
 )
 
 // AVLTree holds elements of the AVL tree.
-type AVLTree[K comparable, V comparable] struct {
+type AVLTree[K comparable, V any] struct {
 	mu         rwmutex.RWMutex
 	root       *AVLTreeNode[K, V]
 	comparator func(v1, v2 K) int
@@ -24,7 +24,7 @@ type AVLTree[K comparable, V comparable] struct {
 }
 
 // AVLTreeNode is a single element within the tree.
-type AVLTreeNode[K comparable, V comparable] struct {
+type AVLTreeNode[K comparable, V any] struct {
 	key      K
 	value    V
 	parent   *AVLTreeNode[K, V]
@@ -35,7 +35,7 @@ type AVLTreeNode[K comparable, V comparable] struct {
 // NewAVLTree instantiates an AVL tree with the custom key comparators.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewAVLTree[K comparable, V comparable](comparator func(v1, v2 K) int, safe ...bool) *AVLTree[K, V] {
+func NewAVLTree[K comparable, V any](comparator func(v1, v2 K) int, safe ...bool) *AVLTree[K, V] {
 	return &AVLTree[K, V]{
 		mu:         rwmutex.Create(safe...),
 		comparator: comparator,
@@ -45,7 +45,7 @@ func NewAVLTree[K comparable, V comparable](comparator func(v1, v2 K) int, safe 
 // NewAVLTreeFrom instantiates an AVL tree with the custom key comparators and data map.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewAVLTreeFrom[K comparable, V comparable](comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *AVLTree[K, V] {
+func NewAVLTreeFrom[K comparable, V any](comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *AVLTree[K, V] {
 	tree := NewAVLTree[K, V](comparator, safe...)
 	for k, v := range data {
 		tree.put(k, v, nil, &tree.root)
@@ -410,21 +410,6 @@ func (tree *AVLTree[K, V]) MapStrAny() map[string]V {
 	return m
 }
 
-// Flip exchanges key-value of the tree to value-key.
-// Note that you should guarantee the value is the same type as key,
-// or else the comparators would panic.
-//
-// If the type of value is different with key, you pass the new `comparators`.
-func (tree *AVLTree[K, V]) Flip(comparator func(v1, v2 V) int) *AVLTree[V, K] {
-	t := (*AVLTree[V, K])(nil)
-	t = NewAVLTree[V, K](comparator, tree.mu.IsSafe())
-	tree.ForEachAsc(func(key K, value V) bool {
-		t.put(value, key, nil, &t.root)
-		return true
-	})
-	return t
-}
-
 // ForEach is alias of ForEachAsc.
 func (tree *AVLTree[K, V]) ForEach(f func(key K, value V) bool) {
 	tree.ForEachAsc(f)
@@ -569,7 +554,7 @@ func (tree *AVLTree[K, V]) remove(key K, qp **AVLTreeNode[K, V]) (value V, fix b
 	return value, false
 }
 
-func removeMin[K comparable, V comparable](qp **AVLTreeNode[K, V], minKey *K, minVal *V) bool {
+func removeMin[K comparable, V any](qp **AVLTreeNode[K, V], minKey *K, minVal *V) bool {
 	q := *qp
 	if q.children[0] == nil {
 		*minKey = q.key
@@ -587,7 +572,7 @@ func removeMin[K comparable, V comparable](qp **AVLTreeNode[K, V], minKey *K, mi
 	return false
 }
 
-func putFix[K comparable, V comparable](c int8, t **AVLTreeNode[K, V]) bool {
+func putFix[K comparable, V any](c int8, t **AVLTreeNode[K, V]) bool {
 	s := *t
 	if s.b == 0 {
 		s.b = c
@@ -608,7 +593,7 @@ func putFix[K comparable, V comparable](c int8, t **AVLTreeNode[K, V]) bool {
 	return false
 }
 
-func removeFix[K comparable, V comparable](c int8, t **AVLTreeNode[K, V]) bool {
+func removeFix[K comparable, V any](c int8, t **AVLTreeNode[K, V]) bool {
 	s := *t
 	if s.b == 0 {
 		s.b = c
@@ -637,14 +622,14 @@ func removeFix[K comparable, V comparable](c int8, t **AVLTreeNode[K, V]) bool {
 	return true
 }
 
-func singleRotate[K comparable, V comparable](c int8, s *AVLTreeNode[K, V]) *AVLTreeNode[K, V] {
+func singleRotate[K comparable, V any](c int8, s *AVLTreeNode[K, V]) *AVLTreeNode[K, V] {
 	s.b = 0
 	s = rotate(c, s)
 	s.b = 0
 	return s
 }
 
-func doubleRotate[K comparable, V comparable](c int8, s *AVLTreeNode[K, V]) *AVLTreeNode[K, V] {
+func doubleRotate[K comparable, V any](c int8, s *AVLTreeNode[K, V]) *AVLTreeNode[K, V] {
 	a := (c + 1) / 2
 	r := s.children[a]
 	s.children[a] = rotate(-c, s.children[a])
@@ -666,7 +651,7 @@ func doubleRotate[K comparable, V comparable](c int8, s *AVLTreeNode[K, V]) *AVL
 	return p
 }
 
-func rotate[K comparable, V comparable](c int8, s *AVLTreeNode[K, V]) *AVLTreeNode[K, V] {
+func rotate[K comparable, V any](c int8, s *AVLTreeNode[K, V]) *AVLTreeNode[K, V] {
 	a := (c + 1) / 2
 	r := s.children[a]
 	s.children[a] = r.children[a^1]
@@ -724,7 +709,7 @@ func (node *AVLTreeNode[K, V]) walk1(a int) *AVLTreeNode[K, V] {
 	return p
 }
 
-func output[K comparable, V comparable](node *AVLTreeNode[K, V], prefix string, isTail bool, str *string) {
+func output[K comparable, V any](node *AVLTreeNode[K, V], prefix string, isTail bool, str *string) {
 	if node.children[1] != nil {
 		newPrefix := prefix
 		if isTail {

@@ -17,7 +17,7 @@ import (
 )
 
 // HashMap wraps map type `map[K]V` and provides more map features.
-type HashMap[K comparable, V comparable] struct {
+type HashMap[K comparable, V any] struct {
 	mu   rwmutex.RWMutex
 	data map[K]V
 }
@@ -25,7 +25,7 @@ type HashMap[K comparable, V comparable] struct {
 // NewHashMap creates and returns an empty hash map.
 // The parameter `safe` is used to specify whether using map in concurrent-safety,
 // which is false in default.
-func NewHashMap[K comparable, V comparable](safe ...bool) *HashMap[K, V] {
+func NewHashMap[K comparable, V any](safe ...bool) *HashMap[K, V] {
 	return &HashMap[K, V]{
 		mu:   rwmutex.Create(safe...),
 		data: make(map[K]V),
@@ -37,7 +37,7 @@ func NewHashMap[K comparable, V comparable](safe ...bool) *HashMap[K, V] {
 // there might be some concurrent-safe issues when changing the map outside.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewHashMapFrom[K comparable, V comparable](data map[K]V, safe ...bool) *HashMap[K, V] {
+func NewHashMapFrom[K comparable, V any](data map[K]V, safe ...bool) *HashMap[K, V] {
 	return &HashMap[K, V]{
 		mu:   rwmutex.Create(safe...),
 		data: data,
@@ -380,17 +380,6 @@ func (m *HashMap[K, V]) RLockFunc(f func(m map[K]V)) {
 	f(m.data)
 }
 
-// Flip exchanges key-value of the map to value-key.
-func (m *HashMap[K, V]) Flip() *HashMap[V, K] {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	n := make(map[V]K, len(m.data))
-	for k, v := range m.data {
-		n[v] = k
-	}
-	return NewHashMapFrom[V, K](n, m.mu.IsSafe())
-}
-
 // Merge merges two hash maps.
 // The `other` map will be merged into the map `m`.
 func (m *HashMap[K, V]) Merge(other *HashMap[K, V]) {
@@ -483,25 +472,4 @@ func (m *HashMap[K, V]) DeepCopy() interface{} {
 		data[k] = deepcopy.Copy(v).(V)
 	}
 	return NewHashMapFrom[K, V](data, m.mu.IsSafe())
-}
-
-// IsSubOf checks whether the current map is a sub-map of `other`.
-func (m *HashMap[K, V]) IsSubOf(other *HashMap[K, V]) bool {
-	if m == other {
-		return true
-	}
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-	other.mu.RLock()
-	defer other.mu.RUnlock()
-	for key, value := range m.data {
-		otherValue, ok := other.data[key]
-		if !ok {
-			return false
-		}
-		if otherValue != value {
-			return false
-		}
-	}
-	return true
 }

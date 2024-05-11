@@ -42,12 +42,6 @@ func Test_AVLTree_Basic(t *testing.T) {
 
 		m.Puts(map[string]string{"key3": "val3", "key1": "val1"})
 
-		mFlipped := m.Flip(comparators.ComparatorString)
-		t.Assert(mFlipped.Map(), map[string]string{"val3": "key3", "val1": "key1"})
-
-		m = mFlipped.Flip(comparators.ComparatorString)
-		t.Assert(m.Map(), map[string]string{"key3": "val3", "key1": "val1"})
-
 		m.Clear()
 		t.Assert(m.Size(), 0)
 		t.Assert(m.IsEmpty(), true)

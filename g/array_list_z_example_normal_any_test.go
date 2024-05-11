@@ -93,7 +93,7 @@ func ExampleNew() {
 	a.Remove(100)
 	fmt.Println(a.Slice())
 
-	// Empty the array, removes all items of it.
+	// IsEmpty the array, removes all items of it.
 	fmt.Println(a.Slice())
 	a.Clear()
 	fmt.Println(a.Slice())
@@ -202,7 +202,7 @@ func ExampleArray_Chunk() {
 func ExampleArray_PopLeft() {
 	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
-	// Any Pop* functions pick, delete and return the item from array.
+	// Any MustPop* functions pick, delete and return the item from array.
 
 	fmt.Println(array.PopLeft())
 	fmt.Println(array.PopLefts(2))
@@ -219,7 +219,7 @@ func ExampleArray_PopLeft() {
 func ExampleArray_PopLefts() {
 	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
-	// Any Pop* functions pick, delete and return the item from array.
+	// Any MustPop* functions pick, delete and return the item from array.
 
 	fmt.Println(array.PopLeft())
 	fmt.Println(array.PopLefts(2))
@@ -236,7 +236,7 @@ func ExampleArray_PopLefts() {
 func ExampleArray_PopRight() {
 	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
-	// Any Pop* functions pick, delete and return the item from array.
+	// Any MustPop* functions pick, delete and return the item from array.
 
 	fmt.Println(array.PopLeft())
 	fmt.Println(array.PopLefts(2))
@@ -253,7 +253,7 @@ func ExampleArray_PopRight() {
 func ExampleArray_PopRights() {
 	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
-	// Any Pop* functions pick, delete and return the item from array.
+	// Any MustPop* functions pick, delete and return the item from array.
 
 	fmt.Println(array.PopLeft())
 	fmt.Println(array.PopLefts(2))

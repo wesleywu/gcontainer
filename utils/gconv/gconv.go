@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	// Empty strings.
+	// IsEmpty strings.
 	emptyStringMap = map[string]struct{}{
 		"":      {},
 		"0":     {},
@@ -152,7 +152,7 @@ func String(any interface{}) string {
 		}
 		return value.String()
 	default:
-		// Empty checks.
+		// IsEmpty checks.
 		if value == nil {
 			return ""
 		}

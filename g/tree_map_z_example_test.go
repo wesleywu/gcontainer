@@ -776,23 +776,6 @@ func ExampleTreeMap_Search() {
 	//  false
 }
 
-func ExampleTreeMap_Flip() {
-	tree := g.NewRedBlackTree[int, int](comparators.ComparatorInt)
-	for i := 1; i < 6; i++ {
-		tree.Put(i, i*10)
-	}
-
-	fmt.Println("Before Flip", tree.Map())
-
-	treeFlipped := tree.Flip(comparators.ComparatorInt)
-
-	fmt.Println("After Flip", treeFlipped.Map())
-
-	// Output:
-	// Before Flip map[1:10 2:20 3:30 4:40 5:50]
-	// After Flip map[10:1 20:2 30:3 40:4 50:5]
-}
-
 func ExampleTreeMap_MarshalJSON() {
 	tree := g.NewRedBlackTree[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {

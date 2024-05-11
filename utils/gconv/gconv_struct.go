@@ -504,7 +504,7 @@ func bindVarToReflectValue(structFieldValue reflect.Value, value interface{}, ma
 					}
 					switch elemKind {
 					case reflect.String:
-						// Empty string cannot be assigned to string slice.
+						// IsEmpty string cannot be assigned to string slice.
 						return nil
 					}
 				}

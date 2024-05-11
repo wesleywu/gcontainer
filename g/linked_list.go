@@ -14,19 +14,20 @@ import (
 	"github.com/wesleywu/gcontainer/internal/deepcopy"
 	"github.com/wesleywu/gcontainer/internal/json"
 	"github.com/wesleywu/gcontainer/internal/rwmutex"
+	"github.com/wesleywu/gcontainer/utils/equal"
 	"github.com/wesleywu/gcontainer/utils/gconv"
 )
 
 // LinkedList represents a doubly linked list.
 // The zero value for LinkedList is an empty list ready to use.
-type LinkedList[T comparable] struct {
+type LinkedList[T any] struct {
 	mu   rwmutex.RWMutex
 	root Element[T] // sentinel list element, only &root, root.prev, and root.next are used
 	len  int        // current list length excluding (this) sentinel element
 }
 
 // Element is an element of a linked list.
-type Element[T comparable] struct {
+type Element[T any] struct {
 	// Next and previous pointers in the doubly-linked list of elements.
 	// To simplify the implementation, internally a list l is implemented
 	// as a ring, such that &l.root is both the next element of the last
@@ -50,7 +51,7 @@ func (l *LinkedList[T]) Init() *LinkedList[T] {
 }
 
 // NewLinkedList returns an initialized list.
-func NewLinkedList[T comparable](safe ...bool) *LinkedList[T] {
+func NewLinkedList[T any](safe ...bool) *LinkedList[T] {
 	l := new(LinkedList[T]).Init()
 	l.mu = rwmutex.Create(safe...)
 	return l
@@ -59,7 +60,7 @@ func NewLinkedList[T comparable](safe ...bool) *LinkedList[T] {
 // NewLinkedListFrom creates and returns a list from a copy of given slice `array`.
 // The parameter `safe` is used to specify whether using list in concurrent-safety,
 // which is false in default.
-func NewLinkedListFrom[T comparable](array []T, safe ...bool) *LinkedList[T] {
+func NewLinkedListFrom[T any](array []T, safe ...bool) *LinkedList[T] {
 	l := NewLinkedList[T](safe...)
 	for _, v := range array {
 		l.PushBack(v)
@@ -116,7 +117,7 @@ func (l *LinkedList[T]) Contains(value T) bool {
 	length := l.len
 	if length > 0 {
 		for i, e := 0, l.root.next; i < length; i, e = i+1, e.Next() {
-			if e.Value == value {
+			if equal.Equals(e.Value, value) {
 				found = true
 				break
 			}
@@ -130,7 +131,7 @@ func (l *LinkedList[T]) ContainsAll(values Collection[T]) bool {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 	l.lazyInit()
-	foundMap := make(map[T]bool, 0)
+	foundMap := make(map[any]bool, 0)
 	values.ForEach(func(t T) bool {
 		foundMap[t] = false
 		return true
@@ -182,7 +183,7 @@ func (l *LinkedList[T]) Slice() []T {
 func (l *LinkedList[T]) search(value T) *Element[T] {
 	if l.len > 0 {
 		for i, e := 0, l.root.next; i < l.len; i, e = i+1, e.Next() {
-			if e.Value == value {
+			if equal.Equals(e.Value, value) {
 				return e
 			}
 		}
@@ -639,7 +640,7 @@ func (l *LinkedList[T]) Equals(another Collection[T]) bool {
 		valuesAno[i] = e.Value
 	}
 	for i := 0; i < l.len; i++ {
-		if values[i] != valuesAno[i] {
+		if !equal.Equals(values[i], valuesAno[i]) {
 			return false
 		}
 	}

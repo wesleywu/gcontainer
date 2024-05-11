@@ -25,13 +25,13 @@ import (
 // Structure is not thread safe.
 //
 // Reference: http://en.wikipedia.org/wiki/Associative_array
-type LinkedHashMap[K comparable, V comparable] struct {
+type LinkedHashMap[K comparable, V any] struct {
 	mu   rwmutex.RWMutex
 	data map[K]*Element[*gListMapNode[K, V]]
 	list *LinkedList[*gListMapNode[K, V]]
 }
 
-type gListMapNode[K comparable, V comparable] struct {
+type gListMapNode[K comparable, V any] struct {
 	key   K
 	value V
 }
@@ -40,7 +40,7 @@ type gListMapNode[K comparable, V comparable] struct {
 // LinkedHashMap is backed by a hash table to store values and doubly-linked list to store ordering.
 // The parameter `safe` is used to specify whether using map in concurrent-safety,
 // which is false in default.
-func NewListMap[K comparable, V comparable](safe ...bool) *LinkedHashMap[K, V] {
+func NewListMap[K comparable, V any](safe ...bool) *LinkedHashMap[K, V] {
 	return &LinkedHashMap[K, V]{
 		mu:   rwmutex.Create(safe...),
 		data: make(map[K]*Element[*gListMapNode[K, V]]),
@@ -51,7 +51,7 @@ func NewListMap[K comparable, V comparable](safe ...bool) *LinkedHashMap[K, V] {
 // NewListMapFrom returns a link map from given map `data`.
 // Note that, the param `data` map will be set as the underlying data map(no deep copy),
 // there might be some concurrent-safe issues when changing the map outside.
-func NewListMapFrom[K comparable, V comparable](data map[K]V, safe ...bool) *LinkedHashMap[K, V] {
+func NewListMapFrom[K comparable, V any](data map[K]V, safe ...bool) *LinkedHashMap[K, V] {
 	m := NewListMap[K, V](safe...)
 	m.Puts(data)
 	return m
@@ -453,16 +453,6 @@ func (m *LinkedHashMap[K, V]) Size() (size int) {
 // It returns true if map is empty, or else false.
 func (m *LinkedHashMap[K, V]) IsEmpty() bool {
 	return m.Size() == 0
-}
-
-// Flip exchanges key-value of current map to value-key and return the new map, without modifying current map.
-func (m *LinkedHashMap[K, V]) Flip() *LinkedHashMap[V, K] {
-	data := m.Map()
-	result := NewListMap[V, K](m.mu.IsSafe())
-	for key, value := range data {
-		result.Put(value, key)
-	}
-	return result
 }
 
 // Merge merges two link maps.

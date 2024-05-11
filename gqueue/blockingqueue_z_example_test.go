@@ -61,7 +61,7 @@ func ExampleNew() {
 	// 0123456789
 }
 
-func ExampleQueue_Push() {
+func ExampleBlockingQueue_Push() {
 	q := gqueue.New[int]()
 
 	for i := 0; i < 10; i++ {
@@ -78,7 +78,7 @@ func ExampleQueue_Push() {
 	// 2
 }
 
-func ExampleQueue_Pop() {
+func ExampleBlockingQueue_Pop() {
 	q := gqueue.New[int]()
 
 	for i := 0; i < 10; i++ {
@@ -102,7 +102,7 @@ func ExampleQueue_Pop() {
 	// 0 false
 }
 
-func ExampleQueue_MustPop() {
+func ExampleBlockingQueue_MustPop() {
 	q := gqueue.New[*exampleQueueItem]()
 
 	for i := 0; i < 10; i++ {
@@ -122,7 +122,7 @@ func ExampleQueue_MustPop() {
 	// <nil>
 }
 
-func ExampleQueue_Close() {
+func ExampleBlockingQueue_Close() {
 	q := gqueue.New[int]()
 
 	for i := 0; i < 10; i++ {
@@ -140,7 +140,7 @@ func ExampleQueue_Close() {
 	// <nil>
 }
 
-func ExampleQueue_Len() {
+func ExampleBlockingQueue_Len() {
 	q := gqueue.New[int]()
 
 	q.Push(1)
@@ -152,7 +152,7 @@ func ExampleQueue_Len() {
 	// 2
 }
 
-func ExampleQueue_Size() {
+func ExampleBlockingQueue_Size() {
 	q := gqueue.New[int]()
 
 	q.Push(1)

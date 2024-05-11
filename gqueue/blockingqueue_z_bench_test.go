@@ -24,7 +24,7 @@ var qdynamic = gqueue.New[int]()
 
 var cany = make(chan int, length)
 
-func Benchmark_Gqueue_StaticPushAndPop(b *testing.B) {
+func Benchmark_BlockingQueue_StaticPushAndPop(b *testing.B) {
 	b.N = bn
 	for i := 0; i < b.N; i++ {
 		qstatic.Push(i)
@@ -32,14 +32,14 @@ func Benchmark_Gqueue_StaticPushAndPop(b *testing.B) {
 	}
 }
 
-func Benchmark_Gqueue_DynamicPush(b *testing.B) {
+func Benchmark_BlockingQueue_DynamicPush(b *testing.B) {
 	b.N = bn
 	for i := 0; i < b.N; i++ {
 		qdynamic.Push(i)
 	}
 }
 
-func Benchmark_Gqueue_DynamicPop(b *testing.B) {
+func Benchmark_BlockingQueue_DynamicPop(b *testing.B) {
 	b.N = bn
 	for i := 0; i < b.N; i++ {
 		qdynamic.Pop()

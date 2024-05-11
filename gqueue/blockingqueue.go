@@ -24,8 +24,8 @@ import (
 	"github.com/wesleywu/gcontainer/gtype"
 )
 
-// Queue is a concurrent-safe queue built on doubly linked list and channel.
-type Queue[T comparable] struct {
+// BlockingQueue is a concurrent-safe queue built on doubly linked list and channel.
+type BlockingQueue[T any] struct {
 	limit  int              // Limit for queue size.
 	list   *g.LinkedList[T] // Underlying list structure for data maintaining.
 	closed *gtype.Bool      // Whether queue is closed.
@@ -40,9 +40,9 @@ const (
 
 // New returns an empty queue object.
 // Optional parameter `limit` is used to limit the size of the queue, which is unlimited in default.
-// When `limit` is given, the queue will be static and high performance which is comparable with stdlib channel.
-func New[T comparable](limit ...int) *Queue[T] {
-	q := &Queue[T]{
+// When `limit` is given, the queue will be static and high performance which is any with stdlib channel.
+func New[T any](limit ...int) *BlockingQueue[T] {
+	q := &BlockingQueue[T]{
 		closed: gtype.NewBool(),
 	}
 	if len(limit) > 0 && limit[0] > 0 {
@@ -59,7 +59,7 @@ func New[T comparable](limit ...int) *Queue[T] {
 
 // Push pushes the data `v` into the queue.
 // Note that it would panic if Push is called after the queue is closed.
-func (q *Queue[T]) Push(v T) {
+func (q *BlockingQueue[T]) Push(v T) {
 	if q.limit > 0 {
 		q.C <- v
 	} else {
@@ -72,12 +72,12 @@ func (q *Queue[T]) Push(v T) {
 
 // MustPop pops an item from the queue in FIFO way.
 // Note that it would return empty value of T or nil if T is a pointer, when Pop is called after the queue is closed.
-func (q *Queue[T]) MustPop() T {
+func (q *BlockingQueue[T]) MustPop() T {
 	return <-q.C
 }
 
 // Pop pops an item from the queue in FIFO way, and a bool value indicating whether the channel is still open.
-func (q *Queue[T]) Pop() (result T, ok bool) {
+func (q *BlockingQueue[T]) Pop() (result T, ok bool) {
 	result, ok = <-q.C
 	return
 }
@@ -85,7 +85,7 @@ func (q *Queue[T]) Pop() (result T, ok bool) {
 // Close closes the queue.
 // Notice: It would notify all goroutines return immediately,
 // which are being blocked reading using Pop method.
-func (q *Queue[T]) Close() {
+func (q *BlockingQueue[T]) Close() {
 	if !q.closed.Cas(false, true) {
 		return
 	}
@@ -104,7 +104,7 @@ func (q *Queue[T]) Close() {
 // Len returns the length of the queue.
 // Note that the result might not be accurate if using unlimited queue size as there's an
 // asynchronous channel reading the list constantly.
-func (q *Queue[T]) Len() (length int64) {
+func (q *BlockingQueue[T]) Len() (length int64) {
 	bufferedSize := int64(len(q.C))
 	if q.limit > 0 {
 		return bufferedSize
@@ -114,13 +114,13 @@ func (q *Queue[T]) Len() (length int64) {
 
 // Size is alias of Len.
 // Deprecated: use Len instead.
-func (q *Queue[T]) Size() int64 {
+func (q *BlockingQueue[T]) Size() int64 {
 	return q.Len()
 }
 
 // asyncLoopFromListToChannel starts an asynchronous goroutine,
 // which handles the data synchronization from list `q.list` to channel `q.C`.
-func (q *Queue[T]) asyncLoopFromListToChannel() {
+func (q *BlockingQueue[T]) asyncLoopFromListToChannel() {
 	defer func() {
 		if q.closed.Val() {
 			_ = recover()

@@ -708,10 +708,10 @@ func (tree *BTree[K, V]) splitNonRoot(node *BTreeNode[K, V]) {
 	copy(parent.Entries[insertPosition+1:], parent.Entries[insertPosition:])
 	parent.Entries[insertPosition] = node.Entries[middle]
 
-	// Put child left of inserted key in parent to the created left node
+	// Push child left of inserted key in parent to the created left node
 	parent.Children[insertPosition] = left
 
-	// Put child right of inserted key in parent to the created right node
+	// Push child right of inserted key in parent to the created right node
 	parent.Children = append(parent.Children, nil)
 	copy(parent.Children[insertPosition+2:], parent.Children[insertPosition+1:])
 	parent.Children[insertPosition+1] = right

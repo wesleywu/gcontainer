@@ -24,7 +24,7 @@ const (
 )
 
 // TreeMap implements the red-black tree.
-type TreeMap[K comparable, V comparable] struct {
+type TreeMap[K comparable, V any] struct {
 	mu         rwmutex.RWMutex
 	root       *RedBlackTreeNode[K, V]
 	size       int
@@ -32,7 +32,7 @@ type TreeMap[K comparable, V comparable] struct {
 }
 
 // RedBlackTreeNode is a single element within the tree.
-type RedBlackTreeNode[K comparable, V comparable] struct {
+type RedBlackTreeNode[K comparable, V any] struct {
 	key    K
 	value  V
 	color  color
@@ -44,7 +44,7 @@ type RedBlackTreeNode[K comparable, V comparable] struct {
 // NewRedBlackTree instantiates a red-black tree with the custom key comparators.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewRedBlackTree[K comparable, V comparable](comparator comparators.Comparator[K], safe ...bool) *TreeMap[K, V] {
+func NewRedBlackTree[K comparable, V any](comparator comparators.Comparator[K], safe ...bool) *TreeMap[K, V] {
 	return &TreeMap[K, V]{
 		mu:         rwmutex.Create(safe...),
 		comparator: comparator,
@@ -54,7 +54,7 @@ func NewRedBlackTree[K comparable, V comparable](comparator comparators.Comparat
 // NewRedBlackTreeDefault instantiates a red-black tree with default key comparators.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewRedBlackTreeDefault[K comparable, V comparable](safe ...bool) *TreeMap[K, V] {
+func NewRedBlackTreeDefault[K comparable, V any](safe ...bool) *TreeMap[K, V] {
 	return &TreeMap[K, V]{
 		mu:         rwmutex.Create(safe...),
 		comparator: comparators.ComparatorAny[K],
@@ -64,7 +64,7 @@ func NewRedBlackTreeDefault[K comparable, V comparable](safe ...bool) *TreeMap[K
 // NewRedBlackTreeFrom instantiates a red-black tree with the custom key comparators and `data` map.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewRedBlackTreeFrom[K comparable, V comparable](comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *TreeMap[K, V] {
+func NewRedBlackTreeFrom[K comparable, V any](comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *TreeMap[K, V] {
 	tree := NewRedBlackTree[K, V](comparator, safe...)
 	for k, v := range data {
 		tree.insertEntry(k, v)
@@ -422,42 +422,42 @@ func (tree *TreeMap[K, V]) fixAfterDeletion(x *RedBlackTreeNode[K, V]) {
 	x.color = black
 }
 
-func leftOf[K comparable, V comparable](p *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
+func leftOf[K comparable, V any](p *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
 	if p == nil {
 		return nil
 	}
 	return p.left
 }
 
-func rightOf[K comparable, V comparable](p *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
+func rightOf[K comparable, V any](p *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
 	if p == nil {
 		return nil
 	}
 	return p.right
 }
 
-func parentOf[K comparable, V comparable](p *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
+func parentOf[K comparable, V any](p *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
 	if p == nil {
 		return nil
 	}
 	return p.parent
 }
 
-func colorOf[K comparable, V comparable](p *RedBlackTreeNode[K, V]) color {
+func colorOf[K comparable, V any](p *RedBlackTreeNode[K, V]) color {
 	if p == nil {
 		return black
 	}
 	return p.color
 }
 
-func setColor[K comparable, V comparable](p *RedBlackTreeNode[K, V], c color) {
+func setColor[K comparable, V any](p *RedBlackTreeNode[K, V], c color) {
 	if p != nil {
 		p.color = c
 	}
 }
 
 // successor returns the successor of the specified Entry, or nil if no such.
-func successor[K comparable, V comparable](t *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
+func successor[K comparable, V any](t *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
 	if t == nil {
 		return nil
 	} else if t.right != nil {
@@ -478,7 +478,7 @@ func successor[K comparable, V comparable](t *RedBlackTreeNode[K, V]) *RedBlackT
 }
 
 // predecessor returns the predecessor of the specified Entry, or nil if no such.
-func predecessor[K comparable, V comparable](t *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
+func predecessor[K comparable, V any](t *RedBlackTreeNode[K, V]) *RedBlackTreeNode[K, V] {
 	if t == nil {
 		return nil
 	} else if t.left != nil {
@@ -1109,21 +1109,6 @@ func (tree *TreeMap[K, V]) TailMap(fromKey K, inclusive bool) SortedMap[K, V] {
 		return true
 	})
 	return result
-}
-
-// Flip exchanges key-value of the tree to value-key.
-// Note that you should guarantee the value is the same type as key,
-// or else the comparators would panic.
-//
-// If the type of value is different with key, you pass the new `comparators`.
-func (tree *TreeMap[K, V]) Flip(comparator func(v1, v2 V) int) *TreeMap[V, K] {
-	t := (*TreeMap[V, K])(nil)
-	t = NewRedBlackTree[V, K](comparator, tree.mu.IsSafe())
-	tree.ForEachAsc(func(key K, value V) bool {
-		t.insertEntry(value, key)
-		return true
-	})
-	return t
 }
 
 func (tree *TreeMap[K, V]) output(node *RedBlackTreeNode[K, V], prefix string, isTail bool, str *string) {

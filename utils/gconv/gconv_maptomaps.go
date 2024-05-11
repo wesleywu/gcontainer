@@ -80,7 +80,7 @@ func doMapToMaps(params interface{}, pointer interface{}, mapping ...map[string]
 	if paramsElemKind != reflect.Map && paramsElemKind != reflect.Struct && paramsElemKind != reflect.Interface {
 		return gerror.Newf("params element should be type of map/*map/struct/*struct, but got: %s", paramsElemKind)
 	}
-	// Empty slice, no need continue.
+	// IsEmpty slice, no need continue.
 	if paramsRv.Len() == 0 {
 		return nil
 	}

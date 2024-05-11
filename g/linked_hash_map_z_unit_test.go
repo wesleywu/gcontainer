@@ -39,10 +39,6 @@ func Test_ListMap_Var(t *testing.T) {
 		t.AssertIN("val3", m.Values())
 		t.AssertIN("val1", m.Values())
 
-		mFlipped := m.Flip()
-
-		t.Assert(mFlipped.Map(), map[string]string{"val3": "key3", "val1": "key1"})
-
 		m.Clear()
 		t.Assert(m.Size(), 0)
 		t.Assert(m.IsEmpty(), true)
@@ -72,10 +68,6 @@ func Test_ListMap_Basic(t *testing.T) {
 		t.AssertIN("key1", m.Keys())
 		t.AssertIN("val3", m.Values())
 		t.AssertIN("val1", m.Values())
-
-		mFlipped := m.Flip()
-
-		t.Assert(mFlipped.Map(), map[string]string{"val3": "key3", "val1": "key1"})
 
 		m.Clear()
 		t.Assert(m.Size(), 0)

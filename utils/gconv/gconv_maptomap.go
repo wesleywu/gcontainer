@@ -75,7 +75,7 @@ func doMapToMap(params interface{}, pointer interface{}, mapping ...map[string]s
 	if paramsKind != reflect.Map {
 		return doMapToMap(Map(params), pointer, mapping...)
 	}
-	// Empty params map, no need continue.
+	// IsEmpty params map, no need continue.
 	if paramsRv.Len() == 0 {
 		return nil
 	}

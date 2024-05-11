@@ -16,7 +16,7 @@ import (
 	"github.com/wesleywu/gcontainer/internal/gtest"
 )
 
-func TestQueue_Len(t *testing.T) {
+func TestBlockingQueue_Len(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		var (
 			maxNum   = 100
@@ -28,7 +28,6 @@ func TestQueue_Len(t *testing.T) {
 				q1.Push(i)
 			}
 			t.Assert(q1.Len(), maxNum)
-			t.Assert(q1.Size(), maxNum)
 		}
 	})
 	gtest.C(t, func(t *gtest.T) {
@@ -42,12 +41,11 @@ func TestQueue_Len(t *testing.T) {
 				q1.Push(i)
 			}
 			t.AssertLE(q1.Len(), maxNum)
-			t.AssertLE(q1.Size(), maxNum)
 		}
 	})
 }
 
-func TestQueue_Basic(t *testing.T) {
+func TestBlockingQueue_Basic(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		q := gqueue.New[int]()
 		for i := 0; i < 100; i++ {
@@ -58,7 +56,7 @@ func TestQueue_Basic(t *testing.T) {
 	})
 }
 
-func TestQueue_Pop(t *testing.T) {
+func TestBlockingQueue_Pop(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		q1 := gqueue.New[int]()
 		q1.Push(1)
@@ -70,7 +68,7 @@ func TestQueue_Pop(t *testing.T) {
 	})
 }
 
-func TestQueue_Close(t *testing.T) {
+func TestBlockingQueue_Close(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		q1 := gqueue.New[int]()
 		q1.Push(1)

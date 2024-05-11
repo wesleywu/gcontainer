@@ -19,6 +19,7 @@ import (
 	"github.com/wesleywu/gcontainer/internal/json"
 	"github.com/wesleywu/gcontainer/internal/rwmutex"
 	"github.com/wesleywu/gcontainer/utils/empty"
+	"github.com/wesleywu/gcontainer/utils/equal"
 	"github.com/wesleywu/gcontainer/utils/gconv"
 	"github.com/wesleywu/gcontainer/utils/grand"
 	"github.com/wesleywu/gcontainer/utils/gstr"
@@ -27,7 +28,7 @@ import (
 // ArrayList is a golang array with rich features.
 // It contains a concurrent-safe/unsafe switch, which should be set
 // when its initialization and cannot be changed then.
-type ArrayList[T comparable] struct {
+type ArrayList[T any] struct {
 	mu    rwmutex.RWMutex
 	array []T
 }
@@ -35,14 +36,14 @@ type ArrayList[T comparable] struct {
 // NewArrayList creates and returns an empty array.
 // The parameter `safe` is used to specify whether using array in concurrent-safety,
 // which is false in default.
-func NewArrayList[T comparable](safe ...bool) *ArrayList[T] {
+func NewArrayList[T any](safe ...bool) *ArrayList[T] {
 	return NewArrayListSize[T](0, 0, safe...)
 }
 
 // NewArrayListSize create and returns an array with given size and cap.
 // The parameter `safe` is used to specify whether using array in concurrent-safety,
 // which is false in default.
-func NewArrayListSize[T comparable](size int, cap int, safe ...bool) *ArrayList[T] {
+func NewArrayListSize[T any](size int, cap int, safe ...bool) *ArrayList[T] {
 	return &ArrayList[T]{
 		mu:    rwmutex.Create(safe...),
 		array: make([]T, size, cap),
@@ -66,7 +67,7 @@ func NewArrayListRange(start, end, step int, safe ...bool) *ArrayList[int] {
 
 // NewArrayListFrom is alias of NewArrayListFrom.
 // See NewArrayListFrom.
-func NewArrayListFrom[T comparable](array []T, safe ...bool) *ArrayList[T] {
+func NewArrayListFrom[T any](array []T, safe ...bool) *ArrayList[T] {
 	return &ArrayList[T]{
 		mu:    rwmutex.Create(safe...),
 		array: array,
@@ -75,7 +76,7 @@ func NewArrayListFrom[T comparable](array []T, safe ...bool) *ArrayList[T] {
 
 // NewArrayListFromCopy is alias of NewArrayFromCopy.
 // See NewArrayFromCopy.
-func NewArrayListFromCopy[T comparable](array []T, safe ...bool) *ArrayList[T] {
+func NewArrayListFromCopy[T any](array []T, safe ...bool) *ArrayList[T] {
 	newArray := make([]T, len(array))
 	copy(newArray, array)
 	return &ArrayList[T]{
@@ -522,7 +523,7 @@ func (a *ArrayList[T]) Equals(another Collection[T]) bool {
 		return false
 	}
 	for index, value := range a.array {
-		if value != ano.array[index] {
+		if !equal.Equals(value, ano.array[index]) {
 			return false
 		}
 	}
@@ -562,7 +563,7 @@ func (a *ArrayList[T]) doSearchWithoutLock(value T) int {
 	}
 	result := -1
 	for index, v := range a.array {
-		if v == value {
+		if equal.Equals(v, value) {
 			result = index
 			break
 		}
@@ -581,7 +582,7 @@ func (a *ArrayList[T]) Unique() List[T] {
 	var (
 		ok          bool
 		temp        T
-		uniqueSet   = make(map[T]struct{})
+		uniqueSet   = make(map[any]struct{})
 		uniqueArray = make([]T, 0, len(a.array))
 	)
 	for i := 0; i < len(a.array); i++ {
@@ -741,8 +742,8 @@ func (a *ArrayList[T]) Join(glue string) string {
 }
 
 // CountValues counts the number of occurrences of all values in the array.
-func (a *ArrayList[T]) CountValues() map[T]int {
-	m := make(map[T]int)
+func (a *ArrayList[T]) CountValues() map[any]int {
+	m := make(map[any]int)
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	for _, v := range a.array {

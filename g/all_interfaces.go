@@ -6,13 +6,15 @@
 
 package g
 
-import "github.com/wesleywu/gcontainer/utils/comparators"
+import (
+	"github.com/wesleywu/gcontainer/utils/comparators"
+)
 
 // Collection is the root interface in the collection hierarchy.
 // A collection represents a group of objects, known as its elements.
 // Some collections allow duplicate elements and others do not.
 // Some are ordered and others unordered.
-type Collection[T comparable] interface {
+type Collection[T any] interface {
 	// Add adds all the elements in the specified slice to this collection.
 	// Returns true if this collection changed as a result of the call
 	Add(...T) bool
@@ -147,7 +149,7 @@ type SortedSet[T comparable] interface {
 // List is nn ordered collection (also known as a sequence). The user of this interface has precise control over
 // where in the list each element is inserted. The user can access elements by their integer index (position in the list),
 // and search for elements in the list.
-type List[T comparable] interface {
+type List[T any] interface {
 	Collection[T]
 
 	// Chunk splits an array into multiple arrays,
@@ -159,9 +161,6 @@ type List[T comparable] interface {
 	// For element type other than string, ContainsI returns the same result as Contains
 	// Note that it internally iterates the whole array to do the comparison with case-insensitively.
 	ContainsI(value T) bool
-
-	// CountValues counts the number of occurrences of all values in the array.
-	CountValues() map[T]int
 
 	// ForEachAsc iterates the array readonly in ascending order with given callback function `f`.
 	// If `f` returns true, then it continues iterating; or false to stop.
@@ -274,7 +273,7 @@ type List[T comparable] interface {
 // The order of a map is defined as the order in which the iterators on the map's collection views return their elements.
 // Some map implementations, like the TreeMap struct, make specific guarantees as to their order;
 // others, like the HashMap struct, do not.
-type Map[K comparable, V comparable] interface {
+type Map[K comparable, V any] interface {
 	// Put sets key-value to the map.
 	Put(key K, value V)
 
@@ -374,7 +373,7 @@ type Map[K comparable, V comparable] interface {
 // returning empty if there is no such key.
 // Similarly, methods LowerKey, FloorKey, CeilingKey, and HigherKey return only the associated keys.
 // All of these methods are designed for locating, not traversing entries.
-type SortedMap[K comparable, V comparable] interface {
+type SortedMap[K comparable, V any] interface {
 	Map[K, V]
 
 	// AscendingKeySet returns a view of the keys contained in this map, in its natural ascending order.
@@ -437,7 +436,7 @@ type SortedMap[K comparable, V comparable] interface {
 }
 
 // MapEntry is a key-value pair, usually representing the element entries in a Map
-type MapEntry[K comparable, V comparable] interface {
+type MapEntry[K comparable, V any] interface {
 	// Key returns the key corresponding to this entry.
 	Key() K
 
