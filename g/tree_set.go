@@ -30,7 +30,7 @@ type TreeSet[T comparable] struct {
 func NewTreeSet[T comparable](comparator comparators.Comparator[T], safe ...bool) *TreeSet[T] {
 	return &TreeSet[T]{
 		mu:   rwmutex.Create(safe...),
-		tree: NewRedBlackTree[T, struct{}](comparator, false),
+		tree: NewTreeMap[T, struct{}](comparator, false),
 	}
 }
 
@@ -42,7 +42,7 @@ func NewTreeSet[T comparable](comparator comparators.Comparator[T], safe ...bool
 func NewTreeSetDefault[T comparable](safe ...bool) *TreeSet[T] {
 	return &TreeSet[T]{
 		mu:   rwmutex.Create(safe...),
-		tree: NewRedBlackTree[T, struct{}](comparators.ComparatorAny[T], false),
+		tree: NewTreeMap[T, struct{}](comparators.ComparatorAny[T], false),
 	}
 }
 
@@ -52,7 +52,7 @@ func NewTreeSetDefault[T comparable](safe ...bool) *TreeSet[T] {
 func NewTreeSetFrom[T comparable](elements []T, comparator comparators.Comparator[T], safe ...bool) *TreeSet[T] {
 	a := &TreeSet[T]{
 		mu:   rwmutex.Create(safe...),
-		tree: NewRedBlackTree[T, struct{}](comparator, false),
+		tree: NewTreeMap[T, struct{}](comparator, false),
 	}
 	for _, value := range elements {
 		a.tree.PutIfAbsent(value, struct{}{})
@@ -62,7 +62,7 @@ func NewTreeSetFrom[T comparable](elements []T, comparator comparators.Comparato
 
 func (t *TreeSet[T]) lazyInit() {
 	if t.tree == nil {
-		t.tree = NewRedBlackTree[T, struct{}](comparators.ComparatorAny[T], false)
+		t.tree = NewTreeMap[T, struct{}](comparators.ComparatorAny[T], false)
 	}
 }
 

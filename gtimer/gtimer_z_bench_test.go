@@ -19,8 +19,8 @@ var (
 
 func Benchmark_Add(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		timer.Add(ctx, time.Hour, func(ctx context.Context) {
-
+		timer.Add(ctx, time.Hour, func(ctx context.Context) error {
+			return nil
 		})
 	}
 }

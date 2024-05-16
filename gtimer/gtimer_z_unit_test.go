@@ -10,6 +10,7 @@ package gtimer_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -25,8 +26,9 @@ var (
 func TestSetTimeout(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array := g.NewArrayList[int](true)
-		gtimer.SetTimeout(ctx, 200*time.Millisecond, func(ctx context.Context) {
+		gtimer.SetTimeout(ctx, 200*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		})
 		time.Sleep(1000 * time.Millisecond)
 		t.Assert(array.Len(), 1)
@@ -36,8 +38,9 @@ func TestSetTimeout(t *testing.T) {
 func TestSetInterval(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array := g.NewArrayList[int](true)
-		gtimer.SetInterval(ctx, 300*time.Millisecond, func(ctx context.Context) {
+		gtimer.SetInterval(ctx, 300*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		})
 		time.Sleep(1000 * time.Millisecond)
 		t.Assert(array.Len(), 3)
@@ -47,20 +50,36 @@ func TestSetInterval(t *testing.T) {
 func TestAddEntry(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array := g.NewArrayList[int](true)
-		gtimer.AddEntry(ctx, 200*time.Millisecond, func(ctx context.Context) {
+		gtimer.AddEntry(ctx, 200*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		}, false, 2, gtimer.StatusReady)
 		time.Sleep(1100 * time.Millisecond)
 		t.Assert(array.Len(), 2)
 	})
 }
 
+func TestJobError(t *testing.T) {
+	gtest.C(t, func(t *gtest.T) {
+		array := g.NewArrayList[int](true)
+		job := gtimer.AddEntry(ctx, 200*time.Millisecond, func(ctx context.Context) error {
+			array.Add(1)
+			return errors.New("I am error")
+		}, false, 2, gtimer.StatusReady)
+		time.Sleep(1100 * time.Millisecond)
+		t.Assert(array.Len(), 2)
+		t.Assert(job.HasErrors(), true)
+		t.Assert(len(job.Errors()), 2)
+	})
+}
+
 func TestAddSingleton(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array := g.NewArrayList[int](true)
-		gtimer.AddSingleton(ctx, 200*time.Millisecond, func(ctx context.Context) {
+		gtimer.AddSingleton(ctx, 200*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
 			time.Sleep(10000 * time.Millisecond)
+			return nil
 		})
 		time.Sleep(1100 * time.Millisecond)
 		t.Assert(array.Len(), 1)
@@ -70,8 +89,9 @@ func TestAddSingleton(t *testing.T) {
 func TestAddTimes(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array := g.NewArrayList[int](true)
-		gtimer.AddTimes(ctx, 200*time.Millisecond, 2, func(ctx context.Context) {
+		gtimer.AddTimes(ctx, 200*time.Millisecond, 2, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		})
 		time.Sleep(1000 * time.Millisecond)
 		t.Assert(array.Len(), 2)
@@ -81,8 +101,9 @@ func TestAddTimes(t *testing.T) {
 func TestDelayAdd(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array := g.NewArrayList[int](true)
-		gtimer.DelayAdd(ctx, 500*time.Millisecond, 500*time.Millisecond, func(ctx context.Context) {
+		gtimer.DelayAdd(ctx, 500*time.Millisecond, 500*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		})
 		time.Sleep(600 * time.Millisecond)
 		t.Assert(array.Len(), 0)
@@ -94,8 +115,9 @@ func TestDelayAdd(t *testing.T) {
 func TestDelayAddEntry(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array := g.NewArrayList[int](true)
-		gtimer.DelayAddEntry(ctx, 500*time.Millisecond, 500*time.Millisecond, func(ctx context.Context) {
+		gtimer.DelayAddEntry(ctx, 500*time.Millisecond, 500*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		}, false, 2, gtimer.StatusReady)
 		time.Sleep(500 * time.Millisecond)
 		t.Assert(array.Len(), 0)
@@ -107,9 +129,10 @@ func TestDelayAddEntry(t *testing.T) {
 func TestDelayAddSingleton(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array := g.NewArrayList[int](true)
-		gtimer.DelayAddSingleton(ctx, 500*time.Millisecond, 500*time.Millisecond, func(ctx context.Context) {
+		gtimer.DelayAddSingleton(ctx, 500*time.Millisecond, 500*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
 			time.Sleep(10000 * time.Millisecond)
+			return nil
 		})
 		time.Sleep(300 * time.Millisecond)
 		t.Assert(array.Len(), 0)
@@ -121,8 +144,9 @@ func TestDelayAddSingleton(t *testing.T) {
 func TestDelayAddOnce(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array := g.NewArrayList[int](true)
-		gtimer.DelayAddOnce(ctx, 1000*time.Millisecond, 2000*time.Millisecond, func(ctx context.Context) {
+		gtimer.DelayAddOnce(ctx, 1000*time.Millisecond, 2000*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		})
 		time.Sleep(2000 * time.Millisecond)
 		t.Assert(array.Len(), 0)
@@ -134,8 +158,9 @@ func TestDelayAddOnce(t *testing.T) {
 func TestDelayAddTimes(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		array := g.NewArrayList[int](true)
-		gtimer.DelayAddTimes(ctx, 500*time.Millisecond, 500*time.Millisecond, 2, func(ctx context.Context) {
+		gtimer.DelayAddTimes(ctx, 500*time.Millisecond, 500*time.Millisecond, 2, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		})
 		time.Sleep(300 * time.Millisecond)
 		t.Assert(array.Len(), 0)

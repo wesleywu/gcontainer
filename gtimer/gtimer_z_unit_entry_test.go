@@ -22,8 +22,9 @@ func TestJob_Start_Stop_Close(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		timer := gtimer.New()
 		array := g.NewArrayList[int](true)
-		job := timer.Add(ctx, 200*time.Millisecond, func(ctx context.Context) {
+		job := timer.Add(ctx, 200*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		})
 		time.Sleep(250 * time.Millisecond)
 		t.Assert(array.Len(), 1)
@@ -45,9 +46,10 @@ func TestJob_Singleton(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		timer := gtimer.New()
 		array := g.NewArrayList[int](true)
-		job := timer.Add(ctx, 200*time.Millisecond, func(ctx context.Context) {
+		job := timer.Add(ctx, 200*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
 			time.Sleep(10 * time.Second)
+			return nil
 		})
 		t.Assert(job.IsSingleton(), false)
 		job.SetSingleton(true)
@@ -66,9 +68,10 @@ func TestJob_SingletonQuick(t *testing.T) {
 			Quick: true,
 		})
 		array := g.NewArrayList[int](true)
-		job := timer.Add(ctx, 5*time.Second, func(ctx context.Context) {
+		job := timer.Add(ctx, 5*time.Second, func(ctx context.Context) error {
 			array.Add(1)
 			time.Sleep(10 * time.Second)
+			return nil
 		})
 		t.Assert(job.IsSingleton(), false)
 		job.SetSingleton(true)
@@ -85,8 +88,9 @@ func TestJob_SetTimes(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		timer := gtimer.New()
 		array := g.NewArrayList[int](true)
-		job := timer.Add(ctx, 200*time.Millisecond, func(ctx context.Context) {
+		job := timer.Add(ctx, 200*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		})
 		job.SetTimes(2)
 		//job.IsSingleton()
@@ -99,8 +103,9 @@ func TestJob_Run(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		timer := gtimer.New()
 		array := g.NewArrayList[int](true)
-		job := timer.Add(ctx, 1000*time.Millisecond, func(ctx context.Context) {
+		job := timer.Add(ctx, 1000*time.Millisecond, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		})
 		job.Job()(ctx)
 		t.Assert(array.Len(), 1)

@@ -29,8 +29,9 @@ func ExampleNew() {
 	}
 
 	// Close the queue in three seconds.
-	gtimer.SetTimeout(context.Background(), time.Second*3, func(ctx context.Context) {
+	gtimer.SetTimeout(context.Background(), time.Second*3, func(ctx context.Context) error {
 		q.Close()
+		return nil
 	})
 
 	// The consumer constantly reads the queue data.

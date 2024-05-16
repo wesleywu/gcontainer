@@ -21,8 +21,9 @@ func TestTimer_Proceed(t *testing.T) {
 		timer := New(TimerOptions{
 			Interval: time.Hour,
 		})
-		timer.Add(ctx, 10000*time.Hour, func(ctx context.Context) {
+		timer.Add(ctx, 10000*time.Hour, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		})
 		timer.proceed(10001)
 		time.Sleep(10 * time.Millisecond)
@@ -36,8 +37,9 @@ func TestTimer_Proceed(t *testing.T) {
 		timer := New(TimerOptions{
 			Interval: time.Millisecond * 100,
 		})
-		timer.Add(ctx, 10000*time.Hour, func(ctx context.Context) {
+		timer.Add(ctx, 10000*time.Hour, func(ctx context.Context) error {
 			array.Add(1)
+			return nil
 		})
 		ticks := int64((10000 * time.Hour) / (time.Millisecond * 100))
 		timer.proceed(ticks + 1)

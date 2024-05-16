@@ -396,10 +396,10 @@ func (c *AdapterMemory[K, V]) makeExpireKey(expire int64) int64 {
 // 1. Asynchronously process the data in the event list,
 // and synchronize the results to the `expireTimes` and `expireSets` properties.
 // 2. Clean up the expired key-value pair data.
-func (c *AdapterMemory[K, V]) syncEventAndClearExpired(ctx context.Context) {
+func (c *AdapterMemory[K, V]) syncEventAndClearExpired(ctx context.Context) error {
 	if c.closed.Val() {
 		gtimer.Exit()
-		return
+		return nil
 	}
 	var (
 		oldExpireTime int64
@@ -462,6 +462,7 @@ func (c *AdapterMemory[K, V]) syncEventAndClearExpired(ctx context.Context) {
 			c.expireSets.Delete(expireTime)
 		}
 	}
+	return nil
 }
 
 // clearByKey deletes the key-value pair with given `key`.

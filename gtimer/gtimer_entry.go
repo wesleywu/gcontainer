@@ -8,7 +8,9 @@ package gtimer
 
 import (
 	"context"
+	"time"
 
+	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/gtype"
 	"github.com/wesleywu/gcontainer/utils/gerror"
 )
@@ -24,10 +26,16 @@ type Entry struct {
 	isSingleton *gtype.Bool     // Singleton mode.
 	nextTicks   *gtype.Int64    // Next run ticks of the job.
 	infinite    *gtype.Bool     // No times limit.
+	errors      *g.LinkedList[*JobError]
+}
+
+type JobError struct {
+	error
+	occurs time.Time
 }
 
 // JobFunc is the timing called job function in timer.
-type JobFunc = func(ctx context.Context)
+type JobFunc = func(ctx context.Context) error
 
 // Status returns the status of the job.
 func (entry *Entry) Status() int {
@@ -62,7 +70,13 @@ func (entry *Entry) Run() {
 				entry.SetStatus(StatusReady)
 			}
 		}()
-		entry.job(entry.ctx)
+		err := entry.job(entry.ctx)
+		if err != nil {
+			entry.errors.Add(&JobError{
+				error:  err,
+				occurs: time.Now(),
+			})
+		}
 	}()
 }
 
@@ -143,4 +157,14 @@ func (entry *Entry) Ctx() context.Context {
 func (entry *Entry) SetTimes(times int) {
 	entry.times.Set(times)
 	entry.infinite.Set(false)
+}
+
+// HasErrors indicates whether past job executions has errors
+func (entry *Entry) HasErrors() bool {
+	return entry.errors.Len() > 0
+}
+
+// Errors returns errors occurred during past job executions
+func (entry *Entry) Errors() []*JobError {
+	return entry.errors.FrontAll()
 }

@@ -10,6 +10,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/wesleywu/gcontainer/g"
 	"github.com/wesleywu/gcontainer/gtype"
 )
 
@@ -105,40 +106,45 @@ func (t *Timer) AddTimes(ctx context.Context, interval time.Duration, times int,
 // DelayAdd adds a timing job after delay of `delay` duration.
 // Also see Add.
 func (t *Timer) DelayAdd(ctx context.Context, delay time.Duration, interval time.Duration, job JobFunc) {
-	t.AddOnce(ctx, delay, func(ctx context.Context) {
+	t.AddOnce(ctx, delay, func(ctx context.Context) error {
 		t.Add(ctx, interval, job)
+		return nil
 	})
 }
 
 // DelayAddEntry adds a timing job after delay of `delay` duration.
 // Also see AddEntry.
 func (t *Timer) DelayAddEntry(ctx context.Context, delay time.Duration, interval time.Duration, job JobFunc, isSingleton bool, times int, status int) {
-	t.AddOnce(ctx, delay, func(ctx context.Context) {
+	t.AddOnce(ctx, delay, func(ctx context.Context) error {
 		t.AddEntry(ctx, interval, job, isSingleton, times, status)
+		return nil
 	})
 }
 
 // DelayAddSingleton adds a timing job after delay of `delay` duration.
 // Also see AddSingleton.
 func (t *Timer) DelayAddSingleton(ctx context.Context, delay time.Duration, interval time.Duration, job JobFunc) {
-	t.AddOnce(ctx, delay, func(ctx context.Context) {
+	t.AddOnce(ctx, delay, func(ctx context.Context) error {
 		t.AddSingleton(ctx, interval, job)
+		return nil
 	})
 }
 
 // DelayAddOnce adds a timing job after delay of `delay` duration.
 // Also see AddOnce.
 func (t *Timer) DelayAddOnce(ctx context.Context, delay time.Duration, interval time.Duration, job JobFunc) {
-	t.AddOnce(ctx, delay, func(ctx context.Context) {
+	t.AddOnce(ctx, delay, func(ctx context.Context) error {
 		t.AddOnce(ctx, interval, job)
+		return nil
 	})
 }
 
 // DelayAddTimes adds a timing job after delay of `delay` duration.
 // Also see AddTimes.
 func (t *Timer) DelayAddTimes(ctx context.Context, delay time.Duration, interval time.Duration, times int, job JobFunc) {
-	t.AddOnce(ctx, delay, func(ctx context.Context) {
+	t.AddOnce(ctx, delay, func(ctx context.Context) error {
 		t.AddTimes(ctx, interval, times, job)
+		return nil
 	})
 }
 
@@ -201,6 +207,7 @@ func (t *Timer) createEntry(in createEntryInput) *Entry {
 			isSingleton: gtype.NewBool(in.IsSingleton),
 			nextTicks:   gtype.NewInt64(nextTicks),
 			infinite:    gtype.NewBool(infinite),
+			errors:      g.NewLinkedList[*JobError](true),
 		}
 	)
 	t.queue.Push(entry, nextTicks)

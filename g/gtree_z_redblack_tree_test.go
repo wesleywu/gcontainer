@@ -18,7 +18,7 @@ import (
 
 func Test_RedBlackTree_Basic(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewRedBlackTree[string, string](comparators.ComparatorString)
+		m := g.NewTreeMap[string, string](comparators.ComparatorString)
 		m.Put("key1", "val1")
 		t.Assert(m.Keys(), []interface{}{"key1"})
 
@@ -48,7 +48,7 @@ func Test_RedBlackTree_Basic(t *testing.T) {
 		t.Assert(m.Size(), 0)
 		t.Assert(m.IsEmpty(), true)
 
-		m2 := g.NewRedBlackTreeFrom(comparators.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
+		m2 := g.NewTreeMapFrom(comparators.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
 		t.Assert(m2.Map(), map[string]string{"1": "1", "key1": "val1"})
 	})
 }
@@ -56,7 +56,7 @@ func Test_RedBlackTree_Basic(t *testing.T) {
 func Test_RedBlackTree_Set_Fun(t *testing.T) {
 	//GetOrPutFunc lock or unlock
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewRedBlackTree[string, int](comparators.ComparatorString)
+		m := g.NewTreeMap[string, int](comparators.ComparatorString)
 		t.Assert(m.GetOrPutFunc("fun", getValue), 3)
 		t.Assert(m.GetOrPutFunc("fun", getValue), 3)
 		t.Assert(m.GetOrPutFunc("funlock", getValue), 3)
@@ -66,7 +66,7 @@ func Test_RedBlackTree_Set_Fun(t *testing.T) {
 	})
 	//PutIfAbsentFunc lock or unlock
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewRedBlackTree[string, int](comparators.ComparatorString)
+		m := g.NewTreeMap[string, int](comparators.ComparatorString)
 		t.Assert(m.PutIfAbsentFunc("fun", getValue), true)
 		t.Assert(m.PutIfAbsentFunc("fun", getValue), false)
 		t.Assert(m.PutIfAbsentFunc("funlock", getValue), true)
@@ -79,7 +79,7 @@ func Test_RedBlackTree_Set_Fun(t *testing.T) {
 
 func Test_RedBlackTree_Batch(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewRedBlackTree[string, string](comparators.ComparatorString)
+		m := g.NewTreeMap[string, string](comparators.ComparatorString)
 		m.Puts(map[string]string{"1": "1", "key1": "val1", "key2": "val2", "key3": "val3"})
 		t.Assert(m.Map(), map[string]string{"1": "1", "key1": "val1", "key2": "val2", "key3": "val3"})
 		m.Removes([]string{"key1", "1"})
@@ -93,7 +93,7 @@ func Test_RedBlackTree_Iterator(t *testing.T) {
 	index := 0
 
 	expect := map[string]string{"key4": "val4", "1": "1", "key1": "val1", "key2": "val2", "key3": "val3"}
-	m := g.NewRedBlackTreeFrom[string, string](comparators.ComparatorString, expect)
+	m := g.NewTreeMapFrom[string, string](comparators.ComparatorString, expect)
 
 	gtest.C(t, func(t *gtest.T) {
 
@@ -152,7 +152,7 @@ func Test_RedBlackTree_IteratorFrom(t *testing.T) {
 		}
 		m[i] = i * 10
 	}
-	tree := g.NewRedBlackTreeFrom[int, int](comparators.ComparatorInt, m)
+	tree := g.NewTreeMapFrom[int, int](comparators.ComparatorInt, m)
 
 	gtest.C(t, func(t *gtest.T) {
 		n1 := 5
@@ -262,7 +262,7 @@ func Test_RedBlackTree_SubMap(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			m["key"+gconv.String(i)] = i * 10
 		}
-		tree := g.NewRedBlackTreeFrom(comparators.ComparatorString, m)
+		tree := g.NewTreeMapFrom(comparators.ComparatorString, m)
 		// both key exists in map
 		t.Assert(tree.SubMap("key5", true, "key7", true).Values(), []int{50, 60, 70})
 		t.Assert(tree.SubMap("key5", false, "key7", true).Values(), []int{60, 70})
@@ -300,7 +300,7 @@ func Test_RedBlackTree_SubMap(t *testing.T) {
 func Test_RedBlackTree_Clone(t *testing.T) {
 	gtest.C(t, func(t *gtest.T) {
 		//clone 方法是深克隆
-		m := g.NewRedBlackTreeFrom[string, string](comparators.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
+		m := g.NewTreeMapFrom[string, string](comparators.ComparatorString, map[string]string{"1": "1", "key1": "val1"})
 		m_clone := m.Clone()
 		m.Remove("1")
 		//修改原 map,clone 后的 map 不影响
@@ -316,13 +316,13 @@ func Test_RedBlackTree_LRNode(t *testing.T) {
 	expect := map[string]string{"key4": "val4", "key1": "val1", "key2": "val2", "key3": "val3"}
 	//safe
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewRedBlackTreeFrom[string, string](comparators.ComparatorString, expect)
+		m := g.NewTreeMapFrom[string, string](comparators.ComparatorString, expect)
 		t.Assert(m.Left().Key(), "key1")
 		t.Assert(m.Right().Key(), "key4")
 	})
 	//unsafe
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewRedBlackTreeFrom[string, string](comparators.ComparatorString, expect, true)
+		m := g.NewTreeMapFrom[string, string](comparators.ComparatorString, expect, true)
 		t.Assert(m.Left().Key(), "key1")
 		t.Assert(m.Right().Key(), "key4")
 	})
@@ -341,7 +341,7 @@ func Test_RedBlackTree_CeilingFloor(t *testing.T) {
 		4:  "val4"}
 	//found and eq
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewRedBlackTreeFrom[int, string](comparators.ComparatorInt, expect)
+		m := g.NewTreeMapFrom[int, string](comparators.ComparatorInt, expect)
 		c := m.CeilingEntry(8)
 		t.Assert(c != nil, true)
 		t.Assert(c.Value(), "val8")
@@ -351,7 +351,7 @@ func Test_RedBlackTree_CeilingFloor(t *testing.T) {
 	})
 	//found and neq
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewRedBlackTreeFrom[int, string](comparators.ComparatorInt, expect)
+		m := g.NewTreeMapFrom[int, string](comparators.ComparatorInt, expect)
 		c := m.CeilingEntry(9)
 		t.Assert(c != nil, true)
 		t.Assert(c.Value(), "val10")
@@ -361,7 +361,7 @@ func Test_RedBlackTree_CeilingFloor(t *testing.T) {
 	})
 	//nofound
 	gtest.C(t, func(t *gtest.T) {
-		m := g.NewRedBlackTreeFrom[int, string](comparators.ComparatorInt, expect)
+		m := g.NewTreeMapFrom[int, string](comparators.ComparatorInt, expect)
 		c := m.CeilingEntry(21)
 		t.Assert(c, nil)
 		f := m.FloorEntry(-1)
@@ -370,7 +370,7 @@ func Test_RedBlackTree_CeilingFloor(t *testing.T) {
 }
 
 func Test_RedBlackTree_Remove(t *testing.T) {
-	m := g.NewRedBlackTree[int, string](comparators.ComparatorInt)
+	m := g.NewTreeMap[int, string](comparators.ComparatorInt)
 	for i := 1; i <= 100; i++ {
 		m.Put(i, fmt.Sprintf("val%d", i))
 	}

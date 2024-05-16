@@ -159,12 +159,12 @@ func (q *RingQueue[T]) Pop() (x T, ok bool) {
 	return x, true
 }
 
-// BatchPop removes and returns specified number of items at the front of the queue.
+// PopMulti removes and returns specified number of items at the front of the queue.
 // It returns empty slice if the queue is empty.
-// Otherwise, it returns true and the item.
+// Otherwise, it returns the popped items.
 //
-// This is an O(1) operation and does not allocate.
-func (q *RingQueue[T]) BatchPop(numberOfItems int) []T {
+// This is an O(n) operation
+func (q *RingQueue[T]) PopMulti(numberOfItems int) []T {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	if q.head == q.tail {
@@ -178,7 +178,7 @@ func (q *RingQueue[T]) BatchPop(numberOfItems int) []T {
 		}
 		result := make([]T, popCount)
 		copy(result, q.buff[q.head:q.head+popCount])
-		q.head += popCount
+		q.head = q.head + popCount
 
 		if q.head == len(q.buff) {
 			// Wrap around.
@@ -195,7 +195,39 @@ func (q *RingQueue[T]) BatchPop(numberOfItems int) []T {
 		result := make([]T, popCount)
 		copy(result, q.buff[q.head:len(q.buff)])
 		copy(result[tailedCount:], q.buff[:q.tail])
-		q.head += popCount - len(q.buff)
+		q.head = q.head + popCount - len(q.buff)
+		return result
+	}
+}
+
+// PopAll removes returns all items from the front to the tail of the queue.
+// It returns empty slice if the queue is empty.
+// Otherwise, it returns the popped items.
+//
+// This is an O(n) operation
+func (q *RingQueue[T]) PopAll() []T {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	var (
+		queueLen int
+	)
+	if q.head == q.tail {
+		return []T{}
+	}
+
+	if q.tail > q.head { // the items need to be popped are continuous
+		queueLen = q.tail - q.head
+		result := make([]T, queueLen)
+		copy(result, q.buff[q.head:q.tail])
+		q.head = q.tail
+		return result
+	} else { // the items need to be popped are discontinuous
+		queueLen = len(q.buff) - q.head + q.tail
+		tailedCount := len(q.buff) - q.head
+		result := make([]T, queueLen)
+		copy(result, q.buff[q.head:len(q.buff)])
+		copy(result[tailedCount:], q.buff[:q.tail])
+		q.head = q.tail
 		return result
 	}
 }

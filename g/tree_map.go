@@ -41,31 +41,31 @@ type RedBlackTreeNode[K comparable, V any] struct {
 	parent *RedBlackTreeNode[K, V]
 }
 
-// NewRedBlackTree instantiates a red-black tree with the custom key comparators.
+// NewTreeMap instantiates a red-black tree with the custom key comparators.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewRedBlackTree[K comparable, V any](comparator comparators.Comparator[K], safe ...bool) *TreeMap[K, V] {
+func NewTreeMap[K comparable, V any](comparator comparators.Comparator[K], safe ...bool) *TreeMap[K, V] {
 	return &TreeMap[K, V]{
 		mu:         rwmutex.Create(safe...),
 		comparator: comparator,
 	}
 }
 
-// NewRedBlackTreeDefault instantiates a red-black tree with default key comparators.
+// NewTreeMapDefault instantiates a red-black tree with default key comparators.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewRedBlackTreeDefault[K comparable, V any](safe ...bool) *TreeMap[K, V] {
+func NewTreeMapDefault[K comparable, V any](safe ...bool) *TreeMap[K, V] {
 	return &TreeMap[K, V]{
 		mu:         rwmutex.Create(safe...),
 		comparator: comparators.ComparatorAny[K],
 	}
 }
 
-// NewRedBlackTreeFrom instantiates a red-black tree with the custom key comparators and `data` map.
+// NewTreeMapFrom instantiates a red-black tree with the custom key comparators and `data` map.
 // The parameter `safe` is used to specify whether using tree in concurrent-safety,
 // which is false in default.
-func NewRedBlackTreeFrom[K comparable, V any](comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *TreeMap[K, V] {
-	tree := NewRedBlackTree[K, V](comparator, safe...)
+func NewTreeMapFrom[K comparable, V any](comparator func(v1, v2 K) int, data map[K]V, safe ...bool) *TreeMap[K, V] {
+	tree := NewTreeMap[K, V](comparator, safe...)
 	for k, v := range data {
 		tree.insertEntry(k, v)
 	}
@@ -123,7 +123,7 @@ func (tree *TreeMap[K, V]) SetComparator(comparator comparators.Comparator[K]) {
 
 // Clone returns a new tree with a copy of current tree.
 func (tree *TreeMap[K, V]) Clone(safe ...bool) Map[K, V] {
-	newTree := NewRedBlackTree[K, V](tree.comparator, safe...)
+	newTree := NewTreeMap[K, V](tree.comparator, safe...)
 	newTree.Puts(tree.Map())
 	return newTree
 }
@@ -560,7 +560,7 @@ func (tree *TreeMap[K, V]) Removes(keys []K) {
 
 // Reverse returns a reverse order view of the mappings contained in this map.
 func (tree *TreeMap[K, V]) Reverse() SortedMap[K, V] {
-	newTree := NewRedBlackTree[K, V](comparators.Reverse(tree.comparator), tree.mu.IsSafe())
+	newTree := NewTreeMap[K, V](comparators.Reverse(tree.comparator), tree.mu.IsSafe())
 	newTree.Puts(tree.Map())
 	return newTree
 }
@@ -774,7 +774,7 @@ func (tree *TreeMap[K, V]) CeilingKey(key K) (ceilingKey K, ok bool) {
 
 // HeadMap returns a view of the portion of this map whose keys are less than (or equal to, if inclusive is true) toKey.
 func (tree *TreeMap[K, V]) HeadMap(toKey K, inclusive bool) SortedMap[K, V] {
-	result := NewRedBlackTree[K, V](tree.Comparator(), tree.mu.IsSafe())
+	result := NewTreeMap[K, V](tree.Comparator(), tree.mu.IsSafe())
 	tree.IteratorDescFrom(toKey, inclusive, func(key K, value V) bool {
 		result.Put(key, value)
 		return true
@@ -1003,7 +1003,7 @@ func (tree *TreeMap[K, V]) SubMap(fromKey K, fromInclusive bool, toKey K, toIncl
 		startElement *RedBlackTreeNode[K, V]
 		endElement   *RedBlackTreeNode[K, V]
 		outOfBound   bool
-		result       = NewRedBlackTree[K, V](tree.getComparator(), tree.mu.IsSafe())
+		result       = NewTreeMap[K, V](tree.getComparator(), tree.mu.IsSafe())
 	)
 	if fromInclusive {
 		entry := tree.CeilingEntry(fromKey)
@@ -1103,7 +1103,7 @@ func (tree *TreeMap[K, V]) Search(key K) (value V, found bool) {
 
 // TailMap returns a view of the portion of this map whose keys are greater than (or equal to, if inclusive is true) fromKey.
 func (tree *TreeMap[K, V]) TailMap(fromKey K, inclusive bool) SortedMap[K, V] {
-	result := NewRedBlackTree[K, V](tree.Comparator(), tree.mu.IsSafe())
+	result := NewTreeMap[K, V](tree.Comparator(), tree.mu.IsSafe())
 	tree.IteratorAscFrom(fromKey, inclusive, func(key K, value V) bool {
 		result.Put(key, value)
 		return true

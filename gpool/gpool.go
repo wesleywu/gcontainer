@@ -139,7 +139,7 @@ func (p *Pool[T]) Close() {
 }
 
 // checkExpire removes expired items from pool in every second.
-func (p *Pool[T]) checkExpireItems(ctx context.Context) {
+func (p *Pool[T]) checkExpireItems(ctx context.Context) error {
 	if p.closed.Val() {
 		// If p has ExpireFunc,
 		// then it must close all items using this function.
@@ -156,7 +156,7 @@ func (p *Pool[T]) checkExpireItems(ctx context.Context) {
 	}
 	// All items do not expire.
 	if p.TTL == 0 {
-		return
+		return nil
 	}
 	// The latest item expire timestamp in milliseconds.
 	var latestExpire int64 = -1
@@ -183,4 +183,5 @@ func (p *Pool[T]) checkExpireItems(ctx context.Context) {
 			break
 		}
 	}
+	return nil
 }

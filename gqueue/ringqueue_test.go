@@ -35,7 +35,8 @@ type queue[T any] interface {
 	Clear()
 	Push(x T)
 	Pop() (T, bool)
-	BatchPop(int) []T
+	PopMulti(int) []T
+	PopAll() []T
 	Peek() (T, bool)
 	Snapshot([]T) []T
 }
@@ -175,7 +176,7 @@ func (s *queueSuite) TestPushPopWraparound(t *testing.T) {
 	assert.Equal(t, want, got, "items")
 }
 
-func (s *queueSuite) TestPushBatchPopWithPushingBack(t *testing.T) {
+func (s *queueSuite) TestPushPopMultiWithPushingBack(t *testing.T) {
 	t.Parallel()
 
 	for _, batchSize := range s.BatchSizes {
@@ -189,7 +190,7 @@ func (s *queueSuite) TestPushBatchPopWithPushingBack(t *testing.T) {
 		currentLength := q.Len()
 
 		for i := 0; i < (capacity/batchSize)+3; i++ { // test batchPop 3 times
-			poppedItems := q.BatchPop(batchSize)
+			poppedItems := q.PopMulti(batchSize)
 			poppedCount := len(poppedItems)
 			assert.True(t, poppedCount <= batchSize, "popped count")
 			if poppedCount < batchSize {
@@ -206,7 +207,7 @@ func (s *queueSuite) TestPushBatchPopWithPushingBack(t *testing.T) {
 	}
 }
 
-func (s *queueSuite) TestPushBatchPopWithoutPushingBack(t *testing.T) {
+func (s *queueSuite) TestPushPopMultiWithoutPushingBack(t *testing.T) {
 	t.Parallel()
 
 	for _, batchSize := range s.BatchSizes {
@@ -220,7 +221,7 @@ func (s *queueSuite) TestPushBatchPopWithoutPushingBack(t *testing.T) {
 		currentLength := q.Len()
 
 		for i := 0; i < (capacity/batchSize)+3; i++ { // test batchPop 3 times
-			poppedItems := q.BatchPop(batchSize)
+			poppedItems := q.PopMulti(batchSize)
 			poppedCount := len(poppedItems)
 			assert.True(t, poppedCount <= batchSize, "popped count")
 			if poppedCount < batchSize {
@@ -230,6 +231,32 @@ func (s *queueSuite) TestPushBatchPopWithoutPushingBack(t *testing.T) {
 			assert.Equal(t, capacity, q.Cap(), "capacity")
 			currentLength = q.Len()
 		}
+	}
+}
+
+func (s *queueSuite) TestPushPopAll(t *testing.T) {
+	t.Parallel()
+
+	q := s.NewEmpty()
+	for i := 0; i < s.NumItems; i++ {
+		q.Push(i)
+	}
+	assert.False(t, q.IsEmpty(), "empty")
+	assert.Equal(t, s.NumItems, q.Len(), "length")
+	capacity := q.Cap()
+	currentLength := q.Len()
+
+	for i := 0; i < capacity; i += 10 { // test PopAll
+		poppedItems := q.PopAll()
+		poppedCount := len(poppedItems)
+		assert.True(t, poppedCount == currentLength, "popped count")
+		assert.True(t, q.IsEmpty(), "empty")
+		// insert some items into queue again
+		for j := 0; j < i; j++ {
+			q.Push(j)
+		}
+		assert.Equal(t, capacity, q.Cap(), "capacity")
+		currentLength = q.Len()
 	}
 }
 
@@ -292,7 +319,7 @@ func TestRingQueue_PeekPop(t *testing.T) {
 	assert.True(t, q.IsEmpty(), "empty")
 }
 
-func TestRingQueue_BatchPop(t *testing.T) {
+func TestRingQueue_PopMulti(t *testing.T) {
 	t.Parallel()
 
 	q := gqueue.NewRingQueue[int](1026)
@@ -305,7 +332,7 @@ func TestRingQueue_BatchPop(t *testing.T) {
 	currentLength := q.Len()
 
 	for i := 0; i < 350; i++ { // test batchPop 3 times
-		poppedItems := q.BatchPop(batchSize)
+		poppedItems := q.PopMulti(batchSize)
 		poppedCount := len(poppedItems)
 		assert.True(t, poppedCount <= batchSize, "popped count")
 		if poppedCount < batchSize {

@@ -20,9 +20,10 @@ func ExampleAdd() {
 		now      = time.Now()
 		interval = 1400 * time.Millisecond
 	)
-	gtimer.Add(ctx, interval, func(ctx context.Context) {
+	gtimer.Add(ctx, interval, func(ctx context.Context) error {
 		fmt.Println(time.Now(), time.Duration(time.Now().UnixNano()-now.UnixNano()))
 		now = time.Now()
+		return nil
 	})
 
 	select {}
