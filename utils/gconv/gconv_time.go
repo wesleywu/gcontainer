@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/araddon/dateparse"
 	"github.com/wesleywu/gcontainer/internal/utils"
 	"github.com/wesleywu/gcontainer/utils/gerror"
 	"github.com/wesleywu/gcontainer/utils/gregex"
@@ -18,13 +19,36 @@ import (
 
 // Time converts `any` to time.Time.
 func Time(any interface{}, format ...string) time.Time {
+	if any == nil {
+		return time.Time{}
+	}
 	// It's already this type.
 	if len(format) == 0 {
-		if v, ok := any.(time.Time); ok {
-			return v
+		if t, ok := any.(time.Time); ok {
+			return t
+		}
+		if t, ok := any.(*time.Time); ok {
+			return *t
 		}
 	}
-	return time.Time{}
+	s := String(any)
+	if len(s) == 0 {
+		return time.Time{}
+	}
+	// Priority conversion using given format.
+	if len(format) > 0 {
+		t, err := time.Parse(format[0], s)
+		if err == nil {
+			return t
+		}
+		return time.Time{}
+	}
+	if utils.IsNumeric(s) {
+		return time.Unix(Int64(s), 0)
+	} else {
+		t, _ := dateparse.ParseAny(s)
+		return t
+	}
 }
 
 // Duration converts `any` to time.Duration.

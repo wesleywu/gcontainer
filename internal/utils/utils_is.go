@@ -8,7 +8,19 @@ package utils
 
 import (
 	"reflect"
+
+	"github.com/wesleywu/gcontainer/utils/empty"
 )
+
+// IsNil checks whether `value` is nil, especially for interface{} type value.
+func IsNil(value interface{}) bool {
+	return empty.IsNil(value)
+}
+
+// IsEmpty checks whether `value` is empty.
+func IsEmpty(value interface{}) bool {
+	return empty.IsEmpty(value)
+}
 
 // IsInt checks whether `value` is type of int.
 func IsInt(value interface{}) bool {
@@ -45,6 +57,7 @@ func IsSlice(value interface{}) bool {
 	)
 	for reflectKind == reflect.Ptr {
 		reflectValue = reflectValue.Elem()
+		reflectKind = reflectValue.Kind()
 	}
 	switch reflectKind {
 	case reflect.Slice, reflect.Array:
@@ -61,6 +74,7 @@ func IsMap(value interface{}) bool {
 	)
 	for reflectKind == reflect.Ptr {
 		reflectValue = reflectValue.Elem()
+		reflectKind = reflectValue.Kind()
 	}
 	switch reflectKind {
 	case reflect.Map:
