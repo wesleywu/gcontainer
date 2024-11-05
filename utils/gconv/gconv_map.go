@@ -10,11 +10,11 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/wesleywu/gcontainer/greflect"
 	"github.com/wesleywu/gcontainer/internal/json"
 	"github.com/wesleywu/gcontainer/internal/utils"
 	"github.com/wesleywu/gcontainer/utils/empty"
 	"github.com/wesleywu/gcontainer/utils/gconv/internal/localinterface"
+	"github.com/wesleywu/gcontainer/utils/greflect"
 	"github.com/wesleywu/gcontainer/utils/gtag"
 )
 
