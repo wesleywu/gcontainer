@@ -51,7 +51,7 @@ func (e *exampleElement) String() string {
 	return result
 }
 
-func ExampleNew() {
+func ExampleNewArrayList() {
 	// A normal array.
 	a := g.NewArrayList[int]()
 
@@ -113,7 +113,7 @@ func ExampleNew() {
 	// []
 }
 
-func ExampleStdArray_ForEach() {
+func ExampleArrayList_ForEach() {
 	array := g.NewArrayListFrom[string]([]string{"a", "b", "c"})
 	// ForEach is alias of ForEachAsc, which iterates the array readonly in ascending order
 	//  with given callback function `f`.
@@ -138,7 +138,7 @@ func ExampleStdArray_ForEach() {
 	// 0 a
 }
 
-func ExampleArray_Reverse() {
+func ExampleArrayList_Reverse() {
 	array := g.NewArrayListFrom[int]([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Reverse makes array with elements in reverse order.
@@ -148,14 +148,14 @@ func ExampleArray_Reverse() {
 	// [9 8 7 6 5 4 3 2 1]
 }
 
-func ExampleArray_Shuffle() {
+func ExampleArrayList_Shuffle() {
 	array := g.NewArrayListFrom[int]([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Shuffle randomly shuffles the array.
 	fmt.Println(array.Shuffle().Slice())
 }
 
-func ExampleArray_Rands() {
+func ExampleArrayList_Rands() {
 	array := g.NewArrayListFrom[int]([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Randomly retrieve and return 2 items from the array.
@@ -167,7 +167,7 @@ func ExampleArray_Rands() {
 	fmt.Println(array.PopRand())
 }
 
-func ExampleArray_PopRand() {
+func ExampleArrayList_PopRand() {
 	array := g.NewArrayListFrom[int]([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Randomly retrieve and return 2 items from the array.
@@ -179,7 +179,7 @@ func ExampleArray_PopRand() {
 	fmt.Println(array.PopRand())
 }
 
-func ExampleArray_Join() {
+func ExampleArrayList_Join() {
 	array := g.NewArrayListFrom[string]([]string{"a", "b", "c", "d"})
 	fmt.Println(array.Join(","))
 
@@ -187,7 +187,7 @@ func ExampleArray_Join() {
 	// a,b,c,d
 }
 
-func ExampleArray_Chunk() {
+func ExampleArrayList_Chunk() {
 	array := g.NewArrayListFrom[int]([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Chunk splits an array into multiple arrays,
@@ -199,7 +199,7 @@ func ExampleArray_Chunk() {
 	// [[1 2] [3 4] [5 6] [7 8] [9]]
 }
 
-func ExampleArray_PopLeft() {
+func ExampleArrayList_PopLeft() {
 	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Any MustPop* functions pick, delete and return the item from array.
@@ -216,7 +216,7 @@ func ExampleArray_PopLeft() {
 	// [7 8]
 }
 
-func ExampleArray_PopLefts() {
+func ExampleArrayList_PopLefts() {
 	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Any MustPop* functions pick, delete and return the item from array.
@@ -233,7 +233,7 @@ func ExampleArray_PopLefts() {
 	// [7 8]
 }
 
-func ExampleArray_PopRight() {
+func ExampleArrayList_PopRight() {
 	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Any MustPop* functions pick, delete and return the item from array.
@@ -250,7 +250,7 @@ func ExampleArray_PopRight() {
 	// [7 8]
 }
 
-func ExampleArray_PopRights() {
+func ExampleArrayList_PopRights() {
 	array := g.NewArrayListFrom([]int{1, 2, 3, 4, 5, 6, 7, 8, 9})
 
 	// Any MustPop* functions pick, delete and return the item from array.
@@ -267,7 +267,7 @@ func ExampleArray_PopRights() {
 	// [7 8]
 }
 
-func ExampleArray_Contains() {
+func ExampleArrayList_Contains() {
 	var array g.ArrayList[string]
 	array.Add("a")
 	fmt.Println(array.Contains("a"))
@@ -280,7 +280,7 @@ func ExampleArray_Contains() {
 	// true
 }
 
-func ExampleArray_Merge() {
+func ExampleArrayList_AddAll() {
 	array1 := g.NewArrayListFrom[int]([]int{1, 2})
 	array2 := g.NewArrayListFrom[int]([]int{3, 4})
 	slice1 := []int{5, 6}
@@ -299,7 +299,7 @@ func ExampleArray_Merge() {
 	// [1 2 1 2 3 4 5 6 7 8 9 0]
 }
 
-func ExampleArray_Filter() {
+func ExampleArrayList_Filter() {
 	array1 := g.NewArrayListFrom[*exampleElement]([]*exampleElement{
 		{Code: 0},
 		{Code: 1},
@@ -326,7 +326,7 @@ func ExampleArray_Filter() {
 	// [1 2 "john"]
 }
 
-func ExampleArray_FilterEmpty() {
+func ExampleArrayList_FilterEmpty() {
 	array1 := g.NewArrayListFrom[*exampleElement]([]*exampleElement{
 		{Code: 0},
 		{Code: 1},
@@ -349,7 +349,7 @@ func ExampleArray_FilterEmpty() {
 	// [1 2 "john"]
 }
 
-func ExampleArray_FilterNil() {
+func ExampleArrayList_FilterNil() {
 	array1 := g.NewArrayListFrom[*exampleElement]([]*exampleElement{
 		{Code: 0},
 		{Code: 1},

@@ -262,6 +262,11 @@ func (tree *AVLTree[K, V]) Values() []V {
 	return values
 }
 
+// KeySet returns a set of the keys contained in the tree.
+func (tree *AVLTree[K, V]) KeySet() Set[K] {
+	return NewHashSetFrom(tree.Keys(), tree.mu.IsSafe())
+}
+
 // Left returns the minimum element of the AVL tree
 // or nil if the tree is empty.
 func (tree *AVLTree[K, V]) Left() *AVLTreeNode[K, V] {

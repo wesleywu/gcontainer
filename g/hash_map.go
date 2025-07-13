@@ -326,6 +326,11 @@ func (m *HashMap[K, V]) Values() []V {
 	return values
 }
 
+// KeySet returns a set of the keys contained in the map.
+func (m *HashMap[K, V]) KeySet() Set[K] {
+	return NewHashSetFrom(m.Keys(), m.mu.IsSafe())
+}
+
 // ContainsKey checks whether a key exists.
 // It returns true if the `key` exists, or else false.
 func (m *HashMap[K, V]) ContainsKey(key K) bool {

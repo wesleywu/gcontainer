@@ -272,6 +272,11 @@ func (tree *BTree[K, V]) Values() []V {
 	return values
 }
 
+// KeySet returns a set of the keys contained in the tree.
+func (tree *BTree[K, V]) KeySet() Set[K] {
+	return NewHashSetFrom(tree.Keys(), tree.mu.IsSafe())
+}
+
 // Map returns all key-value items as map.
 func (tree *BTree[K, V]) Map() map[K]V {
 	m := make(map[K]V, tree.Size())

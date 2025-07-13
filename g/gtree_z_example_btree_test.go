@@ -394,7 +394,8 @@ func ExampleBTree_Print() {
 	//     key5
 }
 
-func ExampleBTree_Iterator() {
+// 改为 ForEach/ForEachAsc/ForEachDesc
+func ExampleBTree_ForEach() {
 	tree := g.NewBTree[int, int](3, comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
@@ -416,14 +417,14 @@ func ExampleBTree_Iterator() {
 	// totalValue: 27
 }
 
-func ExampleBTree_IteratorFrom() {
+func ExampleBTree_IteratorAscFrom() {
 	m := make(map[int]int)
 	for i := 1; i <= 5; i++ {
 		m[i] = i * 10
 	}
 	tree := g.NewBTreeFrom(3, comparators.ComparatorInt, m)
 
-	tree.IteratorFrom(1, true, func(key, value int) bool {
+	tree.IteratorAscFrom(1, true, func(key, value int) bool {
 		fmt.Println("key:", key, ", value:", value)
 		return true
 	})
@@ -436,7 +437,7 @@ func ExampleBTree_IteratorFrom() {
 	// key: 5 , value: 50
 }
 
-func ExampleBTree_IteratorAsc() {
+func ExampleBTree_ForEachAsc() {
 	tree := g.NewBTree[int, int](3, comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
@@ -460,62 +461,7 @@ func ExampleBTree_IteratorAsc() {
 	// key: 9 , value: 1
 }
 
-func ExampleBTree_IteratorAscFrom_Normal() {
-	m := make(map[int]int)
-	for i := 1; i <= 5; i++ {
-		m[i] = i * 10
-	}
-	tree := g.NewBTreeFrom(3, comparators.ComparatorInt, m)
-
-	tree.IteratorAscFrom(1, true, func(key, value int) bool {
-		fmt.Println("key:", key, ", value:", value)
-		return true
-	})
-
-	// Output:
-	// key: 1 , value: 10
-	// key: 2 , value: 20
-	// key: 3 , value: 30
-	// key: 4 , value: 40
-	// key: 5 , value: 50
-}
-
-func ExampleBTree_IteratorAscFrom_NoExistKey() {
-	m := make(map[int]int)
-	for i := 1; i <= 5; i++ {
-		m[i] = i * 10
-	}
-	tree := g.NewBTreeFrom(3, comparators.ComparatorInt, m)
-
-	tree.IteratorAscFrom(0, true, func(key, value int) bool {
-		fmt.Println("key:", key, ", value:", value)
-		return true
-	})
-
-	// Output:
-}
-
-func ExampleBTree_IteratorAscFrom_NoExistKeyAndMatchFalse() {
-	m := make(map[int]int)
-	for i := 1; i <= 5; i++ {
-		m[i] = i * 10
-	}
-	tree := g.NewBTreeFrom(3, comparators.ComparatorInt, m)
-
-	tree.IteratorAscFrom(0, false, func(key, value int) bool {
-		fmt.Println("key:", key, ", value:", value)
-		return true
-	})
-
-	// Output:
-	// key: 1 , value: 10
-	// key: 2 , value: 20
-	// key: 3 , value: 30
-	// key: 4 , value: 40
-	// key: 5 , value: 50
-}
-
-func ExampleBTree_IteratorDesc() {
+func ExampleBTree_ForEachDesc() {
 	tree := g.NewBTree[int, int](3, comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
