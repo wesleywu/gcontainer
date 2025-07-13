@@ -451,7 +451,7 @@ func ExampleAVLTree_Print() {
 	//         └── key0
 }
 
-func ExampleAVLTree_Iterator() {
+func ExampleAVLTree_ForEach() {
 	tree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
@@ -493,7 +493,7 @@ func ExampleAVLTree_IteratorFrom() {
 	// key: 5 , value: 50
 }
 
-func ExampleAVLTree_IteratorAsc() {
+func ExampleAVLTree_ForEachAsc() {
 	tree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)
@@ -567,7 +567,7 @@ func ExampleAVLTree_IteratorAscFrom_noExistKeyAndMatchFalse() {
 	// Output:
 }
 
-func ExampleAVLTree_IteratorDesc() {
+func ExampleAVLTree_ForEachDesc() {
 	tree := g.NewAVLTree[int, int](comparators.ComparatorInt)
 	for i := 0; i < 10; i++ {
 		tree.Put(i, 10-i)

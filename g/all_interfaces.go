@@ -319,6 +319,9 @@ type Map[K comparable, V any] interface {
 	// Size returns the size of the map.
 	Size() int
 
+	// KeySet returns all keys of the map as a set.
+	KeySet() Set[K]
+
 	// Keys returns all keys of the map as a slice, maintaining the order of belonging entries in the map.
 	Keys() []K
 

@@ -73,14 +73,12 @@ func ExampleNewBTreeFrom() {
 	// map[key0:val0 key1:val1 key2:val2 key3:val3 key4:val4 key5:val5]
 }
 
-func ExampleNewRedBlackTree() {
-	rbTree := g.NewTreeMap[string, string](comparators.ComparatorString)
+func ExampleNewTreeMap() {
+	tree := g.NewTreeMap[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
-		rbTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
+		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
-
-	fmt.Println(rbTree)
-
+	fmt.Println(tree)
 	// Output:
 	// │           ┌── key5
 	// │       ┌── key4
@@ -90,15 +88,13 @@ func ExampleNewRedBlackTree() {
 	//     └── key0
 }
 
-func ExampleNewRedBlackTreeFrom() {
-	rbTree := g.NewTreeMap[string, string](comparators.ComparatorString)
+func ExampleNewTreeMapFrom() {
+	tree := g.NewTreeMap[string, string](comparators.ComparatorString)
 	for i := 0; i < 6; i++ {
-		rbTree.Put("key"+gconv.String(i), "val"+gconv.String(i))
+		tree.Put("key"+gconv.String(i), "val"+gconv.String(i))
 	}
-
-	otherRBTree := g.NewTreeMapFrom[string, string](comparators.ComparatorString, rbTree.Map())
-	fmt.Println(otherRBTree)
-
+	otherTree := g.NewTreeMapFrom[string, string](comparators.ComparatorString, tree.Map())
+	fmt.Println(otherTree)
 	// May Output:
 	// │           ┌── key5
 	// │       ┌── key4

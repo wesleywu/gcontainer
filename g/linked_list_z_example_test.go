@@ -12,40 +12,6 @@ import (
 	"github.com/wesleywu/gcontainer/g"
 )
 
-func ExampleNewArrayList() {
-	n := 10
-	l := g.NewLinkedList[int]()
-	for i := 0; i < n; i++ {
-		l.PushBack(i)
-	}
-
-	fmt.Println(l.Len())
-	fmt.Println(l)
-	fmt.Println(l.FrontAll())
-	fmt.Println(l.BackAll())
-
-	for i := 0; i < n; i++ {
-		v, _ := l.PopFront()
-		fmt.Print(v)
-	}
-
-	fmt.Println()
-	fmt.Println(l.Len())
-	v, _ := l.PopFront()
-	fmt.Println(v)
-	fmt.Println(l.Len())
-
-	// Output:
-	// 10
-	// [0,1,2,3,4,5,6,7,8,9]
-	// [0 1 2 3 4 5 6 7 8 9]
-	// [9 8 7 6 5 4 3 2 1 0]
-	// 0123456789
-	// 0
-	// 0
-	// 0
-}
-
 func ExampleNewArrayListFrom() {
 	n := 10
 	l := g.NewLinkedListFrom[int](g.NewArrayListRange(1, 10, 1).Slice())

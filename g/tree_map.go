@@ -142,6 +142,11 @@ func (tree *TreeMap[K, V]) DescendingKeySet() SortedSet[K] {
 	return keySet
 }
 
+// KeySet returns a set of the keys contained in the tree.
+func (tree *TreeMap[K, V]) KeySet() Set[K] {
+	return NewHashSetFrom(tree.Keys(), tree.mu.IsSafe())
+}
+
 func (tree *TreeMap[K, V]) FirstEntry() MapEntry[K, V] {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
@@ -257,11 +262,10 @@ func (tree *TreeMap[K, V]) doSetWithLockCheckFunc(key K, f func() V) V {
 // GetOrPut returns the value by key,
 // or sets value with given `value` if it does not exist and then returns this value.
 func (tree *TreeMap[K, V]) GetOrPut(key K, value V) V {
-	if v, ok := tree.Search(key); !ok {
-		return tree.doSetWithLockCheck(key, value)
-	} else {
+	if v, ok := tree.Search(key); ok {
 		return v
 	}
+	return tree.doSetWithLockCheck(key, value)
 }
 
 // GetOrPutFunc returns the value by key,
@@ -271,11 +275,10 @@ func (tree *TreeMap[K, V]) GetOrPut(key K, value V) V {
 // GetOrSetFuncLock differs with GetOrSetFunc function is that it executes function `f`
 // with mutex.Lock of the hash map.
 func (tree *TreeMap[K, V]) GetOrPutFunc(key K, f func() V) V {
-	if v, ok := tree.Search(key); !ok {
-		return tree.doSetWithLockCheckFunc(key, f)
-	} else {
+	if v, ok := tree.Search(key); ok {
 		return v
 	}
+	return tree.doSetWithLockCheckFunc(key, f)
 }
 
 // PutIfAbsent sets `value` to the map if the `key` does not exist, and then returns true.
