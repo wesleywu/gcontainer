@@ -4,7 +4,7 @@
 // If a copy of the MIT was not distributed with this file,
 // You can obtain one at https://github.com/gogf/gf.
 
-// Package gset provides kinds of concurrent-safe/unsafe sets.
+// Package g provides kinds of concurrent-safe/unsafe containers.
 package g
 
 import (
@@ -327,87 +327,26 @@ func (set *HashSet[T]) Equals(another Collection[T]) bool {
 	return true
 }
 
-// IsSubsetOf checks whether the current set is a sub-set of `other`.
-func (set *HashSet[T]) IsSubsetOf(other *HashSet[T]) bool {
-	if set == other {
-		return true
-	}
-	set.mu.RLock()
-	defer set.mu.RUnlock()
-	other.mu.RLock()
-	defer other.mu.RUnlock()
-	for key := range set.data {
-		if _, ok := other.data[key]; !ok {
-			return false
-		}
-	}
-	return true
-}
-
-// Union returns a new set which is the union of `set` and `others`.
-// Which means, all the items in `newSet` are in `set` or in `others`.
-func (set *HashSet[T]) Union(others ...*HashSet[T]) (newSet *HashSet[T]) {
-	newSet = NewHashSet[T]()
-	set.mu.RLock()
-	defer set.mu.RUnlock()
-	for _, other := range others {
-		if set != other {
-			other.mu.RLock()
-		}
-		for k, v := range set.data {
-			newSet.data[k] = v
-		}
-		if set != other {
-			for k, v := range other.data {
-				newSet.data[k] = v
-			}
-		}
-		if set != other {
-			other.mu.RUnlock()
-		}
-	}
-
-	return
-}
-
 // Diff returns a new set which is the difference set from `set` to `others`.
-// Which means, all the items in `newSet` are in `set` but not in `others`.
-func (set *HashSet[T]) Diff(others ...*HashSet[T]) (newSet *HashSet[T]) {
+// Which means, all the items in `newSet` are in `set` but not in any of the `others`.
+func (set *HashSet[T]) Diff(others ...Set[T]) (newSet Set[T]) {
 	newSet = NewHashSet[T]()
 	set.mu.RLock()
 	defer set.mu.RUnlock()
-	for _, other := range others {
-		if set == other {
-			continue
-		}
-		other.mu.RLock()
-		for k, v := range set.data {
-			if _, ok := other.data[k]; !ok {
-				newSet.data[k] = v
+	for k := range set.data {
+		found := false
+		for _, other := range others {
+			if set == other {
+				found = true
+				break
+			}
+			if other.Contains(k) {
+				found = true
+				break
 			}
 		}
-		other.mu.RUnlock()
-	}
-	return
-}
-
-// Intersect returns a new set which is the intersection from `set` to `others`.
-// Which means, all the items in `newSet` are in `set` and also in `others`.
-func (set *HashSet[T]) Intersect(others ...*HashSet[T]) (newSet *HashSet[T]) {
-	newSet = NewHashSet[T]()
-	set.mu.RLock()
-	defer set.mu.RUnlock()
-	for _, other := range others {
-		if set != other {
-			other.mu.RLock()
-		}
-		for k, v := range set.data {
-			if _, ok := other.data[k]; ok {
-				newSet.data[k] = v
-			}
-		}
-		if set != other {
-			other.mu.RUnlock()
+		if !found {
+			newSet.Add(k)
 		}
 	}
 	return
@@ -418,38 +357,122 @@ func (set *HashSet[T]) Intersect(others ...*HashSet[T]) (newSet *HashSet[T]) {
 //
 // It returns the difference between `full` and `set`
 // if the given set `full` is not the full set of `set`.
-func (set *HashSet[T]) Complement(full *HashSet[T]) (newSet *HashSet[T]) {
+func (set *HashSet[T]) Complement(full Set[T]) (newSet Set[T]) {
+	newSet = NewHashSet[T]()
+	if set == full {
+		return newSet // 补集为空，避免死锁
+	}
+	full.ForEach(func(v T) bool {
+		if !set.Contains(v) {
+			newSet.Add(v)
+		}
+		return true
+	})
+	return
+}
+
+// Merge adds items from `others` sets into `set`.
+func (set *HashSet[T]) Merge(others ...Set[T]) Set[T] {
+	set.mu.Lock()
+	defer set.mu.Unlock()
+	for _, other := range others {
+		if set == other {
+			continue
+		}
+		other.ForEach(func(v T) bool {
+			if _, found := set.data[v]; !found {
+				set.data[v] = struct{}{}
+			}
+			return true
+		})
+	}
+	return set
+}
+
+// Intersect returns a new set which is the intersection from `set` to `others`.
+// Which means, all the items in `newSet` are in `set` and also in all the `others`.
+func (set *HashSet[T]) Intersect(others ...Set[T]) (newSet Set[T]) {
 	newSet = NewHashSet[T]()
 	set.mu.RLock()
 	defer set.mu.RUnlock()
-	if set != full {
-		full.mu.RLock()
-		defer full.mu.RUnlock()
-	}
-	for k, v := range full.data {
-		if _, ok := set.data[k]; !ok {
-			newSet.data[k] = v
+	for k := range set.data {
+		foundInAll := true
+		for _, other := range others {
+			if set == other {
+				continue // 避免死锁
+			}
+			if !other.Contains(k) {
+				foundInAll = false
+				break
+			}
+		}
+		if foundInAll {
+			newSet.Add(k)
 		}
 	}
 	return
 }
 
-// Merge adds items from `others` sets into `set`.
-func (set *HashSet[T]) Merge(others ...*HashSet[T]) *HashSet[T] {
-	set.mu.Lock()
-	defer set.mu.Unlock()
+// Union returns a new set which is the union of `set` and `others`.
+// Which means, all the items in `newSet` are in `set` or in `others`.
+func (set *HashSet[T]) Union(others ...Set[T]) (newSet Set[T]) {
+	newSet = NewHashSet[T]()
+	// 添加当前 set 的所有元素
+	set.ForEach(func(v T) bool {
+		newSet.Add(v)
+		return true
+	})
+	// 添加所有 others 的元素
 	for _, other := range others {
-		if set != other {
-			other.mu.RLock()
+		if set == other {
+			continue // 跳过自身
 		}
-		for k, v := range other.data {
-			set.data[k] = v
-		}
-		if set != other {
-			other.mu.RUnlock()
-		}
+		other.ForEach(func(v T) bool {
+			newSet.Add(v)
+			return true
+		})
 	}
-	return set
+	return
+}
+
+// IsSubsetOf checks whether the current set is a sub-set of `other`.
+func (set *HashSet[T]) IsSubsetOf(other Set[T]) bool {
+	if set == other {
+		return true
+	}
+	isSubset := true
+	set.ForEach(func(v T) bool {
+		if !other.Contains(v) {
+			isSubset = false
+			return false // 终止遍历
+		}
+		return true
+	})
+	return isSubset
+}
+
+// IsSupersetOf checks whether the current set is a super-set of `other`.
+func (set *HashSet[T]) IsSupersetOf(other Set[T]) bool {
+	if set == other {
+		return true
+	}
+	return other.IsSubsetOf(set)
+}
+
+// IsDisjointWith returns true if the current set has no elements in common with the given set.
+func (set *HashSet[T]) IsDisjointWith(other Set[T]) bool {
+	if set == other {
+		return set.IsEmpty()
+	}
+	isDisjoint := true
+	set.ForEach(func(v T) bool {
+		if other.Contains(v) {
+			isDisjoint = false
+			return false // 终止遍历
+		}
+		return true
+	})
+	return isDisjoint
 }
 
 // Sum sums items.
