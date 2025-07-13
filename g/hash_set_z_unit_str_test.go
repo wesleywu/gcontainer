@@ -175,8 +175,8 @@ func TestStrSet_Diff(t *testing.T) {
 
 		s4 := s1
 		s5 := s1.Diff(s2, s4)
-		t.Assert(s5.Contains("1"), true)
-		t.Assert(s5.Contains("2"), true)
+		t.Assert(s5.Contains("1"), false)
+		t.Assert(s5.Contains("2"), false)
 		t.Assert(s5.Contains("3"), false)
 		t.Assert(s5.Contains("4"), false)
 	})

@@ -242,7 +242,7 @@ func (t *TreeSet[T]) HeadSet(toElement T, inclusive bool) SortedSet[T] {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	t.lazyInit()
-	result := NewTreeSet[T](t.tree.Comparator(), t.mu.IsSafe())
+	result := NewTreeSet(t.tree.Comparator(), t.mu.IsSafe())
 
 	t.tree.IteratorDescFrom(toElement, inclusive, func(key T, _ struct{}) bool {
 		result.Add(key)
@@ -331,7 +331,7 @@ func (t *TreeSet[T]) PollHeadSet(toElement T, inclusive bool) SortedSet[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.lazyInit()
-	result := NewTreeSet[T](t.Comparator(), t.mu.IsSafe())
+	result := NewTreeSet(t.Comparator(), t.mu.IsSafe())
 	headKeys := t.tree.HeadMap(toElement, inclusive).Keys()
 	for _, key := range headKeys {
 		t.tree.Remove(key)
@@ -355,7 +355,7 @@ func (t *TreeSet[T]) PollTailSet(fromElement T, inclusive bool) SortedSet[T] {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.lazyInit()
-	result := NewTreeSet[T](t.Comparator(), t.mu.IsSafe())
+	result := NewTreeSet(t.Comparator(), t.mu.IsSafe())
 	tailKeys := t.tree.TailMap(fromElement, inclusive).Keys()
 	for _, key := range tailKeys {
 		t.tree.Remove(key)
@@ -444,14 +444,14 @@ func (t *TreeSet[T]) SubSet(fromElement T, fromInclusive bool, toElement T, toIn
 	defer t.mu.RUnlock()
 	t.lazyInit()
 	subKeys := t.tree.SubMap(fromElement, fromInclusive, toElement, toInclusive).Keys()
-	return NewTreeSetFrom(subKeys, t.tree.Comparator(), t.mu.IsSafe())
+	return NewTreeSetFrom[T](subKeys, t.tree.Comparator(), t.mu.IsSafe())
 }
 
 func (t *TreeSet[T]) TailSet(fromElement T, inclusive bool) SortedSet[T] {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	t.lazyInit()
-	result := NewTreeSet[T](t.tree.Comparator(), t.mu.IsSafe())
+	result := NewTreeSet(t.tree.Comparator(), t.mu.IsSafe())
 
 	t.tree.IteratorAscFrom(fromElement, inclusive, func(key T, _ struct{}) bool {
 		result.Add(key)
@@ -496,4 +496,151 @@ func (t *TreeSet[T]) UnmarshalValue(value interface{}) (err error) {
 		t.tree.Put(v, struct{}{})
 	}
 	return
+}
+
+// Diff returns a new set which is the difference set from `t` to `others`.
+// Which means, all the items in `newSet` are in `t` but not in any of the `others`.
+func (t *TreeSet[T]) Diff(others ...Set[T]) Set[T] {
+	newSet := NewTreeSet(t.Comparator(), t.mu.IsSafe())
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	t.lazyInit()
+	for _, other := range others {
+		if t == other {
+			return newSet // 差集为空
+		}
+	}
+	for _, k := range t.tree.Keys() {
+		found := false
+		for _, other := range others {
+			if other.Contains(k) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			newSet.Add(k)
+		}
+	}
+	return newSet
+}
+
+// Complement returns a new set which is the complement from `t` to `full`.
+// Which means, all the items in `newSet` are in `full` and not in `t`.
+func (t *TreeSet[T]) Complement(full Set[T]) Set[T] {
+	newSet := NewTreeSet(t.Comparator(), t.mu.IsSafe())
+	if t == full {
+		return newSet // 补集为空，避免死锁
+	}
+	full.ForEach(func(v T) bool {
+		if !t.Contains(v) {
+			newSet.Add(v)
+		}
+		return true
+	})
+	return newSet
+}
+
+// Merge merges the given sets into the current set (in-place).
+// This method modifies the current set by adding all elements from the given sets.
+// Returns the current set after modification.
+func (t *TreeSet[T]) Merge(others ...Set[T]) Set[T] {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.lazyInit()
+	for _, other := range others {
+		if t == other {
+			continue
+		}
+		other.ForEach(func(v T) bool {
+			t.tree.PutIfAbsent(v, struct{}{})
+			return true
+		})
+	}
+	return t
+}
+
+// Intersect returns a new set which is the intersection from `t` to `others`.
+// Which means, all the items in `newSet` are in `t` and also in all the `others`.
+func (t *TreeSet[T]) Intersect(others ...Set[T]) Set[T] {
+	newSet := NewTreeSet(t.Comparator(), t.mu.IsSafe())
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	t.lazyInit()
+	for _, k := range t.tree.Keys() {
+		foundInAll := true
+		for _, other := range others {
+			if t == other {
+				continue // 避免死锁
+			}
+			if !other.Contains(k) {
+				foundInAll = false
+				break
+			}
+		}
+		if foundInAll {
+			newSet.Add(k)
+		}
+	}
+	return newSet
+}
+
+// Union returns a new set which is the union of `t` and `others`.
+// Which means, all the items in `newSet` are in `t` or in `others`.
+func (t *TreeSet[T]) Union(others ...Set[T]) Set[T] {
+	newSet := NewTreeSet(t.Comparator(), t.mu.IsSafe())
+	t.ForEach(func(v T) bool {
+		newSet.Add(v)
+		return true
+	})
+	for _, other := range others {
+		if t == other {
+			continue // 跳过自身
+		}
+		other.ForEach(func(v T) bool {
+			newSet.Add(v)
+			return true
+		})
+	}
+	return newSet
+}
+
+// IsSubsetOf returns true if the current set is a subset of the given set.
+func (t *TreeSet[T]) IsSubsetOf(other Set[T]) bool {
+	if t == other {
+		return true
+	}
+	isSubset := true
+	t.ForEach(func(v T) bool {
+		if !other.Contains(v) {
+			isSubset = false
+			return false // 终止遍历
+		}
+		return true
+	})
+	return isSubset
+}
+
+// IsSupersetOf returns true if the current set is a superset of the given set.
+func (t *TreeSet[T]) IsSupersetOf(other Set[T]) bool {
+	if t == other {
+		return true
+	}
+	return other.IsSubsetOf(t)
+}
+
+// IsDisjointWith returns true if the current set has no elements in common with the given set.
+func (t *TreeSet[T]) IsDisjointWith(other Set[T]) bool {
+	if t == other {
+		return t.IsEmpty()
+	}
+	isDisjoint := true
+	t.ForEach(func(v T) bool {
+		if other.Contains(v) {
+			isDisjoint = false
+			return false // 终止遍历
+		}
+		return true
+	})
+	return isDisjoint
 }

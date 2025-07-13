@@ -75,6 +75,49 @@ type Collection[T any] interface {
 // As implied by its name, this interface models the mathematical set abstraction.
 type Set[T comparable] interface {
 	Collection[T]
+
+	// Diff returns a new set containing elements that are in the current set but not in any of the given sets.
+	// This method does not modify the current set.
+	// Example: {1,2,3}.Diff({2,3}) => {1}
+	Diff(...Set[T]) Set[T]
+
+	// Complement returns a new set containing elements that are in the given 'full' set but not in the current set.
+	// This method does not modify the current set.
+	// If the given set is the same as the current set, the result is an empty set.
+	// Example: {1,2}.Complement({1,2,3,4}) => {3,4}
+	Complement(Set[T]) Set[T]
+
+	// Merge merges the given sets into the current set (in-place).
+	// This method modifies the current set by adding all elements from the given sets.
+	// Returns the current set after modification.
+	// Note: Unlike Union, which returns a new set and does not modify the current set,
+	// Merge performs in-place modification.
+	Merge(...Set[T]) Set[T]
+
+	// Intersect returns a new set containing elements that are present in the current set and in all of the given sets.
+	// This method does not modify the current set.
+	// Example: {1,2,3}.Intersect({2,3,4}) => {2,3}
+	Intersect(...Set[T]) Set[T]
+
+	// Union returns a new set containing all elements that are present in the current set or in any of the given sets.
+	// This method does not modify the current set.
+	// Example: {1,2}.Union({2,3}) => {1,2,3}
+	Union(...Set[T]) Set[T]
+
+	// IsSubsetOf returns true if the current set is a subset of the given set.
+	// That is, every element of the current set is also in the given set.
+	// Example: {1,2}.IsSubsetOf({1,2,3}) => true
+	IsSubsetOf(Set[T]) bool
+
+	// IsSupersetOf returns true if the current set is a superset of the given set.
+	// That is, every element of the given set is also in the current set.
+	// Example: {1,2,3}.IsSupersetOf({1,2}) => true
+	IsSupersetOf(Set[T]) bool
+
+	// IsDisjointWith returns true if the current set has no elements in common with the given set.
+	// That is, the intersection of the two sets is empty.
+	// Example: {1,2}.IsDisjointWith({3,4}) => true
+	IsDisjointWith(Set[T]) bool
 }
 
 // SortedSet is a Set that further provides a total ordering on its elements.
