@@ -644,3 +644,74 @@ func (t *TreeSet[T]) IsDisjointWith(other Set[T]) bool {
 	})
 	return isDisjoint
 }
+
+// Permutation returns all possible permutations of the set elements.
+// A permutation is a rearrangement of the elements.
+// For a set with n elements, there are n! (n factorial) permutations.
+// Returns a slice of slices, where each inner slice represents one permutation.
+func (t *TreeSet[T]) Permutation() [][]T {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
+	t.lazyInit()
+	if t.tree.Size() == 0 {
+		return [][]T{}
+	}
+
+	// Convert set to slice for permutation generation
+	elements := t.Slice()
+	if len(elements) == 0 {
+		return [][]T{}
+	}
+
+	// Generate all permutations
+	return generateTreeSetPermutations(elements)
+}
+
+// generatePermutations generates all possible permutations of the given slice
+// using Heap's algorithm for efficiency
+func generateTreeSetPermutations[T comparable](elements []T) [][]T {
+	n := len(elements)
+	if n == 0 {
+		return [][]T{}
+	}
+	if n == 1 {
+		return [][]T{{elements[0]}}
+	}
+
+	// Create a copy to avoid modifying the original
+	arr := make([]T, n)
+	copy(arr, elements)
+
+	var result [][]T
+
+	// Heap's algorithm for generating permutations
+	var generate func(int)
+	generate = func(k int) {
+		if k == 1 {
+			// Create a copy of current permutation
+			perm := make([]T, n)
+			copy(perm, arr)
+			result = append(result, perm)
+			return
+		}
+
+		// Generate permutations with k-th element fixed
+		generate(k - 1)
+
+		// Generate permutations for k-th element swapped with each element
+		for i := 0; i < k-1; i++ {
+			if k%2 == 0 {
+				// Even k: swap i and k-1
+				arr[i], arr[k-1] = arr[k-1], arr[i]
+			} else {
+				// Odd k: swap 0 and k-1
+				arr[0], arr[k-1] = arr[k-1], arr[0]
+			}
+			generate(k - 1)
+		}
+	}
+
+	generate(n)
+	return result
+}
