@@ -234,6 +234,12 @@ func (set *HashSet[T]) Slice() []T {
 	return ret
 }
 
+// Values returns all elements of the set as a slice, maintaining the order of elements in the set.
+// This method is functionally identical to Slice() and is provided for consistency with Map interfaces.
+func (set *HashSet[T]) Values() []T {
+	return set.Slice()
+}
+
 // Join joins items with a string `glue`.
 func (set *HashSet[T]) Join(glue string) string {
 	set.mu.RLock()
