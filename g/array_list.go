@@ -464,6 +464,12 @@ func (a *ArrayList[T]) Slice() []T {
 	}
 }
 
+// Values returns all elements of the array as a slice, maintaining the order of elements in the array.
+// This method is functionally identical to Slice() and is provided for consistency with Map interfaces.
+func (a *ArrayList[T]) Values() []T {
+	return a.Slice()
+}
+
 // Interfaces returns current array as []T.
 func (a *ArrayList[T]) Interfaces() []T {
 	return a.Slice()

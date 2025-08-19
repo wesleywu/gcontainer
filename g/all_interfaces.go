@@ -66,6 +66,10 @@ type Collection[T any] interface {
 	// Slice returns an array containing shadow copy of all the elements in this collection.
 	Slice() []T
 
+	// Values returns all elements of the set as a slice, maintaining the order of elements in the set.
+	// This method is functionally identical to Slice() and is provided for consistency with Map interfaces.
+	Values() []T
+
 	// String returns items as a string, which implements like json.Marshal does.
 	String() string
 }
@@ -118,6 +122,13 @@ type Set[T comparable] interface {
 	// That is, the intersection of the two sets is empty.
 	// Example: {1,2}.IsDisjointWith({3,4}) => true
 	IsDisjointWith(Set[T]) bool
+
+	// Permutation returns all possible permutations of the set elements.
+	// A permutation is a rearrangement of the elements.
+	// For a set with n elements, there are n! (n factorial) permutations.
+	// Returns a slice of slices, where each inner slice represents one permutation.
+	// Example: {1,2,3}.Permutation() => [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]]
+	Permutation() [][]T
 }
 
 // SortedSet is a Set that further provides a total ordering on its elements.
@@ -126,6 +137,10 @@ type Set[T comparable] interface {
 // The set's iterator will traverse the set in ascending element order.
 // Several additional operations are provided to take advantage of the ordering.
 // (This interface is the set analogue of SortedMap.)
+//
+// SortedSet inherits all methods from Set interface, including Permutation() which returns
+// all possible permutations of the set elements in the order defined by the underlying
+// implementation (typically based on the set's iteration order).
 //
 // SortedSet also provides navigation methods lower, floor, ceiling, and higher return elements
 // respectively less than, less than or equal, greater than or equal, and greater than a given element,

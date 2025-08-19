@@ -179,6 +179,12 @@ func (l *LinkedList[T]) Slice() []T {
 	return l.FrontAll()
 }
 
+// Values returns all elements of the list as a slice, maintaining the order of elements in the list.
+// This method is functionally identical to Slice() and is provided for consistency with Map interfaces.
+func (l *LinkedList[T]) Values() []T {
+	return l.Slice()
+}
+
 // search returns the matching element in this list, or nil if the element can not be found.
 func (l *LinkedList[T]) search(value T) *Element[T] {
 	if l.len > 0 {
