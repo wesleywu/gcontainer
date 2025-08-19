@@ -118,6 +118,13 @@ type Set[T comparable] interface {
 	// That is, the intersection of the two sets is empty.
 	// Example: {1,2}.IsDisjointWith({3,4}) => true
 	IsDisjointWith(Set[T]) bool
+
+	// Permutation returns all possible permutations of the set elements.
+	// A permutation is a rearrangement of the elements.
+	// For a set with n elements, there are n! (n factorial) permutations.
+	// Returns a slice of slices, where each inner slice represents one permutation.
+	// Example: {1,2,3}.Permutation() => [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]]
+	Permutation() [][]T
 }
 
 // SortedSet is a Set that further provides a total ordering on its elements.
