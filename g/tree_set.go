@@ -405,6 +405,12 @@ func (t *TreeSet[T]) Slice() []T {
 	return t.tree.Keys()
 }
 
+// Values returns all elements of the set as a slice, maintaining the order of elements in the set.
+// This method is functionally identical to Slice() and is provided for consistency with Map interfaces.
+func (t *TreeSet[T]) Values() []T {
+	return t.Slice()
+}
+
 func (t *TreeSet[T]) String() string {
 	if t == nil {
 		return ""
